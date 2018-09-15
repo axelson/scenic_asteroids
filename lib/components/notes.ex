@@ -12,23 +12,23 @@ defmodule Play.Component.Notes do
   @font_size 20
   @indent 30
 
-  #--------------------------------------------------------
-  def verify( notes ) when is_bitstring(notes), do: {:ok, notes}
-  def verify( _ ), do: :invalid_data
+  # --------------------------------------------------------
+  def verify(notes) when is_bitstring(notes), do: {:ok, notes}
+  def verify(_), do: :invalid_data
 
-
-  #----------------------------------------------------------------------------
-  def init( notes, opts ) do    
+  # ----------------------------------------------------------------------------
+  def init(notes, opts) do
     # Get the viewport width
-    {:ok, %ViewPort.Status{size: {vp_width,vp_height}}} = opts[:viewport]
-    |> ViewPort.info()
+    {:ok, %ViewPort.Status{size: {vp_width, vp_height}}} =
+      opts[:viewport]
+      |> ViewPort.info()
 
-    graph = Graph.build(font_size: @font_size, translate: {0, vp_height - @height} )
-    |> rect({vp_width, @height}, fill: {48,48,48})
-    |> text( notes, translate: {@indent, @font_size * 2} )
-    |> push_graph()
+    graph =
+      Graph.build(font_size: @font_size, translate: {0, vp_height - @height})
+      |> rect({vp_width, @height}, fill: {48, 48, 48})
+      |> text(notes, translate: {@indent, @font_size * 2})
+      |> push_graph()
 
-    {:ok, %{graph: graph, viewport: opts[:viewport]} }
+    {:ok, %{graph: graph, viewport: opts[:viewport]}}
   end
-
-end 
+end
