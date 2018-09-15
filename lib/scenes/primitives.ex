@@ -117,8 +117,6 @@ defmodule Play.Scene.Primitives do
          |> Nav.add_to_graph(__MODULE__)
          |> Notes.add_to_graph(@notes)
 
-  def start_link(_), do: GenServer.start_link(__MODULE__, :ok, name: :primitives)
-
   def init(_, opts) do
     IO.inspect(opts, label: "opts")
     IO.inspect(self(), label: "self()")

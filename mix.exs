@@ -26,27 +26,30 @@ defmodule Play.MixProject do
   defp deps do
     [
       {:elixir_make, "~> 0.4"},
+      {:dialyxir, "1.0.0-rc.3", only: :dev, runtime: false},
+      # {:exsync, "~> 0.2", only: :dev},
+      {:exsync, path: "../forks/exsync", only: :dev},
 
       # deps to use AFTER it is released publicly
-      {:scenic, "~> 0.7.0"},
-      {:scenic_driver_glfw, "~> 0.7.0"},
+      {:scenic, path: "../forks/scenic", override: true},
+      {:scenic_driver_glfw, git: "git@github.com:boydm/scenic_driver_glfw.git"},
 
       # These deps are optional and are included as they are often used.
       # If your app doesn't need them, they are safe to remove.
       {:scenic_sensor, "~> 0.7.0"},
-      {:scenic_clock, ">= 0.0.0"},
+      {:scenic_clock, ">= 0.0.0"}
 
       # the https versions
       # { :scenic, git: "https://github.com/boydm/scenic.git", override: true },
       # { :scenic_driver_glfw, git: "https://github.com/boydm/scenic_driver_glfw.git"},
       # { :scenic_sensor, git: "https://github.com/boydm/scenic_sensor.git"},
       # { :scenic_clock, git: "https://github.com/boydm/scenic_clock.git"},
-      
+
       # the ssh versions
-      #{ :scenic, git: "git@github.com:boydm/scenic.git" },
-      #{ :scenic_driver_glfw, git: "git@github.com:boydm/scenic_driver_glfw.git"},
-      #{ :scenic_sensor, git: "git@github.com:boydm/scenic_sensor.git"},
-      #{ :scenic_clock, git: "git@github.com:boydm/scenic_clock.git"},
+      # { :scenic, git: "git@github.com:boydm/scenic.git" },
+      # { :scenic_driver_glfw, git: "git@github.com:boydm/scenic_driver_glfw.git"},
+      # { :scenic_sensor, git: "git@github.com:boydm/scenic_sensor.git"},
+      # { :scenic_clock, git: "git@github.com:boydm/scenic_clock.git"},
 
       # example deps
       # {:dep_from_hexpm, "~> 0.3.0"},

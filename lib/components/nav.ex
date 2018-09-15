@@ -19,6 +19,8 @@ defmodule Play.Component.Nav do
 
   # ----------------------------------------------------------------------------
   def init(current_scene, opts) do
+    Process.register(self(), __MODULE__)
+
     styles = opts[:styles] || %{}
 
     # Get the viewport width
@@ -32,6 +34,7 @@ defmodule Play.Component.Nav do
       |> text("Scene:", translate: {14, 35}, align: :right)
       |> dropdown(
         {[
+           {"Asteroids", Play.Scene.Asteroids},
            {"Sensor", Play.Scene.Sensor},
            {"Primitives", Play.Scene.Primitives},
            {"Components", Play.Scene.Components},
@@ -41,21 +44,48 @@ defmodule Play.Component.Nav do
         translate: {70, 15}
       )
       |> digital_clock(text_align: :right, translate: {width - 20, 35})
+      |> Scenic.Components.button("Reload", id: :reload_app_btn, width: 100, translate: {240, 15})
       |> push_graph()
 
-    {:ok, %{graph: graph, viewport: opts[:viewport]}}
+    {:ok, %{graph: graph, viewport: opts[:viewport], current_scene: current_scene}}
   end
 
-  # ----------------------------------------------------------------------------
+  @impl true
   def filter_event({:value_changed, :nav, scene}, _, %{viewport: vp} = state)
       when is_atom(scene) do
     ViewPort.set_root(vp, {scene, nil})
     {:stop, state}
   end
 
-  # ----------------------------------------------------------------------------
   def filter_event({:value_changed, :nav, scene}, _, %{viewport: vp} = state) do
     ViewPort.set_root(vp, scene)
     {:stop, state}
+  end
+
+  def filter_event({:click, :reload_app_btn}, _pid, %{graph: graph, current_scene: current_scene} = state) do
+    reload_current_scene(current_scene)
+
+    graph =
+      graph
+      |> Graph.modify(:reload_app_btn, &Scenic.Components.button(&1, "Reloaded", []))
+      |> push_graph()
+
+    {:stop, %{state | graph: graph}}
+  end
+
+  def handle_call(:reload_current_scene, _, state) do
+    IO.puts "Reload current scene from call3!"
+    %{current_scene: current_scene} = state
+    reload_current_scene(current_scene)
+    {:reply, nil, state}
+  end
+
+  defp reload_current_scene(current_scene) do
+    current_scene
+    |> Process.whereis()
+    |> case do
+         nil -> nil
+         pid -> Process.exit(pid, :kill)
+       end
   end
 end

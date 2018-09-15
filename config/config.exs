@@ -6,7 +6,7 @@ use Mix.Config
 config :play, :viewport, %{
   name: :main_viewport,
   size: {700, 600},
-  default_scene: {Play.Scene.Splash, Play.Scene.Primitives},
+  default_scene: {Play.Scene.Splash, Play.Scene.Asteroids},
   drivers: [
     %{
       module: Scenic.Driver.Glfw,
