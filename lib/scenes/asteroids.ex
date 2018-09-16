@@ -27,21 +27,23 @@ defmodule Play.Scene.Asteroids do
     IO.puts "init4"
     schedule_animate()
 
-    {:ok, %{graph: @initial_graph, t: 0}}
+    {:ok, %{graph: @initial_graph, t: 0, x: 110}}
   end
 
   @impl true
   def handle_info(:animate, state) do
-    %{graph: graph, t: t} = state
+    %{graph: graph, t: t, x: x} = state
     schedule_animate()
+
+    x = x + 1 / 4
 
     graph =
       graph
-      |> Graph.modify(:asteroid1, &circle(&1, 30, t: {110, 100 + t * 10}))
+      |> Graph.modify(:asteroid1, &circle(&1, 30, t: {x, 100 + t * 1}))
       |> push_graph()
 
-    {:noreply, %{state | t: t + 1, graph: graph}}
+    {:noreply, %{state | t: t + 1, x: x, graph: graph}}
   end
 
-  defp schedule_animate(), do: Process.send_after(self(), :animate, 100)
+  defp schedule_animate(), do: Process.send_after(self(), :animate, 10)
 end
