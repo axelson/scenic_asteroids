@@ -13,29 +13,32 @@ defmodule Play.Scene.Asteroids do
   # [x] Draw a circle to represent an asteroid
   # [x] Draw the circle empty
   # [x] Animate the circle
+  # [x] Live reloading!
+  # [ ] Press `r` to reload!
   # [ ] Make multiple circles
   # [ ] Draw the player
 
+  # Questions: Should there be a process per asteroid?
+
   @initial_graph Graph.build()
-                 |> circle(30, id: :asteroid1, stroke: {3, :white}, t: {110, 290})
+                 |> circle(30, id: :asteroid1, stroke: {3, :white}, t: {0, -100})
                  |> Nav.add_to_graph(__MODULE__)
 
-  @impl true
-  def init(_, opts) do
+  @impl Scenic.Scene
+  def init(_, _opts) do
     Process.register(self(), __MODULE__)
     push_graph(@initial_graph)
-    IO.puts "init4"
     schedule_animate()
 
     {:ok, %{graph: @initial_graph, t: 0, x: 110}}
   end
 
-  @impl true
   def handle_info(:animate, state) do
     %{graph: graph, t: t, x: x} = state
     schedule_animate()
 
-    x = x + 1 / 4
+    # x = x - 1 / 4
+    x = x + :rand.uniform() * 2
 
     graph =
       graph
@@ -44,6 +47,28 @@ defmodule Play.Scene.Asteroids do
 
     {:noreply, %{state | t: t + 1, x: x, graph: graph}}
   end
+
+  @impl Scenic.Scene
+  def filter_event(event, sec, state) do
+    IO.inspect(event, label: "event")
+    IO.inspect(sec, label: "sec")
+
+    {:continue, event, state}
+  end
+
+  @impl Scenic.Scene
+  def handle_input({:key, {"R", :press, _}}, _viewport_context, state) do
+    GenServer.call(Play.Component.Nav, :reload_current_scene)
+
+    {:noreply, state}
+  end
+
+  def handle_input(input, _, state) do
+    IO.inspect(input, label: "#{__MODULE__} ignoring input")
+    {:noreply, state}
+  end
+
+  # def handle_input(_, _, state), do: {:noreply, state}
 
   defp schedule_animate(), do: Process.send_after(self(), :animate, 10)
 end

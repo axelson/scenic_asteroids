@@ -13,11 +13,13 @@ defmodule Play.Component.Nav do
   @height 60
 
   # --------------------------------------------------------
+  @impl Scenic.Component
   def verify(scene) when is_atom(scene), do: {:ok, scene}
   def verify({scene, _} = data) when is_atom(scene), do: {:ok, data}
   def verify(_), do: :invalid_data
 
   # ----------------------------------------------------------------------------
+  @impl Scenic.Scene
   def init(current_scene, opts) do
     Process.register(self(), __MODULE__)
 
@@ -50,7 +52,7 @@ defmodule Play.Component.Nav do
     {:ok, %{graph: graph, viewport: opts[:viewport], current_scene: current_scene}}
   end
 
-  @impl true
+  @impl Scenic.Scene
   def filter_event({:value_changed, :nav, scene}, _, %{viewport: vp} = state)
       when is_atom(scene) do
     ViewPort.set_root(vp, {scene, nil})
