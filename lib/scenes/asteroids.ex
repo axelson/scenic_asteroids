@@ -14,14 +14,16 @@ defmodule Play.Scene.Asteroids do
   # [x] Draw the circle empty
   # [x] Animate the circle
   # [x] Live reloading!
-  # [ ] Press `r` to reload!
-  # [ ] Make multiple circles
+  # [x] Press `r` to reload!
+  # [x] Make multiple circles
   # [ ] Draw the player
 
   # Questions: Should there be a process per asteroid?
 
+  # Note: Asteroids start off the screen
   @initial_graph Graph.build()
                  |> circle(30, id: :asteroid1, stroke: {3, :white}, t: {0, -100})
+                 |> circle(30, id: :asteroid2, stroke: {3, :white}, t: {0, -100})
                  |> Nav.add_to_graph(__MODULE__)
 
   @impl Scenic.Scene
@@ -43,6 +45,7 @@ defmodule Play.Scene.Asteroids do
     graph =
       graph
       |> Graph.modify(:asteroid1, &circle(&1, 30, t: {x, 100 + t * 1}))
+      |> Graph.modify(:asteroid2, &circle(&1, 30, t: {x, 200 + t * 1}))
       |> push_graph()
 
     {:noreply, %{state | t: t + 1, x: x, graph: graph}}
