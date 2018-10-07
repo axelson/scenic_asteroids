@@ -7,7 +7,7 @@ defmodule Play.GameTimer do
 
   @impl true
   def speedup do
-    60
+    @fps / 1000
   end
 
   def speed() do
