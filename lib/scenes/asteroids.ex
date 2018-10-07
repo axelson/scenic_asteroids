@@ -32,6 +32,11 @@ defmodule Play.Scene.Asteroids do
     push_graph(@initial_graph)
     schedule_animate()
 
+    IO.inspect(self(), label: "self()")
+    IO.puts "still 465?"
+
+    Play.TimersExperiment.init()
+
     {:ok, %{graph: @initial_graph, t: 0, x: 110}}
   end
 

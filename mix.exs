@@ -25,8 +25,13 @@ defmodule Play.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:elixir_make, "~> 0.4"},
+      # Project deps
+      # {:sched_ex, "~> 1.0.2"},
+      {:sched_ex, path: "../forks/sched_ex"},
       {:dialyxir, "1.0.0-rc.3", only: :dev, runtime: false},
+
+      # Scenic default deps
+      {:elixir_make, "~> 0.4"},
       # {:exsync, "~> 0.2", only: :dev},
       {:exsync, path: "../forks/exsync", only: :dev},
 
