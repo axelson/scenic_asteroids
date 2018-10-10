@@ -68,6 +68,7 @@ defmodule Play.Scene.Asteroids do
 
   def handle_info({:animate, expected_run_time}, state) do
     diff = time_diff(state, expected_run_time)
+    state = update_player_coords_based_on_keys(state)
     %{graph: graph, t: t, x: x, player_coords: player_coords} = state
 
     # x = x - 1 / 4
@@ -125,7 +126,6 @@ defmodule Play.Scene.Asteroids do
       when key in @movement_keys and action in [:press, :repeat, :release] do
     %{player_coords: {width, height}} = state
     state = record_key_state(state, key, action)
-    state = update_player_coords_based_on_keys(state)
 
     {:noreply, state}
   end
