@@ -26,11 +26,12 @@ defmodule Play.Scene.Asteroids do
 
   @movement_keys ["W", "A", "S", "D"]
 
+  @player_dimensions {{0,0}, {30,0}, {15, 30}}
   # Note: Asteroids start off the screen
   @initial_graph Graph.build()
                  |> circle(30, id: :asteroid1, stroke: {3, :white}, t: {0, -100})
                  |> circle(30, id: :asteroid2, stroke: {3, :white}, t: {0, -100})
-                 |> rect({10, 10}, id: :player, stroke: {1, :white})
+                 |> triangle(@player_dimensions, id: :player, stroke: {1, :white})
                  |> Nav.add_to_graph(__MODULE__)
 
   @impl Scenic.Scene
@@ -90,7 +91,7 @@ defmodule Play.Scene.Asteroids do
       graph
       |> Graph.modify(:asteroid1, &circle(&1, 30, t: {x, 100}))
       |> Graph.modify(:asteroid2, &circle(&1, 30, t: {x, 200}))
-      |> Graph.modify(:player, &rect(&1, {10, 10}, t: player_coords))
+      |> Graph.modify(:player, &triangle(&1, @player_dimensions, t: player_coords))
       |> push_graph()
 
     new_state = %{state | t: t + 1, x: x, graph: graph, last_run_time: expected_run_time}
