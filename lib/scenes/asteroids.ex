@@ -10,7 +10,7 @@ defmodule Play.Scene.Asteroids do
   alias Play.Component.Nav
 
   defmodule State do
-    defstruct [:t, :x, :graph, :last_run_time, :player_coords]
+    defstruct [:t, :x, :graph, :last_run_time, :player_coords, :key_states]
   end
 
   # Steps
@@ -43,7 +43,8 @@ defmodule Play.Scene.Asteroids do
       graph: @initial_graph,
       t: 0,
       x: 110,
-      player_coords: initial_player_coordinates()
+      player_coords: initial_player_coordinates(),
+      key_states: %{}
     }
 
     {:ok, initial_state}
@@ -123,22 +124,28 @@ defmodule Play.Scene.Asteroids do
   def do_handle_input({:key, {key, action, _}}, _viewport_context, state)
       when key in @movement_keys and action in [:press, :repeat, :release] do
     %{player_coords: {width, height}} = state
-    dist = 5
+    state = record_key_state(state, key, action)
+    state = update_player_coords_based_on_keys(state)
 
-    player_coords =
-      case key do
-        "W" -> {width, height - dist}
-        "A" -> {width - dist, height}
-        "S" -> {width, height + dist}
-        "D" -> {width + dist, height}
-      end
-
-    {:noreply, %{state | player_coords: player_coords}}
+    {:noreply, state}
   end
 
   def do_handle_input(input, _, state) do
-    IO.inspect(input, label: "#{__MODULE__} ignoring input")
+    # IO.inspect(input, label: "#{__MODULE__} ignoring input")
     {:noreply, state}
+  end
+
+  defp record_key_state(%State{} = state, key, action) do
+    key_states = state.key_states
+
+    key_states =
+      case action do
+        :press -> Map.put(key_states, key, true)
+        :release -> Map.delete(key_states, key)
+        _ -> key_states
+      end
+
+    %{state | key_states: key_states}
   end
 
   # def handle_input(_, _, state), do: {:noreply, state}
@@ -151,5 +158,35 @@ defmodule Play.Scene.Asteroids do
     end
 
     SchedEx.run_in(func, 1, repeat: true, time_scale: Play.GameTimer)
+  end
+
+  defp key_to_direction("W"), do: :up
+  defp key_to_direction("A"), do: :left
+  defp key_to_direction("S"), do: :down
+  defp key_to_direction("D"), do: :right
+
+  defp update_player_coords(%State{} = state, direction) do
+    %{player_coords: {width, height}} = state
+    dist = 5
+
+    updated_coords =
+      case direction do
+        :up -> {width, height - dist}
+        :left -> {width - dist, height}
+        :down -> {width, height + dist}
+        :right -> {width + dist, height}
+      end
+
+    %{state | player_coords: updated_coords}
+  end
+
+  defp update_player_coords_based_on_keys(%State{} = state) do
+    %{player_coords: {width, height}, key_states: key_states} = state
+
+    key_states
+    |> Enum.reduce(state, fn {key, _key_state}, state ->
+      direction = key_to_direction(key)
+      update_player_coords(state, direction)
+    end)
   end
 end
