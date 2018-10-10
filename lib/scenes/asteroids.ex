@@ -10,7 +10,7 @@ defmodule Play.Scene.Asteroids do
   alias Play.Component.Nav
 
   defmodule State do
-    defstruct [:t, :x, :graph, :last_run_time]
+    defstruct [:t, :x, :graph, :last_run_time, :player_coords]
   end
 
   # Steps
@@ -20,14 +20,17 @@ defmodule Play.Scene.Asteroids do
   # [x] Live reloading!
   # [x] Press `r` to reload!
   # [x] Make multiple circles
-  # [ ] Draw the player
+  # [x] Draw the player
 
   # Questions: Should there be a process per asteroid?
+
+  @movement_keys ["W", "A", "S", "D"]
 
   # Note: Asteroids start off the screen
   @initial_graph Graph.build()
                  |> circle(30, id: :asteroid1, stroke: {3, :white}, t: {0, -100})
                  |> circle(30, id: :asteroid2, stroke: {3, :white}, t: {0, -100})
+                 |> rect({10, 10}, id: :player, stroke: {1, :white})
                  |> Nav.add_to_graph(__MODULE__)
 
   @impl Scenic.Scene
@@ -36,13 +39,35 @@ defmodule Play.Scene.Asteroids do
     push_graph(@initial_graph)
     schedule_animations()
 
-    initial_state = %State{graph: @initial_graph, t: 0, x: 110}
+    initial_state = %State{
+      graph: @initial_graph,
+      t: 0,
+      x: 110,
+      player_coords: initial_player_coordinates()
+    }
+
     {:ok, initial_state}
+  end
+
+  def initial_player_coordinates do
+    width = screen_width() / 2
+    height = screen_height() / 2
+    {width, height}
+  end
+
+  def screen_width do
+    {width, _height} = Application.get_env(:play, :viewport)[:size]
+    width
+  end
+
+  def screen_height do
+    {_width, height} = Application.get_env(:play, :viewport)[:size]
+    height
   end
 
   def handle_info({:animate, expected_run_time}, state) do
     diff = time_diff(state, expected_run_time)
-    %{graph: graph, t: t, x: x} = state
+    %{graph: graph, t: t, x: x, player_coords: player_coords} = state
 
     # x = x - 1 / 4
     # speed = 5 / s
@@ -50,10 +75,12 @@ defmodule Play.Scene.Asteroids do
     # diff = 100 ms
     # speed = 10 u/s
     speed = 100
-    dist = case diff do
-              0 -> 0
-              diff -> speed / 1000 * diff
-            end
+
+    dist =
+      case diff do
+        0 -> 0
+        diff -> speed / 1000 * diff
+      end
 
     x = x + dist
 
@@ -61,6 +88,7 @@ defmodule Play.Scene.Asteroids do
       graph
       |> Graph.modify(:asteroid1, &circle(&1, 30, t: {x, 100}))
       |> Graph.modify(:asteroid2, &circle(&1, 30, t: {x, 200}))
+      |> Graph.modify(:player, &rect(&1, {10, 10}, t: player_coords))
       |> push_graph()
 
     new_state = %{state | t: t + 1, x: x, graph: graph, last_run_time: expected_run_time}
@@ -81,14 +109,35 @@ defmodule Play.Scene.Asteroids do
   end
 
   @impl Scenic.Scene
-  def handle_input({:key, {"R", :press, _}}, _viewport_context, state) do
+  def handle_input(input, viewport_context, state) do
+    # IO.inspect(input, label: "#{__MODULE__} received input")
+    do_handle_input(input, viewport_context, state)
+  end
+
+  def do_handle_input({:key, {"R", :press, _}}, _viewport_context, state) do
     GenServer.call(Play.Component.Nav, :reload_current_scene)
 
     {:noreply, state}
   end
 
-  def handle_input(input, _, state) do
-    # IO.inspect(input, label: "#{__MODULE__} ignoring input")
+  def do_handle_input({:key, {key, action, _}}, _viewport_context, state)
+      when key in @movement_keys and action in [:press, :repeat, :release] do
+    %{player_coords: {width, height}} = state
+    dist = 5
+
+    player_coords =
+      case key do
+        "W" -> {width, height - dist}
+        "A" -> {width - dist, height}
+        "S" -> {width, height + dist}
+        "D" -> {width + dist, height}
+      end
+
+    {:noreply, %{state | player_coords: player_coords}}
+  end
+
+  def do_handle_input(input, _, state) do
+    IO.inspect(input, label: "#{__MODULE__} ignoring input")
     {:noreply, state}
   end
 
