@@ -21,6 +21,8 @@ defmodule Play.Scene.Asteroids do
   # [x] Press `r` to reload!
   # [x] Make multiple circles
   # [x] Draw the player
+  # [x] Constrain the player to the screen
+  # [ ] Collision detection!
 
   # Questions: Should there be a process per asteroid?
 
@@ -177,8 +179,19 @@ defmodule Play.Scene.Asteroids do
         :down -> {width, height + dist}
         :right -> {width + dist, height}
       end
+      |> constrain_coords_to_screen()
 
     %{state | player_coords: updated_coords}
+  end
+
+  defp constrain_coords_to_screen({width, height}) do
+    {constrain(width, 0, screen_width()), constrain(height, 0, screen_height())}
+  end
+
+  defp constrain(value, min, max) do
+    value
+    |> min(max)
+    |> max(min)
   end
 
   defp update_player_coords_based_on_keys(%State{} = state) do
