@@ -28,7 +28,7 @@ defmodule Play.Scene.Asteroids do
 
   @movement_keys ["W", "A", "S", "D"]
 
-  @player_dimensions {{0,0}, {30,0}, {15, 30}}
+  @player_dimensions {{0, 0}, {30, 0}, {15, 30}}
   # Note: Asteroids start off the screen
   @initial_graph Graph.build()
                  |> circle(30, id: :asteroid1, stroke: {3, :white}, t: {0, -100})
@@ -179,13 +179,21 @@ defmodule Play.Scene.Asteroids do
         :down -> {width, height + dist}
         :right -> {width + dist, height}
       end
-      |> constrain_coords_to_screen()
+      |> constrain_player_to_screen()
 
     %{state | player_coords: updated_coords}
   end
 
-  defp constrain_coords_to_screen({width, height}) do
-    {constrain(width, 0, screen_width()), constrain(height, 0, screen_height())}
+  defp constrain_player_to_screen({width, height}) do
+    {_, {player_width, _}, {_, player_height}} = @player_dimensions
+
+    min_width = 0
+    max_width = screen_width() - player_width
+
+    min_height = Nav.height()
+    max_height = screen_height() - player_height
+
+    {constrain(width, min_width, max_width), constrain(height, min_height, max_height)}
   end
 
   defp constrain(value, min, max) do

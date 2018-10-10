@@ -12,6 +12,8 @@ defmodule Play.Component.Nav do
 
   @height 60
 
+  def height, do: @height
+
   # --------------------------------------------------------
   @impl Scenic.Component
   def verify(scene) when is_atom(scene), do: {:ok, scene}
