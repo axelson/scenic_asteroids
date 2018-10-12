@@ -24,9 +24,13 @@ defmodule Play.Scene.Asteroids do
   # [x] Constrain the player to the screen
   # [x] Create bullets
   # [x] Animate bullets
+  # [ ] Limit # bullets
+  # [ ] Remove bullets after they are off the screen
+  # [ ] Track state of spacebar so we can repeat fire and move
   # [ ] Collision detection!
 
-  # Questions: Should there be a process per asteroid?
+  # Question: Should there be a process per asteroid?
+  # Answer: No!
 
   @movement_keys ["W", "A", "S", "D"]
 
