@@ -10,7 +10,7 @@ defmodule Play.Scene.Asteroids do
   alias Play.Component.Nav
 
   defmodule State do
-    defstruct [:t, :x, :graph, :last_run_time, :player_coords, :key_states]
+    defstruct [:t, :x, :graph, :last_run_time, :player_coords, :key_states, :bullets]
   end
 
   # Steps
@@ -22,6 +22,8 @@ defmodule Play.Scene.Asteroids do
   # [x] Make multiple circles
   # [x] Draw the player
   # [x] Constrain the player to the screen
+  # [x] Create bullets
+  # [x] Animate bullets
   # [ ] Collision detection!
 
   # Questions: Should there be a process per asteroid?
@@ -47,7 +49,8 @@ defmodule Play.Scene.Asteroids do
       t: 0,
       x: 110,
       player_coords: initial_player_coordinates(),
-      key_states: %{}
+      key_states: %{},
+      bullets: []
     }
 
     {:ok, initial_state}
@@ -72,13 +75,10 @@ defmodule Play.Scene.Asteroids do
   def handle_info({:animate, expected_run_time}, state) do
     diff = time_diff(state, expected_run_time)
     state = update_player_coords_based_on_keys(state)
-    %{graph: graph, t: t, x: x, player_coords: player_coords} = state
+    %{graph: graph, t: t, x: x, player_coords: player_coords, bullets: bullets} = state
 
-    # x = x - 1 / 4
-    # speed = 5 / s
-    # diff = 0.1s
-    # diff = 100 ms
-    # speed = 10 u/s
+    bullets = tick_bullets(bullets)
+
     speed = 100
 
     dist =
@@ -94,10 +94,27 @@ defmodule Play.Scene.Asteroids do
       |> Graph.modify(:asteroid1, &circle(&1, 30, t: {x, 100}))
       |> Graph.modify(:asteroid2, &circle(&1, 30, t: {x, 200}))
       |> Graph.modify(:player, &triangle(&1, @player_dimensions, t: player_coords))
+      |> animate_bullets(bullets)
       |> push_graph()
 
-    new_state = %{state | t: t + 1, x: x, graph: graph, last_run_time: expected_run_time}
+    new_state = %{state | t: t + 1, x: x, graph: graph, last_run_time: expected_run_time, bullets: bullets}
     {:noreply, new_state}
+  end
+
+  defp tick_bullets(bullets) do
+    bullets
+    |> Enum.reduce([], fn bullet, bullets ->
+      bullet = Play.Bullet.tick(bullet)
+      [bullet | bullets]
+    end)
+  end
+
+  defp animate_bullets(graph, bullets) do
+    bullets
+    |> Enum.reduce(graph, fn bullet, graph ->
+      graph
+      |> Graph.modify(bullet.id, build_render_bullet(bullet))
+    end)
   end
 
   defp time_diff(state, expected_run_time) do
@@ -133,6 +150,12 @@ defmodule Play.Scene.Asteroids do
     {:noreply, state}
   end
 
+  def do_handle_input({:key, {" ", action, _}}, _viewport_context, state)
+      when action in [:press, :repeat] do
+    state = shoot(state)
+    {:noreply, state}
+  end
+
   def do_handle_input(input, _, state) do
     # IO.inspect(input, label: "#{__MODULE__} ignoring input")
     {:noreply, state}
@@ -151,7 +174,24 @@ defmodule Play.Scene.Asteroids do
     %{state | key_states: key_states}
   end
 
-  # def handle_input(_, _, state), do: {:noreply, state}
+  @spec shoot(%State{}) :: %State{}
+  defp shoot(state) do
+    IO.puts "pew pew"
+    %{bullets: bullets, graph: graph, player_coords: player_coords} = state
+
+    bullet = Play.Bullet.new(player_coords)
+    graph = render_bullet(graph, bullet)
+
+    %{state | bullets: [bullet | bullets], graph: graph}
+  end
+
+  defp build_render_bullet(bullet) do
+    fn graph -> render_bullet(graph, bullet) end
+  end
+
+  defp render_bullet(graph, bullet) do
+    circle(graph, 5, id: bullet.id, t: bullet.t, stroke: {1, :white})
+  end
 
   defp schedule_animations() do
     pid = self()
