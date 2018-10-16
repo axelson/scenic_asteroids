@@ -87,9 +87,9 @@ defmodule Play.Scene.Asteroids do
   end
 
   def handle_info({:animate, expected_run_time}, state) do
-    diff = time_diff(state, expected_run_time)
+    _diff = time_diff(state, expected_run_time)
     state = update_player_coords_based_on_keys(state)
-    %{graph: graph, t: t, x: x, player_coords: player_coords, asteroids: asteroids, bullets: bullets} = state
+    %{graph: graph, t: t, player_coords: player_coords, asteroids: asteroids, bullets: bullets} = state
 
     asteroids = tick_asteroids(asteroids)
     bullets = tick_bullets(bullets)
@@ -164,7 +164,6 @@ defmodule Play.Scene.Asteroids do
 
   def do_handle_input({:key, {key, action, _}}, _viewport_context, state)
       when key in @movement_keys and action in [:press, :repeat, :release] do
-    %{player_coords: {width, height}} = state
     state = record_key_state(state, key, action)
 
     {:noreply, state}
@@ -176,7 +175,7 @@ defmodule Play.Scene.Asteroids do
     {:noreply, state}
   end
 
-  def do_handle_input(input, _, state) do
+  def do_handle_input(_input, _, state) do
     # IO.inspect(input, label: "#{__MODULE__} ignoring input")
     {:noreply, state}
   end
@@ -267,7 +266,7 @@ defmodule Play.Scene.Asteroids do
   end
 
   defp update_player_coords_based_on_keys(%State{} = state) do
-    %{player_coords: {width, height}, key_states: key_states} = state
+    %{key_states: key_states} = state
 
     key_states
     |> Enum.reduce(state, fn {key, _key_state}, state ->
