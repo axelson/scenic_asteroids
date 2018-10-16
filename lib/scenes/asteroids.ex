@@ -10,7 +10,7 @@ defmodule Play.Scene.Asteroids do
   alias Play.Component.Nav
 
   defmodule State do
-    defstruct [:t, :x, :graph, :last_run_time, :player_coords, :key_states, :bullets]
+    defstruct [:t, :x, :graph, :last_run_time, :player_coords, :key_states, :bullets, :asteroids]
   end
 
   # Steps
@@ -24,6 +24,7 @@ defmodule Play.Scene.Asteroids do
   # [x] Constrain the player to the screen
   # [x] Create bullets
   # [x] Animate bullets
+  # [x] Loop the asteroids
   # [ ] Limit # bullets
   # [ ] Remove bullets after they are off the screen
   # [ ] Track state of spacebar so we can repeat fire and move
@@ -35,10 +36,7 @@ defmodule Play.Scene.Asteroids do
   @movement_keys ["W", "A", "S", "D"]
 
   @player_dimensions {{0, 0}, {30, 0}, {15, 30}}
-  # Note: Asteroids start off the screen
   @initial_graph Graph.build()
-                 |> circle(30, id: :asteroid1, stroke: {3, :white}, t: {0, -100})
-                 |> circle(30, id: :asteroid2, stroke: {3, :white}, t: {0, -100})
                  |> triangle(@player_dimensions, id: :player, stroke: {1, :white})
                  |> Nav.add_to_graph(__MODULE__)
 
@@ -54,10 +52,32 @@ defmodule Play.Scene.Asteroids do
       x: 110,
       player_coords: initial_player_coordinates(),
       key_states: %{},
-      bullets: []
+      bullets: [],
+      # Note: Asteroids start off the screen
+      asteroids: [
+        Play.Asteroid.new({-100, 100}, 30),
+        Play.Asteroid.new({-100, 200}, 27),
+        Play.Asteroid.new({-100, 300}, 12)
+      ]
     }
 
+    initial_state = render_initial_graph(initial_state)
+
     {:ok, initial_state}
+  end
+
+  @spec render_initial_graph(%State{}) :: %State{}
+  defp render_initial_graph(state) do
+    %{graph: graph, asteroids: asteroids} = state
+
+    graph =
+      asteroids
+      |> Enum.reduce(graph, fn asteroid, graph ->
+        graph
+        |> circle(asteroid.size, id: asteroid.id, stroke: {3, asteroid.color}, t: asteroid.t)
+      end)
+
+    %{state | graph: graph}
   end
 
   def initial_player_coordinates do
@@ -69,38 +89,44 @@ defmodule Play.Scene.Asteroids do
   def handle_info({:animate, expected_run_time}, state) do
     diff = time_diff(state, expected_run_time)
     state = update_player_coords_based_on_keys(state)
-    %{graph: graph, t: t, x: x, player_coords: player_coords, bullets: bullets} = state
+    %{graph: graph, t: t, x: x, player_coords: player_coords, asteroids: asteroids, bullets: bullets} = state
 
+    asteroids = tick_asteroids(asteroids)
     bullets = tick_bullets(bullets)
-
-    speed = 100
-
-    dist =
-      case diff do
-        0 -> 0
-        diff -> speed / 1000 * diff
-      end
-
-    x = x + dist
 
     graph =
       graph
-      |> Graph.modify(:asteroid1, &circle(&1, 30, t: {x, 100}))
-      |> Graph.modify(:asteroid2, &circle(&1, 30, t: {x, 200}))
       |> Graph.modify(:player, &triangle(&1, @player_dimensions, t: player_coords))
+      |> animate_asteroids(asteroids)
       |> animate_bullets(bullets)
       |> push_graph()
 
-    new_state = %{state | t: t + 1, x: x, graph: graph, last_run_time: expected_run_time, bullets: bullets}
+    new_state = %{
+      state
+      | t: t + 1,
+        graph: graph,
+        last_run_time: expected_run_time,
+        asteroids: asteroids,
+        bullets: bullets
+    }
+
     {:noreply, new_state}
   end
 
-  defp tick_bullets(bullets) do
-    bullets
-    |> Enum.reduce([], fn bullet, bullets ->
-      bullet = Play.Bullet.tick(bullet)
-      [bullet | bullets]
+  defp tick_asteroids(asteroids) do
+    Enum.map(asteroids, &Play.Asteroid.tick/1)
+  end
+
+  defp animate_asteroids(graph, asteroids) do
+    asteroids
+    |> Enum.reduce(graph, fn asteroid, graph ->
+      graph
+      |> Graph.modify(asteroid.id, &render_asteroid(&1, asteroid))
     end)
+  end
+
+  defp tick_bullets(bullets) do
+    Enum.map(bullets, &Play.Bullet.tick/1)
   end
 
   defp animate_bullets(graph, bullets) do
@@ -170,13 +196,17 @@ defmodule Play.Scene.Asteroids do
 
   @spec shoot(%State{}) :: %State{}
   defp shoot(state) do
-    IO.puts "pew pew"
+    IO.puts("pew pew")
     %{bullets: bullets, graph: graph, player_coords: player_coords} = state
 
     bullet = Play.Bullet.new(player_coords)
     graph = render_bullet(graph, bullet)
 
     %{state | bullets: [bullet | bullets], graph: graph}
+  end
+
+  defp render_asteroid(graph, asteroid) do
+    circle(graph, asteroid.size, id: asteroid.id, stroke: {3, asteroid.color}, t: asteroid.t)
   end
 
   defp build_render_bullet(bullet) do
