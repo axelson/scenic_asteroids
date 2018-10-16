@@ -61,19 +61,9 @@ defmodule Play.Scene.Asteroids do
   end
 
   def initial_player_coordinates do
-    width = screen_width() / 2
-    height = screen_height() / 2
+    width = Play.Utils.screen_width() / 2
+    height = Play.Utils.screen_height() / 2
     {width, height}
-  end
-
-  def screen_width do
-    {width, _height} = Application.get_env(:play, :viewport)[:size]
-    width
-  end
-
-  def screen_height do
-    {_width, height} = Application.get_env(:play, :viewport)[:size]
-    height
   end
 
   def handle_info({:animate, expected_run_time}, state) do
@@ -232,10 +222,10 @@ defmodule Play.Scene.Asteroids do
     {_, {player_width, _}, {_, player_height}} = @player_dimensions
 
     min_width = 0
-    max_width = screen_width() - player_width
+    max_width = Play.Utils.screen_width() - player_width
 
     min_height = Nav.height()
-    max_height = screen_height() - player_height
+    max_height = Play.Utils.screen_height() - player_height
 
     {constrain(width, min_width, max_width), constrain(height, min_height, max_height)}
   end
