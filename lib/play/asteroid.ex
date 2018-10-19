@@ -15,9 +15,9 @@ defmodule Play.Asteroid do
     %{asteroid | t: {tick_width(asteroid, width), height}}
   end
 
-  def tick_width(%__MODULE__{} = _asteroid, width) do
+  defp tick_width(%__MODULE__{size: size} = _asteroid, width) do
     cond do
-      width > Play.Utils.screen_width() -> -100
+      width - size > Play.Utils.screen_width() -> -size
       true -> width + 1
     end
   end
