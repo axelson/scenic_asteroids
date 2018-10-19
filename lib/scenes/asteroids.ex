@@ -34,6 +34,7 @@ defmodule Play.Scene.Asteroids do
   # Answer: No!
 
   @movement_keys ["W", "A", "S", "D"]
+  @firing_keys [" "]
 
   @player_dimensions {{0, 0}, {30, 0}, {15, 30}}
   @initial_graph Graph.build()
@@ -88,8 +89,10 @@ defmodule Play.Scene.Asteroids do
 
   def handle_info({:animate, expected_run_time}, state) do
     _diff = time_diff(state, expected_run_time)
-    state = update_player_coords_based_on_keys(state)
-    %{graph: graph, t: t, player_coords: player_coords, asteroids: asteroids, bullets: bullets} = state
+    state = update_state_based_on_keys(state)
+
+    %{graph: graph, t: t, player_coords: player_coords, asteroids: asteroids, bullets: bullets} =
+      state
 
     asteroids = tick_asteroids(asteroids)
     bullets = tick_bullets(bullets)
@@ -169,9 +172,10 @@ defmodule Play.Scene.Asteroids do
     {:noreply, state}
   end
 
-  def do_handle_input({:key, {" ", action, _}}, _viewport_context, state)
-      when action in [:press, :repeat] do
-    state = shoot(state)
+  def do_handle_input({:key, {key, action, _}}, _viewport_context, state)
+      when key in @firing_keys and action in [:press, :repeat, :release] do
+    state = record_key_state(state, key, action)
+
     {:noreply, state}
   end
 
@@ -265,13 +269,17 @@ defmodule Play.Scene.Asteroids do
     |> max(min)
   end
 
-  defp update_player_coords_based_on_keys(%State{} = state) do
+  defp update_state_based_on_keys(%State{} = state) do
     %{key_states: key_states} = state
 
     key_states
-    |> Enum.reduce(state, fn {key, _key_state}, state ->
-      direction = key_to_direction(key)
-      update_player_coords(state, direction)
+    |> Enum.reduce(state, fn
+      {key, _key_state}, state when key in @movement_keys ->
+        direction = key_to_direction(key)
+        update_player_coords(state, direction)
+
+      {key, _key_state}, state when key in @firing_keys ->
+        state = shoot(state)
     end)
   end
 end
