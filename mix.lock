@@ -13,7 +13,7 @@
   "mimerl": {:hex, :mimerl, "1.0.2", "993f9b0e084083405ed8252b99460c4f0563e41729ab42d9074fd5e52439be88", [:rebar3], [], "hexpm"},
   "parse_trans": {:hex, :parse_trans, "3.3.0", "09765507a3c7590a784615cfd421d101aec25098d50b89d7aa1d66646bc571c1", [:rebar3], [], "hexpm"},
   "scenic": {:hex, :scenic, "0.7.0", "fa93041fb63bc9e654fc70609d2af4ccad3cace07233ab47784ad96348137b1e", [:mix], [{:scenic_math, "~> 0.7.0", [hex: :scenic_math, repo: "hexpm", optional: false]}], "hexpm"},
-  "scenic_clock": {:hex, :scenic_clock, "0.7.0", "645bfd0f91a37fcaf64e7ad712cc7c110ad7f3004c6566c4cf279c80403ac104", [:mix], [{:scenic, "~> 0.7.0", [hex: :scenic, repo: "hexpm", optional: false]}, {:timex, "~> 3.3", [hex: :timex, repo: "hexpm", optional: false]}], "hexpm"},
+  "scenic_clock": {:hex, :scenic_clock, "0.8.0", "fc1444307062411a3c741c505ae349f2dfd7f5cb71787dfc2fc1b4298daee042", [:mix], [{:scenic, "~> 0.8", [hex: :scenic, repo: "hexpm", optional: false]}, {:timex, "~> 3.3", [hex: :timex, repo: "hexpm", optional: false]}], "hexpm"},
   "scenic_driver_glfw": {:git, "git@github.com:boydm/scenic_driver_glfw.git", "ae988f5e07246707604e93327c470935eb934c47", []},
   "scenic_math": {:git, "git@github.com:boydm/scenic_math.git", "6788458abfacedfd0066cef29c8c165140cafdd4", []},
   "scenic_sensor": {:hex, :scenic_sensor, "0.7.0", "a12aed7596fbab025a535f912325da5a087ff704e96f7acb274c3034d832f9ce", [:mix], [], "hexpm"},
