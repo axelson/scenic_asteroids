@@ -26,7 +26,7 @@ defmodule Play.Scene.Asteroids do
   # [x] Animate bullets
   # [x] Loop the asteroids
   # [ ] Limit # bullets
-  # [ ] Remove bullets after they are off the screen
+  # [x] Remove bullets after they are off the screen
   # [ ] Track state of spacebar so we can repeat fire and move
   # [ ] Collision detection!
 
@@ -35,6 +35,7 @@ defmodule Play.Scene.Asteroids do
 
   @movement_keys ["W", "A", "S", "D"]
   @firing_keys [" "]
+  @keys_to_track @movement_keys ++ @firing_keys
 
   @player_dimensions {{0, 0}, {30, 0}, {15, 30}}
   @initial_graph Graph.build()
@@ -104,6 +105,8 @@ defmodule Play.Scene.Asteroids do
       |> animate_bullets(bullets)
       |> push_graph()
 
+    bullets = remove_dead_bullets(bullets)
+
     new_state = %{
       state
       | t: t + 1,
@@ -116,10 +119,6 @@ defmodule Play.Scene.Asteroids do
     {:noreply, new_state}
   end
 
-  defp tick_asteroids(asteroids) do
-    Enum.map(asteroids, &Play.Asteroid.tick/1)
-  end
-
   defp animate_asteroids(graph, asteroids) do
     asteroids
     |> Enum.reduce(graph, fn asteroid, graph ->
@@ -128,15 +127,31 @@ defmodule Play.Scene.Asteroids do
     end)
   end
 
+  defp animate_bullets(graph, bullets) do
+    bullets
+    |> Enum.reduce(graph, fn
+      {:delete, id}, graph ->
+        Graph.delete(graph, id)
+
+      bullet, graph ->
+        graph
+        |> Graph.modify(bullet.id, build_render_bullet(bullet))
+    end)
+  end
+
+  defp tick_asteroids(asteroids) do
+    Enum.map(asteroids, &Play.Asteroid.tick/1)
+  end
+
   defp tick_bullets(bullets) do
     Enum.map(bullets, &Play.Bullet.tick/1)
   end
 
-  defp animate_bullets(graph, bullets) do
+  defp remove_dead_bullets(bullets) do
     bullets
-    |> Enum.reduce(graph, fn bullet, graph ->
-      graph
-      |> Graph.modify(bullet.id, build_render_bullet(bullet))
+    |> Enum.reject(fn
+      {:delete, _} -> true
+      _ -> false
     end)
   end
 
@@ -166,14 +181,7 @@ defmodule Play.Scene.Asteroids do
   end
 
   def do_handle_input({:key, {key, action, _}}, _viewport_context, state)
-      when key in @movement_keys and action in [:press, :repeat, :release] do
-    state = record_key_state(state, key, action)
-
-    {:noreply, state}
-  end
-
-  def do_handle_input({:key, {key, action, _}}, _viewport_context, state)
-      when key in @firing_keys and action in [:press, :repeat, :release] do
+      when key in @keys_to_track and action in [:press, :repeat, :release] do
     state = record_key_state(state, key, action)
 
     {:noreply, state}
@@ -199,8 +207,8 @@ defmodule Play.Scene.Asteroids do
 
   @spec shoot(%State{}) :: %State{}
   defp shoot(state) do
-    IO.puts("pew pew")
     %{bullets: bullets, graph: graph, player_coords: player_coords} = state
+    IO.puts("pew pew #{length(bullets)}")
 
     bullet = Play.Bullet.new(player_coords)
     graph = render_bullet(graph, bullet)
@@ -217,7 +225,7 @@ defmodule Play.Scene.Asteroids do
   end
 
   defp render_bullet(graph, bullet) do
-    circle(graph, 5, id: bullet.id, t: bullet.t, stroke: {1, :white})
+    circle(graph, bullet.size, id: bullet.id, t: bullet.t, stroke: {1, :white})
   end
 
   defp schedule_animations() do
