@@ -32,8 +32,8 @@ defmodule Play.Scene.Asteroids do
             last_run_time: any,
             player_coords: Play.Scene.Asteroids.coords(),
             key_states: %{required(String.t()) => true},
-            bullets: list(Bullet.t()),
-            asteroids: list(Asteroid.t()),
+            bullets: list(Play.Bullet.t()),
+            asteroids: list(Play.Asteroid.t()),
             last_shot: Play.Scene.Asteroids.game_time()
           }
   end
