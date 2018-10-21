@@ -52,7 +52,7 @@ defmodule Play.Scene.Asteroids do
   # [x] Loop the asteroids
   # [x] Remove bullets after they are off the screen
   # [x] Limit # bullets
-  # [ ] Track state of spacebar so we can repeat fire and move
+  # [x] Track state of spacebar so we can repeat fire and move
   # [ ] Collision detection!
 
   # Question: Should there be a process per asteroid?
