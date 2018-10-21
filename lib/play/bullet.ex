@@ -3,6 +3,13 @@ defmodule Play.Bullet do
 
   @speed 5
 
+  @type t :: %__MODULE__{
+    id: reference(),
+    t: Play.Scene.Asteroids.coords(),
+    color: atom,
+    size: integer
+  }
+
   def new(coords) do
     %__MODULE__{
       id: make_ref(),
@@ -16,6 +23,7 @@ defmodule Play.Bullet do
   def tick(%__MODULE__{} = bullet) do
     {width, height} = bullet.t
     new_bullet = %{bullet | t: {width, height - @speed}}
+
     if offscreen?(new_bullet) do
       {:delete, bullet.id}
     else

@@ -9,8 +9,33 @@ defmodule Play.Scene.Asteroids do
   alias Scenic.Graph
   alias Play.Component.Nav
 
+  @type game_time :: integer
+  @type coords :: {width :: integer, height :: integer}
+
   defmodule State do
-    defstruct [:t, :x, :graph, :last_run_time, :player_coords, :key_states, :bullets, :asteroids]
+    defstruct [
+      :t,
+      :graph,
+      :last_run_time,
+      :player_coords,
+      :key_states,
+      :bullets,
+      :asteroids,
+      :last_shot
+    ]
+
+    @type t :: %__MODULE__{
+            t: Play.Scene.Asteroids.game_time(),
+            # graph: Scenic.Graph.t(),
+            graph: any,
+            # Do we need this?
+            last_run_time: any,
+            player_coords: Play.Scene.Asteroids.coords(),
+            key_states: %{required(String.t()) => true},
+            bullets: list(Bullet.t()),
+            asteroids: list(Asteroid.t()),
+            last_shot: Play.Scene.Asteroids.game_time()
+          }
   end
 
   # Steps
@@ -25,8 +50,8 @@ defmodule Play.Scene.Asteroids do
   # [x] Create bullets
   # [x] Animate bullets
   # [x] Loop the asteroids
-  # [ ] Limit # bullets
   # [x] Remove bullets after they are off the screen
+  # [x] Limit # bullets
   # [ ] Track state of spacebar so we can repeat fire and move
   # [ ] Collision detection!
 
@@ -36,6 +61,7 @@ defmodule Play.Scene.Asteroids do
   @movement_keys ["W", "A", "S", "D"]
   @firing_keys [" "]
   @keys_to_track @movement_keys ++ @firing_keys
+  @max_bullets 5
 
   @player_dimensions {{0, 0}, {30, 0}, {15, 30}}
   @initial_graph Graph.build()
@@ -51,7 +77,6 @@ defmodule Play.Scene.Asteroids do
     initial_state = %State{
       graph: @initial_graph,
       t: 0,
-      x: 110,
       player_coords: initial_player_coordinates(),
       key_states: %{},
       bullets: [],
@@ -60,7 +85,8 @@ defmodule Play.Scene.Asteroids do
         Play.Asteroid.new({-100, 100}, 30),
         Play.Asteroid.new({-100, 200}, 27),
         Play.Asteroid.new({-100, 300}, 12)
-      ]
+      ],
+      last_shot: :never
     }
 
     initial_state = render_initial_graph(initial_state)
@@ -205,6 +231,15 @@ defmodule Play.Scene.Asteroids do
     %{state | key_states: key_states}
   end
 
+  @spec try_to_shoot(%State{}) :: %State{}
+  defp try_to_shoot(state) do
+    cond do
+      shot_recently?(state) -> state
+      length(state.bullets) >= @max_bullets -> state
+      true -> shoot(state)
+    end
+  end
+
   @spec shoot(%State{}) :: %State{}
   defp shoot(state) do
     %{bullets: bullets, graph: graph, player_coords: player_coords} = state
@@ -213,7 +248,7 @@ defmodule Play.Scene.Asteroids do
     bullet = Play.Bullet.new(player_coords)
     graph = render_bullet(graph, bullet)
 
-    %{state | bullets: [bullet | bullets], graph: graph}
+    %{state | bullets: [bullet | bullets], graph: graph, last_shot: state.t}
   end
 
   defp render_asteroid(graph, asteroid) do
@@ -287,7 +322,13 @@ defmodule Play.Scene.Asteroids do
         update_player_coords(state, direction)
 
       {key, _key_state}, state when key in @firing_keys ->
-        state = shoot(state)
+        try_to_shoot(state)
     end)
+  end
+
+  defp shot_recently?(%State{last_shot: :never}), do: false
+
+  defp shot_recently?(%State{last_shot: last_shot, t: t}) do
+    t - last_shot < 4
   end
 end
