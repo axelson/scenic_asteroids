@@ -6,7 +6,7 @@ defmodule Play.Asteroid do
   defstruct [:id, :t, :color, :size]
 
   @type t :: %__MODULE__{
-    id: reference,
+    id: Play.Utils.id(),
     t: Play.Scene.Asteroids.coords(),
     color: atom,
     size: integer
@@ -14,7 +14,7 @@ defmodule Play.Asteroid do
 
   def new(coords, size) do
     %__MODULE__{
-      id: make_ref(),
+      id: Play.Utils.make_id(),
       t: coords,
       color: :white,
       size: size

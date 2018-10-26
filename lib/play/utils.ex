@@ -3,6 +3,10 @@ defmodule Play.Utils do
   Misc utils
   """
 
+  @type id :: reference
+
+  def make_id, do: make_ref()
+
   def screen_width do
     {width, _height} = Application.get_env(:play, :viewport)[:size]
     width

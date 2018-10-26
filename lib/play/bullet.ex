@@ -8,7 +8,7 @@ defmodule Play.Bullet do
   @speed 5
 
   @type t :: %__MODULE__{
-    id: reference(),
+    id: Play.Utils.id(),
     t: Play.Scene.Asteroids.coords(),
     color: atom,
     size: integer
@@ -16,7 +16,7 @@ defmodule Play.Bullet do
 
   def new(coords) do
     %__MODULE__{
-      id: make_ref(),
+      id: Play.Utils.make_id(),
       t: coords,
       color: :white,
       size: 5
