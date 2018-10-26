@@ -7,7 +7,6 @@ defmodule Play.Scene.Asteroids do
   import Scenic.Primitives
 
   alias Scenic.Graph
-  alias Play.Component.Nav
 
   @type game_time :: integer
   @type coords :: {width :: integer, height :: integer}
@@ -67,7 +66,6 @@ defmodule Play.Scene.Asteroids do
   @player_dimensions {{0, 0}, {30, 0}, {15, 30}}
   @initial_graph Graph.build()
                  |> triangle(@player_dimensions, id: :player, stroke: {1, :white})
-                 |> Nav.add_to_graph(__MODULE__)
 
   @impl Scenic.Scene
   def init(_, _opts) do
@@ -202,7 +200,7 @@ defmodule Play.Scene.Asteroids do
   end
 
   def do_handle_input({:key, {"R", :press, _}}, _viewport_context, state) do
-    GenServer.call(Play.Component.Nav, :reload_current_scene)
+    restart()
 
     {:noreply, state}
   end
@@ -301,7 +299,7 @@ defmodule Play.Scene.Asteroids do
     min_width = 0
     max_width = Play.Utils.screen_width() - player_width
 
-    min_height = Nav.height()
+    min_height = 0
     max_height = Play.Utils.screen_height() - player_height
 
     {constrain(width, min_width, max_width), constrain(height, min_height, max_height)}
@@ -332,4 +330,8 @@ defmodule Play.Scene.Asteroids do
   defp shot_recently?(%State{last_shot: last_shot, t: t}) do
     t - last_shot < 4
   end
+
+  def handle_call(:reload_current_scene, _, state), do: restart()
+
+  defp restart, do: Process.exit(self(), :kill)
 end

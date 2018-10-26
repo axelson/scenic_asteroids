@@ -12,7 +12,6 @@ defmodule Play do
     # start the application with the viewport
     children = [
       {DynamicSupervisor, name: Play.GameSupervisor, strategy: :one_for_one},
-      supervisor(Play.Sensor.Supervisor, []),
       supervisor(Scenic, viewports: [main_viewport_config]),
     ]
 
