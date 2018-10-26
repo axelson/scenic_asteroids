@@ -31,9 +31,6 @@ defmodule Play.MixProject do
       # Project deps
       # {:sched_ex, "~> 1.0.2"},
       {:sched_ex, path: "../forks/sched_ex"},
-      # {:dialyxir, "1.0.0-rc.3", only: :dev, runtime: false},
-      {:dialyxir, github: "jeremyjh/dialyxir", only: :dev, runtime: false},
-      {:erlex, github: "asummers/erlex", only: :dev, runtime: false, override: true},
 
       # Scenic default deps
       {:elixir_make, "~> 0.4"},
@@ -49,7 +46,12 @@ defmodule Play.MixProject do
       # These deps are optional and are included as they are often used.
       # If your app doesn't need them, they are safe to remove.
       {:scenic_sensor, "~> 0.7.0"},
-      {:scenic_clock, ">= 0.0.0"}
+      {:scenic_clock, ">= 0.0.0"},
+
+      # {:dialyxir, "1.0.0-rc.3", only: :dev, runtime: false},
+      {:dialyxir, github: "jeremyjh/dialyxir", only: :dev, runtime: false},
+      {:erlex, github: "asummers/erlex", only: :dev, runtime: false, override: true},
+      {:credo, "~> 0.10.0", only: [:dev, :test], runtime: false},
 
       # the https versions
       # { :scenic, git: "https://github.com/boydm/scenic.git", override: true },
