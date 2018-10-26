@@ -10,6 +10,9 @@ defmodule Play.MixProject do
       compilers: [:elixir_make] ++ Mix.compilers(),
       make_env: %{"MIX_ENV" => to_string(Mix.env())},
       make_clean: ["clean"],
+      dialyzer: [
+        plt_add_deps: :transitive, plt_add_apps: [:mix, :iex],
+      ],
       deps: deps()
     ]
   end
@@ -28,7 +31,9 @@ defmodule Play.MixProject do
       # Project deps
       # {:sched_ex, "~> 1.0.2"},
       {:sched_ex, path: "../forks/sched_ex"},
-      {:dialyxir, "1.0.0-rc.3", only: :dev, runtime: false},
+      # {:dialyxir, "1.0.0-rc.3", only: :dev, runtime: false},
+      {:dialyxir, github: "jeremyjh/dialyxir", only: :dev, runtime: false},
+      {:erlex, github: "asummers/erlex", only: :dev, runtime: false, override: true},
 
       # Scenic default deps
       {:elixir_make, "~> 0.4"},
