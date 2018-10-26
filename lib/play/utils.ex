@@ -1,4 +1,8 @@
 defmodule Play.Utils do
+  @moduledoc """
+  Misc utils
+  """
+
   def screen_width do
     {width, _height} = Application.get_env(:play, :viewport)[:size]
     width

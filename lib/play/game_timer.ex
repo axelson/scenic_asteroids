@@ -1,4 +1,8 @@
 defmodule Play.GameTimer do
+  @moduledoc """
+  Uses `SchedEx` to control the timescale of the game
+  """
+
   @behaviour SchedEx.TimeScale
   @fps 60
   @multiplier 1
@@ -11,7 +15,7 @@ defmodule Play.GameTimer do
     @fps / 1000 * @multiplier
   end
 
-  def speed() do
+  def speed do
     @fps
   end
 end

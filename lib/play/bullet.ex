@@ -1,4 +1,8 @@
 defmodule Play.Bullet do
+  @moduledoc """
+  Struct that represents a bullet in the game
+  """
+
   defstruct [:id, :t, :color, :size]
 
   @speed 5

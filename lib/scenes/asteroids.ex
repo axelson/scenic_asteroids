@@ -262,7 +262,7 @@ defmodule Play.Scene.Asteroids do
     circle(graph, bullet.size, id: bullet.id, t: bullet.t, stroke: {1, :white})
   end
 
-  defp schedule_animations() do
+  defp schedule_animations do
     pid = self()
     # Process.send_after(self(), :animate, 2)
     func = fn expected_run_time ->
