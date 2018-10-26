@@ -1,4 +1,8 @@
 defmodule Play.Asteroid do
+  @moduledoc """
+  Represents an asteroid in the game
+  """
+
   defstruct [:id, :t, :color, :size]
 
   @type t :: %__MODULE__{

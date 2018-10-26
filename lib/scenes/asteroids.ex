@@ -13,6 +13,7 @@ defmodule Play.Scene.Asteroids do
   @type coords :: {width :: integer, height :: integer}
 
   defmodule State do
+    @moduledoc false
     defstruct [
       :t,
       :graph,
