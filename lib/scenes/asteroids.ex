@@ -27,7 +27,7 @@ defmodule Play.Scene.Asteroids do
     @type t :: %__MODULE__{
             t: Play.Scene.Asteroids.game_time(),
             # graph: Scenic.Graph.t(),
-            graph: any,
+            graph: %Graph{},
             # Do we need this?
             last_run_time: any,
             player_coords: Play.Scene.Asteroids.coords(),
