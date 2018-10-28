@@ -53,7 +53,8 @@ defmodule Play.Scene.Asteroids do
   # [x] Remove bullets after they are off the screen
   # [x] Limit # bullets
   # [x] Track state of spacebar so we can repeat fire and move
-  # [ ] Collision detection!
+  # [x] Basic Collision detection!
+  # [ ] Shoot the asteroids
 
   # Question: Should there be a process per asteroid?
   # Answer: No!
@@ -81,7 +82,7 @@ defmodule Play.Scene.Asteroids do
       bullets: [],
       # Note: Asteroids start off the screen
       asteroids: [
-        Play.Asteroid.new({-100, 100}, 30),
+        Play.Asteroid.new({-100, 31}, 30),
         Play.Asteroid.new({-100, 200}, 27),
         Play.Asteroid.new({-100, 300}, 12)
       ],
@@ -122,15 +123,11 @@ defmodule Play.Scene.Asteroids do
 
     asteroids = tick_asteroids(asteroids)
     bullets = tick_bullets(bullets)
-
-    graph =
-      graph
-      |> Graph.modify(:player, &triangle(&1, @player_dimensions, t: player_coords))
-      |> animate_asteroids(asteroids)
-      |> animate_bullets(bullets)
-      |> push_graph()
-
     bullets = remove_dead_bullets(bullets)
+
+    if rem(t, 10) == 0 do
+      check_collisions(state)
+    end
 
     new_state = %{
       state
@@ -140,6 +137,16 @@ defmodule Play.Scene.Asteroids do
         asteroids: asteroids,
         bullets: bullets
     }
+
+    graph =
+      graph
+      |> Graph.modify(:player, &triangle(&1, @player_dimensions, t: player_coords))
+      |> animate_asteroids(asteroids)
+      |> animate_bullets(bullets)
+      |> animate_collision_boxes(new_state)
+      |> push_graph()
+
+    new_state = %{new_state | graph: graph}
 
     {:noreply, new_state}
   end
@@ -161,6 +168,21 @@ defmodule Play.Scene.Asteroids do
       bullet, graph ->
         graph
         |> Graph.modify(bullet.id, build_render_bullet(bullet))
+    end)
+  end
+
+  defp animate_collision_boxes(graph, %State{asteroids: asteroids}) do
+    asteroids
+    |> Enum.map(&Play.CollisionBox.from/1)
+    |> Enum.reduce(graph, fn collision_box, graph ->
+      case Graph.get(graph, collision_box.id) do
+        [] ->
+          render_collision_box(graph, collision_box)
+
+        [_] ->
+          graph
+          |> Graph.modify(collision_box.id, build_render_collision_box(collision_box))
+      end
     end)
   end
 
@@ -258,8 +280,17 @@ defmodule Play.Scene.Asteroids do
     fn graph -> render_bullet(graph, bullet) end
   end
 
+  defp build_render_collision_box(collision_box) do
+    fn graph -> render_collision_box(graph, collision_box) end
+  end
+
   defp render_bullet(graph, bullet) do
     circle(graph, bullet.size, id: bullet.id, t: bullet.t, stroke: {1, :white})
+  end
+
+  defp render_collision_box(graph, collision_box) do
+    size = collision_box.size
+    rectangle(graph, {size, size}, id: collision_box.id, t: collision_box.t, stroke: {1, :white})
   end
 
   defp schedule_animations do
@@ -330,6 +361,41 @@ defmodule Play.Scene.Asteroids do
   defp shot_recently?(%State{last_shot: last_shot, t: t}) do
     t - last_shot < 4
   end
+
+  defp check_collisions(%State{} = state) do
+    collisions(state)
+    |> Enum.reduce(state, fn collision, state ->
+      case collision do
+        {:asteroid, :player} ->
+          raise "boom"
+
+        other ->
+          IO.inspect(other, label: "other collision")
+          state
+      end
+    end)
+  end
+
+  defp collisions(%State{graph: graph} = state) do
+    %{asteroids: asteroids, player_coords: player_coords} = state
+    {player_width, player_height} = player_coords
+
+    Enum.reduce(asteroids, [], fn asteroid, collisions ->
+      collision_box = Play.CollisionBox.from(asteroid)
+      {box_width, box_height} = collision_box.t
+
+      overlap_x = overlap(player_width, box_width, box_width + collision_box.size)
+      overlap_y = overlap(player_height, box_height, box_height + collision_box.size)
+
+      if overlap_x && overlap_y do
+        [{:asteroid, :player} | collisions]
+      else
+        collisions
+      end
+    end)
+  end
+
+  defp overlap(x, x1, x2), do: x > x1 && x < x2
 
   def handle_call(:reload_current_scene, _, state), do: restart()
 
