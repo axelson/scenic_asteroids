@@ -54,7 +54,12 @@ defmodule Play.Scene.Asteroids do
   # [x] Limit # bullets
   # [x] Track state of spacebar so we can repeat fire and move
   # [x] Basic Collision detection!
+  # [x] Asteroid, bullet collision
   # [ ] Shoot the asteroids
+  # [ ] Asteroid move in vectors
+  # [ ] Asteroid randomization
+  # [ ] Asteroid spawning
+  # [ ] Asteroid demolition into pieces
 
   # Question: Should there be a process per asteroid?
   # Answer: No!
@@ -366,7 +371,10 @@ defmodule Play.Scene.Asteroids do
     collisions(state)
     |> Enum.reduce(state, fn collision, state ->
       case collision do
-        {:asteroid, :player} ->
+        {:player, :asteroid} ->
+          raise "boom"
+
+        {:bullet, bullet, :asteroid, asteroid} ->
           raise "boom"
 
         other ->
@@ -378,21 +386,50 @@ defmodule Play.Scene.Asteroids do
 
   defp collisions(%State{graph: graph} = state) do
     %{asteroids: asteroids, player_coords: player_coords} = state
-    {player_width, player_height} = player_coords
 
-    Enum.reduce(asteroids, [], fn asteroid, collisions ->
+    asteroids
+    |> Enum.flat_map(fn asteroid ->
       collision_box = Play.CollisionBox.from(asteroid)
-      {box_width, box_height} = collision_box.t
 
-      overlap_x = overlap(player_width, box_width, box_width + collision_box.size)
-      overlap_y = overlap(player_height, box_height, box_height + collision_box.size)
+      Enum.concat([
+        player_collisions(player_coords, collision_box),
+        bullet_collisions(state.bullets, collision_box)
+      ])
+    end)
+  end
 
-      if overlap_x && overlap_y do
-        [{:asteroid, :player} | collisions]
+  defp player_collisions(player_coords, collision_box) do
+    if collides?(player_coords, collision_box) do
+      [{:player, :asteroid}]
+    else
+      []
+    end
+  end
+
+  defp bullet_collisions(bullets, collision_box) do
+    bullets
+    |> Enum.flat_map(fn bullet ->
+      if collides?(bullet.t, collision_box) do
+        [{:bullet, bullet, :asteroid, collision_box}]
       else
-        collisions
+        []
       end
     end)
+  end
+
+  defp bullet_collides?(bullets, collision_box) do
+    bullets
+    |> Enum.reduce(false)
+  end
+
+  @spec collides?(coords, Play.CollisionBox.t()) :: boolean
+  defp collides?({width, height}, %Play.CollisionBox{} = collision_box) do
+    {box_width, box_height} = collision_box.t
+
+    overlap_x = overlap(width, box_width, box_width + collision_box.size)
+    overlap_y = overlap(height, box_height, box_height + collision_box.size)
+
+    overlap_x && overlap_y
   end
 
   defp overlap(x, x1, x2), do: x > x1 && x < x2
