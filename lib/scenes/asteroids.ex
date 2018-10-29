@@ -417,11 +417,6 @@ defmodule Play.Scene.Asteroids do
     end)
   end
 
-  defp bullet_collides?(bullets, collision_box) do
-    bullets
-    |> Enum.reduce(false)
-  end
-
   @spec collides?(coords, Play.CollisionBox.t()) :: boolean
   defp collides?({width, height}, %Play.CollisionBox{} = collision_box) do
     {box_width, box_height} = collision_box.t
