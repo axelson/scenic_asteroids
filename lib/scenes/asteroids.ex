@@ -56,6 +56,7 @@ defmodule Play.Scene.Asteroids do
   # [x] Basic Collision detection!
   # [x] Asteroid, bullet collision
   # [x] Shoot the asteroids
+  # [ ] Press 'q' to quit
   # [ ] Create protocols
   # [ ] Asteroid move in vectors
   # [ ] Asteroid randomization
