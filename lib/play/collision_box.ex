@@ -12,13 +12,17 @@ defmodule Play.CollisionBox do
           size: integer
         }
 
+  def id(entity_id), do: entity_id <> "_collision_box"
+
   # TODO: Change this to a protocol
-  def from(%Play.Asteroid{t: {width, height}, size: size, id: id}) do
+  def from(%Play.Asteroid{t: {width, height}, size: size, id: entity_id}) do
     %__MODULE__{
-      id: id <> "_collision_box",
-      entity_id: id,
+      id: id(entity_id),
+      entity_id: entity_id,
       t: {width - size, height - size},
       size: size * 2
     }
   end
+
+  def from({:delete, id}), do: {:delete, id}
 end

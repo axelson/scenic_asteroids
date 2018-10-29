@@ -21,10 +21,13 @@ defmodule Play.Asteroid do
     }
   end
 
+  # TODO: Make tick into a protocol
   def tick(%__MODULE__{} = asteroid) do
     {width, height} = asteroid.t
     %{asteroid | t: {tick_width(asteroid, width), height}}
   end
+
+  def tick({:delete, id}), do: {:delete, id}
 
   defp tick_width(%__MODULE__{size: size} = _asteroid, width) do
     cond do

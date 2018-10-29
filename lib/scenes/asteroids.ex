@@ -7,6 +7,7 @@ defmodule Play.Scene.Asteroids do
   import Scenic.Primitives
 
   alias Scenic.Graph
+  alias Play.Asteroid
   alias Play.Bullet
   alias Play.CollisionBox
 
@@ -54,7 +55,8 @@ defmodule Play.Scene.Asteroids do
   # [x] Track state of spacebar so we can repeat fire and move
   # [x] Basic Collision detection!
   # [x] Asteroid, bullet collision
-  # [ ] Shoot the asteroids
+  # [x] Shoot the asteroids
+  # [ ] Create protocols
   # [ ] Asteroid move in vectors
   # [ ] Asteroid randomization
   # [ ] Asteroid spawning
@@ -112,25 +114,22 @@ defmodule Play.Scene.Asteroids do
     %{state | graph: graph}
   end
 
-  def initial_player_coordinates do
-    width = Play.Utils.screen_width() / 2
-    height = Play.Utils.screen_height() / 2
-    {width, height}
-  end
-
   def handle_info({:animate, expected_run_time}, state) do
     state =
       state
       |> update_state_based_on_keys()
+      # Tick updates our internal representation of state
       |> tick_time()
       |> tick_asteroids()
       |> tick_bullets()
       |> check_collisions()
+      # Update the rendering of each element in the graph
       |> animate_player()
       |> animate_asteroids()
       |> animate_bullets()
       |> animate_collision_boxes()
       |> remove_dead_bullets()
+      |> remove_dead_asteroids()
 
     %{graph: graph} = state
     push_graph(graph)
@@ -153,10 +152,14 @@ defmodule Play.Scene.Asteroids do
     graph =
       asteroids
       |> Enum.reduce(graph, fn
+        {:delete, id}, graph ->
+          IO.puts("Deleting asteroid")
+          Graph.delete(graph, id)
+
         asteroid, graph ->
           graph
           |> Graph.modify(asteroid.id, &render_asteroid(&1, asteroid))
-        end)
+      end)
 
     %{state | graph: graph}
   end
@@ -183,15 +186,21 @@ defmodule Play.Scene.Asteroids do
     graph =
       asteroids
       |> Enum.map(&Play.CollisionBox.from/1)
-      |> Enum.reduce(graph, fn collision_box, graph ->
-        case Graph.get(graph, collision_box.id) do
-          [] ->
-            render_collision_box(graph, collision_box)
+      |> Enum.reduce(graph, fn
+        %CollisionBox{} = collision_box, graph ->
+          case Graph.get(graph, collision_box.id) do
+            [] ->
+              render_collision_box(graph, collision_box)
 
-          [_] ->
-            graph
-            |> Graph.modify(collision_box.id, build_render_collision_box(collision_box))
-        end
+            [_] ->
+              graph
+              |> Graph.modify(collision_box.id, build_render_collision_box(collision_box))
+          end
+
+        {:delete, id}, graph ->
+          IO.puts "Deleting collision box!"
+          id = CollisionBox.id(id)
+          Graph.delete(graph, id)
       end)
 
     %{state | graph: graph}
@@ -216,6 +225,10 @@ defmodule Play.Scene.Asteroids do
       end)
 
     %{state | bullets: bullets}
+  end
+
+  defp remove_dead_asteroids(%State{asteroids: asteroids} = state) do
+    %{state | asteroids: Enum.reject(asteroids, & match?({:delete, _}, &1))}
   end
 
   @impl Scenic.Scene
@@ -380,13 +393,17 @@ defmodule Play.Scene.Asteroids do
 
   defp check_collisions(state), do: state
 
-  defp handle_collision({:player, :asteroid}, state), do: raise "Boom"
+  defp handle_collision({:player, :asteroid}, state), do: raise("Boom")
 
   defp handle_collision(
          {:bullet, %Bullet{id: bullet_id}, :asteroid, %CollisionBox{entity_id: asteroid_id}},
          state
        ) do
-    asteroids = Enum.reject(state.asteroids, fn asteroid -> asteroid.id == asteroid_id end)
+    asteroids =
+      Enum.map(state.asteroids, fn
+        %Asteroid{id: ^asteroid_id} -> {:delete, asteroid_id}
+        asteroid -> asteroid
+      end)
 
     bullets =
       Enum.map(state.bullets, fn
@@ -445,6 +462,12 @@ defmodule Play.Scene.Asteroids do
   defp overlap(x, x1, x2), do: x > x1 && x < x2
 
   def handle_call(:reload_current_scene, _, state), do: restart()
+
+  defp initial_player_coordinates do
+    width = Play.Utils.screen_width() / 2
+    height = Play.Utils.screen_height() / 2
+    {width, height}
+  end
 
   defp restart, do: Process.exit(self(), :kill)
 end
