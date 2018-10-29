@@ -7,6 +7,8 @@ defmodule Play.Scene.Asteroids do
   import Scenic.Primitives
 
   alias Scenic.Graph
+  alias Play.Bullet
+  alias Play.CollisionBox
 
   @type game_time :: integer
   @type coords :: {width :: integer, height :: integer}
@@ -16,7 +18,6 @@ defmodule Play.Scene.Asteroids do
     defstruct [
       :t,
       :graph,
-      :last_run_time,
       :player_coords,
       :key_states,
       :bullets,
@@ -28,8 +29,6 @@ defmodule Play.Scene.Asteroids do
             t: Play.Scene.Asteroids.game_time(),
             # graph: Scenic.Graph.t(),
             graph: %Graph{},
-            # Do we need this?
-            last_run_time: any,
             player_coords: Play.Scene.Asteroids.coords(),
             key_states: %{required(String.t()) => true},
             bullets: list(Play.Bullet.t()),
@@ -120,96 +119,103 @@ defmodule Play.Scene.Asteroids do
   end
 
   def handle_info({:animate, expected_run_time}, state) do
-    _diff = time_diff(state, expected_run_time)
-    state = update_state_based_on_keys(state)
-
-    %{graph: graph, t: t, player_coords: player_coords, asteroids: asteroids, bullets: bullets} =
+    state =
       state
+      |> update_state_based_on_keys()
+      |> tick_time()
+      |> tick_asteroids()
+      |> tick_bullets()
+      |> check_collisions()
+      |> animate_player()
+      |> animate_asteroids()
+      |> animate_bullets()
+      |> animate_collision_boxes()
+      |> remove_dead_bullets()
 
-    asteroids = tick_asteroids(asteroids)
-    bullets = tick_bullets(bullets)
-    bullets = remove_dead_bullets(bullets)
+    %{graph: graph} = state
+    push_graph(graph)
 
-    if rem(t, 10) == 0 do
-      check_collisions(state)
-    end
+    # if rem(t, 100) == 0 do
+    #   IO.inspect(graph, label: "graph")
+    # end
 
-    new_state = %{
-      state
-      | t: t + 1,
-        graph: graph,
-        last_run_time: expected_run_time,
-        asteroids: asteroids,
-        bullets: bullets
-    }
+    {:noreply, state}
+  end
 
+  defp tick_time(%State{t: t} = state), do: %{state | t: t + 1}
+
+  defp animate_player(%State{graph: graph, player_coords: player_coords} = state) do
+    graph = Graph.modify(graph, :player, &triangle(&1, @player_dimensions, t: player_coords))
+    %{state | graph: graph}
+  end
+
+  defp animate_asteroids(%State{graph: graph, asteroids: asteroids} = state) do
     graph =
-      graph
-      |> Graph.modify(:player, &triangle(&1, @player_dimensions, t: player_coords))
-      |> animate_asteroids(asteroids)
-      |> animate_bullets(bullets)
-      |> animate_collision_boxes(new_state)
-      |> push_graph()
-
-    new_state = %{new_state | graph: graph}
-
-    {:noreply, new_state}
-  end
-
-  defp animate_asteroids(graph, asteroids) do
-    asteroids
-    |> Enum.reduce(graph, fn asteroid, graph ->
-      graph
-      |> Graph.modify(asteroid.id, &render_asteroid(&1, asteroid))
-    end)
-  end
-
-  defp animate_bullets(graph, bullets) do
-    bullets
-    |> Enum.reduce(graph, fn
-      {:delete, id}, graph ->
-        Graph.delete(graph, id)
-
-      bullet, graph ->
-        graph
-        |> Graph.modify(bullet.id, build_render_bullet(bullet))
-    end)
-  end
-
-  defp animate_collision_boxes(graph, %State{asteroids: asteroids}) do
-    asteroids
-    |> Enum.map(&Play.CollisionBox.from/1)
-    |> Enum.reduce(graph, fn collision_box, graph ->
-      case Graph.get(graph, collision_box.id) do
-        [] ->
-          render_collision_box(graph, collision_box)
-
-        [_] ->
+      asteroids
+      |> Enum.reduce(graph, fn
+        asteroid, graph ->
           graph
-          |> Graph.modify(collision_box.id, build_render_collision_box(collision_box))
-      end
-    end)
+          |> Graph.modify(asteroid.id, &render_asteroid(&1, asteroid))
+        end)
+
+    %{state | graph: graph}
   end
 
-  defp tick_asteroids(asteroids) do
-    Enum.map(asteroids, &Play.Asteroid.tick/1)
+  defp animate_bullets(%State{graph: graph, bullets: bullets} = state) do
+    graph =
+      bullets
+      |> Enum.reduce(graph, fn
+        {:delete, id}, graph ->
+          IO.puts("Deleting bullet!")
+          Graph.delete(graph, id)
+
+        bullet, graph ->
+          IO.inspect(bullet, label: "bullet")
+
+          graph
+          |> Graph.modify(bullet.id, build_render_bullet(bullet))
+      end)
+
+    %{state | graph: graph}
   end
 
-  defp tick_bullets(bullets) do
-    Enum.map(bullets, &Play.Bullet.tick/1)
+  defp animate_collision_boxes(%State{asteroids: asteroids, graph: graph} = state) do
+    graph =
+      asteroids
+      |> Enum.map(&Play.CollisionBox.from/1)
+      |> Enum.reduce(graph, fn collision_box, graph ->
+        case Graph.get(graph, collision_box.id) do
+          [] ->
+            render_collision_box(graph, collision_box)
+
+          [_] ->
+            graph
+            |> Graph.modify(collision_box.id, build_render_collision_box(collision_box))
+        end
+      end)
+
+    %{state | graph: graph}
   end
 
-  defp remove_dead_bullets(bullets) do
-    bullets
-    |> Enum.reject(fn
-      {:delete, _} -> true
-      _ -> false
-    end)
+  defp tick_asteroids(%State{asteroids: asteroids} = state) do
+    asteroids = Enum.map(asteroids, &Play.Asteroid.tick/1)
+    %{state | asteroids: asteroids}
   end
 
-  defp time_diff(state, expected_run_time) do
-    last_run_time = Map.get(state, :last_run_time) || expected_run_time
-    DateTime.diff(expected_run_time, last_run_time, :millisecond)
+  defp tick_bullets(%State{bullets: bullets} = state) do
+    bullets = Enum.map(bullets, &Play.Bullet.tick/1)
+    %{state | bullets: bullets}
+  end
+
+  defp remove_dead_bullets(%State{bullets: bullets} = state) do
+    bullets =
+      bullets
+      |> Enum.reject(fn
+        {:delete, _} -> true
+        _ -> false
+      end)
+
+    %{state | bullets: bullets}
   end
 
   @impl Scenic.Scene
@@ -367,7 +373,7 @@ defmodule Play.Scene.Asteroids do
     t - last_shot < 4
   end
 
-  defp check_collisions(%State{} = state) do
+  defp check_collisions(%State{t: t} = state) when rem(t, 10) == 0 do
     collisions(state)
     |> Enum.reduce(state, fn collision, state ->
       case collision do
@@ -375,13 +381,30 @@ defmodule Play.Scene.Asteroids do
           raise "boom"
 
         {:bullet, bullet, :asteroid, asteroid} ->
-          raise "boom"
+          handle_collision({:bullet, bullet, :asteroid, asteroid}, state)
 
         other ->
           IO.inspect(other, label: "other collision")
           state
       end
     end)
+  end
+
+  defp check_collisions(state), do: state
+
+  defp handle_collision(
+         {:bullet, %Bullet{id: bullet_id}, :asteroid, %CollisionBox{entity_id: asteroid_id}},
+         state
+       ) do
+    asteroids = Enum.reject(state.asteroids, fn asteroid -> asteroid.id == asteroid_id end)
+
+    bullets =
+      Enum.map(state.bullets, fn
+        %Bullet{id: ^bullet_id} -> {:delete, bullet_id}
+        bullet -> bullet
+      end)
+
+    %{state | asteroids: asteroids, bullets: bullets}
   end
 
   defp collisions(%State{graph: graph} = state) do
