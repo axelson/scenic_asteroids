@@ -86,11 +86,10 @@ defmodule Play.Scene.Asteroids do
       player_coords: initial_player_coordinates(),
       key_states: %{},
       bullets: [],
-      # Note: Asteroids start off the screen
       asteroids: [
-        Play.Asteroid.new({-100, 31}, 30),
-        Play.Asteroid.new({-100, 200}, 27),
-        Play.Asteroid.new({-100, 300}, 12)
+        Play.Asteroid.new({100, 31}, 30),
+        Play.Asteroid.new({100, 200}, 27),
+        Play.Asteroid.new({100, 300}, 12)
       ],
       last_shot: :never
     }
