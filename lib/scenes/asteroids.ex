@@ -386,7 +386,7 @@ defmodule Play.Scene.Asteroids do
     t - last_shot < 4
   end
 
-  defp check_collisions(%State{t: t} = state) when rem(t, 10) == 0 do
+  defp check_collisions(%State{t: t} = state) when rem(t, 5) == 0 do
     collisions(state)
     |> Enum.reduce(state, &handle_collision/2)
   end
