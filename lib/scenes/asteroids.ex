@@ -375,22 +375,12 @@ defmodule Play.Scene.Asteroids do
 
   defp check_collisions(%State{t: t} = state) when rem(t, 10) == 0 do
     collisions(state)
-    |> Enum.reduce(state, fn collision, state ->
-      case collision do
-        {:player, :asteroid} ->
-          raise "boom"
-
-        {:bullet, bullet, :asteroid, asteroid} ->
-          handle_collision({:bullet, bullet, :asteroid, asteroid}, state)
-
-        other ->
-          IO.inspect(other, label: "other collision")
-          state
-      end
-    end)
+    |> Enum.reduce(state, &handle_collision/2)
   end
 
   defp check_collisions(state), do: state
+
+  defp handle_collision({:player, :asteroid}, state), do: raise "Boom"
 
   defp handle_collision(
          {:bullet, %Bullet{id: bullet_id}, :asteroid, %CollisionBox{entity_id: asteroid_id}},
@@ -406,6 +396,8 @@ defmodule Play.Scene.Asteroids do
 
     %{state | asteroids: asteroids, bullets: bullets}
   end
+
+  defp handle_collision(_, state), do: state
 
   defp collisions(%State{graph: graph} = state) do
     %{asteroids: asteroids, player_coords: player_coords} = state
