@@ -223,7 +223,7 @@ defmodule Play.Scene.Asteroids do
   end
 
   defp remove_dead_asteroids(%State{asteroids: asteroids} = state) do
-    %{state | asteroids: Enum.reject(asteroids, & match?({:delete, _}, &1))}
+    %{state | asteroids: Enum.reject(asteroids, &match?({:delete, _}, &1))}
   end
 
   @impl Scenic.Scene
@@ -435,12 +435,16 @@ defmodule Play.Scene.Asteroids do
 
   defp bullet_collisions(bullets, collision_box) do
     bullets
-    |> Enum.flat_map(fn bullet ->
-      if collides?(bullet.t, collision_box) do
-        [{:bullet, bullet, :asteroid, collision_box}]
-      else
+    |> Enum.flat_map(fn
+      {:delete, _} ->
         []
-      end
+
+      bullet ->
+        if collides?(bullet.t, collision_box) do
+          [{:bullet, bullet, :asteroid, collision_box}]
+        else
+          []
+        end
     end)
   end
 
