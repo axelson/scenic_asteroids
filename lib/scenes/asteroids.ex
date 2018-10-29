@@ -153,7 +153,6 @@ defmodule Play.Scene.Asteroids do
       asteroids
       |> Enum.reduce(graph, fn
         {:delete, id}, graph ->
-          IO.puts("Deleting asteroid")
           Graph.delete(graph, id)
 
         asteroid, graph ->
@@ -169,12 +168,9 @@ defmodule Play.Scene.Asteroids do
       bullets
       |> Enum.reduce(graph, fn
         {:delete, id}, graph ->
-          IO.puts("Deleting bullet!")
           Graph.delete(graph, id)
 
         bullet, graph ->
-          IO.inspect(bullet, label: "bullet")
-
           graph
           |> Graph.modify(bullet.id, build_render_bullet(bullet))
       end)
@@ -198,7 +194,6 @@ defmodule Play.Scene.Asteroids do
           end
 
         {:delete, id}, graph ->
-          IO.puts "Deleting collision box!"
           id = CollisionBox.id(id)
           Graph.delete(graph, id)
       end)
