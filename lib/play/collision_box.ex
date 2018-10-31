@@ -1,6 +1,7 @@
 defmodule Play.CollisionBox do
   @moduledoc """
-  Shows the collision box of an entity. For debug purposes
+  Shows the collision box of an entity. Used to assist in finding collisions and
+  can be shown for debug purposes.
   """
 
   defstruct [:id, :entity_id, :t, :size]
@@ -13,16 +14,14 @@ defmodule Play.CollisionBox do
         }
 
   def id(entity_id), do: entity_id <> "_collision_box"
+end
 
-  # TODO: Change this to a protocol
-  def from(%Play.Asteroid{t: {width, height}, size: size, id: entity_id}) do
-    %__MODULE__{
-      id: id(entity_id),
-      entity_id: entity_id,
-      t: {width - size, height - size},
-      size: size * 2
-    }
-  end
+defprotocol Play.Collision do
+  @doc "Convert this data structure into a collision box"
+  @spec from(any) :: Play.CollisionBox.t()
+  def from(data)
+end
 
-  def from({:delete, id}), do: {:delete, id}
+defimpl Play.Collision, for: Tuple do
+  def from({:delete, _} = tuple), do: tuple
 end

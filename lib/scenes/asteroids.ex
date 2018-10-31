@@ -57,7 +57,7 @@ defmodule Play.Scene.Asteroids do
   # [x] Asteroid, bullet collision
   # [x] Shoot the asteroids
   # [x] Press 'q' to quit
-  # [ ] Create protocols
+  # [x] Create protocols
   # [ ] Clean up scene to essentials of a scene and not gameplay
   # [ ] Asteroid move in vectors
   # [ ] Asteroid randomization
@@ -115,7 +115,7 @@ defmodule Play.Scene.Asteroids do
     %{state | graph: graph}
   end
 
-  def handle_info({:animate, expected_run_time}, state) do
+  def handle_info({:animate, _expected_run_time}, state) do
     state =
       state
       |> update_state_based_on_keys()
@@ -181,7 +181,7 @@ defmodule Play.Scene.Asteroids do
   defp animate_collision_boxes(%State{asteroids: asteroids, graph: graph} = state) do
     graph =
       asteroids
-      |> Enum.map(&Play.CollisionBox.from/1)
+      |> Enum.map(&Play.Collision.from/1)
       |> Enum.reduce(graph, fn
         %CollisionBox{} = collision_box, graph ->
           case Graph.get(graph, collision_box.id) do
@@ -250,7 +250,7 @@ defmodule Play.Scene.Asteroids do
     {:noreply, state}
   end
 
-  def do_handle_input({:key, {"Q", :press, _}}, _viewport_context, state) do
+  def do_handle_input({:key, {"Q", :press, _}}, _viewport_context, _state) do
     System.stop(0)
   end
 
@@ -389,7 +389,7 @@ defmodule Play.Scene.Asteroids do
 
   defp check_collisions(state), do: state
 
-  defp handle_collision({:player, :asteroid}, state), do: raise("Boom")
+  defp handle_collision({:player, :asteroid}, _state), do: raise("Boom")
 
   defp handle_collision(
          {:bullet, %Bullet{id: bullet_id}, :asteroid, %CollisionBox{entity_id: asteroid_id}},
@@ -412,12 +412,12 @@ defmodule Play.Scene.Asteroids do
 
   defp handle_collision(_, state), do: state
 
-  defp collisions(%State{graph: graph} = state) do
+  defp collisions(%State{} = state) do
     %{asteroids: asteroids, player_coords: player_coords} = state
 
     asteroids
     |> Enum.flat_map(fn asteroid ->
-      collision_box = Play.CollisionBox.from(asteroid)
+      collision_box = Play.Collision.from(asteroid)
 
       Enum.concat([
         player_collisions(player_coords, collision_box),
@@ -461,7 +461,7 @@ defmodule Play.Scene.Asteroids do
 
   defp overlap(x, x1, x2), do: x > x1 && x < x2
 
-  def handle_call(:reload_current_scene, _, state), do: restart()
+  def handle_call(:reload_current_scene, _, _state), do: restart()
 
   defp initial_player_coordinates do
     width = Play.Utils.screen_width() / 2
