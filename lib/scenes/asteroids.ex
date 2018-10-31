@@ -56,8 +56,9 @@ defmodule Play.Scene.Asteroids do
   # [x] Basic Collision detection!
   # [x] Asteroid, bullet collision
   # [x] Shoot the asteroids
-  # [ ] Press 'q' to quit
+  # [x] Press 'q' to quit
   # [ ] Create protocols
+  # [ ] Clean up scene to essentials of a scene and not gameplay
   # [ ] Asteroid move in vectors
   # [ ] Asteroid randomization
   # [ ] Asteroid spawning
@@ -251,6 +252,10 @@ defmodule Play.Scene.Asteroids do
     state = record_key_state(state, key, action)
 
     {:noreply, state}
+  end
+
+  def do_handle_input({:key, {"Q", :press, _}}, _viewport_context, state) do
+    System.stop(0)
   end
 
   def do_handle_input(_input, _, state) do
