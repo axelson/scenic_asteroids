@@ -2,6 +2,7 @@ defmodule Play.Bullet do
   @moduledoc """
   Struct that represents a bullet in the game
   """
+  alias Play.Bullet
 
   defstruct [:id, :t, :color, :size]
 
@@ -23,31 +24,34 @@ defmodule Play.Bullet do
     }
   end
 
-  @spec tick(%__MODULE__{}) :: %__MODULE__{} | :delete
-  def tick(%__MODULE__{} = bullet) do
-    {width, height} = bullet.t
-    new_bullet = %{bullet | t: {width, height - @speed}}
+  def speed, do: @speed
 
-    if offscreen?(new_bullet) do
-      {:delete, bullet.id}
-    else
-      new_bullet
+  defimpl Play.Tick, for: __MODULE__ do
+    def tick(%Bullet{} = bullet) do
+      {width, height} = bullet.t
+
+      new_bullet = %{bullet | t: {width, height - Bullet.speed()}}
+
+      if offscreen?(new_bullet) do
+        {:delete, bullet.id}
+      else
+        new_bullet
+      end
     end
-  end
 
-  def tick({:delete, _} = deleted), do: deleted
+    defp offscreen?(%Bullet{} = bullet) do
+      {width, height} = bullet.t
+      screen_width = Play.Utils.screen_width()
+      screen_height = Play.Utils.screen_height()
 
-  defp offscreen?(%__MODULE__{} = bullet) do
-    {width, height} = bullet.t
-    screen_width = Play.Utils.screen_width()
-    screen_height = Play.Utils.screen_height()
-
-    cond do
-      width - bullet.size > screen_width -> true
-      width + bullet.size < 0 -> true
-      height - bullet.size > screen_height -> true
-      height + bullet.size < 0 -> true
-      true -> false
+      cond do
+        width - bullet.size > screen_width -> true
+        width + bullet.size < 0 -> true
+        height - bullet.size > screen_height -> true
+        height + bullet.size < 0 -> true
+        true -> false
+      end
     end
+
   end
 end

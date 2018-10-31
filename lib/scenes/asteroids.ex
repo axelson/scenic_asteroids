@@ -121,8 +121,7 @@ defmodule Play.Scene.Asteroids do
       |> update_state_based_on_keys()
       # Tick updates our internal representation of state
       |> tick_time()
-      |> tick_asteroids()
-      |> tick_bullets()
+      |> tick_entities()
       |> check_collisions()
       # Update the rendering of each element in the graph
       |> animate_player()
@@ -202,14 +201,11 @@ defmodule Play.Scene.Asteroids do
     %{state | graph: graph}
   end
 
-  defp tick_asteroids(%State{asteroids: asteroids} = state) do
-    asteroids = Enum.map(asteroids, &Play.Asteroid.tick/1)
-    %{state | asteroids: asteroids}
-  end
-
-  defp tick_bullets(%State{bullets: bullets} = state) do
-    bullets = Enum.map(bullets, &Play.Bullet.tick/1)
-    %{state | bullets: bullets}
+  defp tick_entities(%State{} = state) do
+    %{state |
+      asteroids: Enum.map(state.asteroids, &Play.Tick.tick/1),
+      bullets: Enum.map(state.bullets, &Play.Tick.tick/1),
+    }
   end
 
   defp remove_dead_bullets(%State{bullets: bullets} = state) do
