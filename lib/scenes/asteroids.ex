@@ -353,13 +353,10 @@ defmodule Play.Scene.Asteroids do
     min_height = 0
     max_height = Play.Utils.screen_height() - player_height
 
-    {constrain(width, min_width, max_width), constrain(height, min_height, max_height)}
-  end
-
-  defp constrain(value, min, max) do
-    value
-    |> min(max)
-    |> max(min)
+    {
+      Play.Utils.constrain(width, min_width, max_width),
+      Play.Utils.constrain(height, min_height, max_height)
+    }
   end
 
   defp update_state_based_on_keys(%State{} = state) do

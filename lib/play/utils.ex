@@ -20,4 +20,11 @@ defmodule Play.Utils do
     {_width, height} = Application.get_env(:play, :viewport)[:size]
     height
   end
+
+  def constrain(value, min, max) do
+    value
+    |> min(max)
+    |> max(min)
+  end
+
 end
