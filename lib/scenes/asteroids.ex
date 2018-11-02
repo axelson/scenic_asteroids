@@ -17,7 +17,7 @@ defmodule Play.Scene.Asteroids do
   defmodule State do
     @moduledoc false
     defstruct [
-      :t,
+      :time,
       :graph,
       :player_coords,
       :key_states,
@@ -27,7 +27,7 @@ defmodule Play.Scene.Asteroids do
     ]
 
     @type t :: %__MODULE__{
-            t: Play.Scene.Asteroids.game_time(),
+            time: Play.Scene.Asteroids.game_time(),
             # graph: Scenic.Graph.t(),
             graph: %Graph{},
             player_coords: Play.Scene.Asteroids.coords(),
@@ -86,7 +86,7 @@ defmodule Play.Scene.Asteroids do
 
     initial_state = %State{
       graph: @initial_graph,
-      t: 0,
+      time: 0,
       player_coords: initial_player_coordinates(),
       key_states: %{},
       bullets: [],
@@ -141,7 +141,7 @@ defmodule Play.Scene.Asteroids do
     {:noreply, state}
   end
 
-  defp tick_time(%State{t: t} = state), do: %{state | t: t + 1}
+  defp tick_time(%State{time: t} = state), do: %{state | time: t + 1}
 
   defp draw_player(%State{graph: graph, player_coords: player_coords} = state) do
     graph = Graph.modify(graph, :player, &triangle(&1, @player_dimensions, t: player_coords))
@@ -261,7 +261,7 @@ defmodule Play.Scene.Asteroids do
 
     bullet = Play.Bullet.new(player_coords)
 
-    %{state | bullets: [bullet | bullets], last_shot: state.t}
+    %{state | bullets: [bullet | bullets], last_shot: state.time}
   end
 
   defp schedule_animations do
@@ -326,11 +326,11 @@ defmodule Play.Scene.Asteroids do
 
   defp shot_recently?(%State{last_shot: :never}), do: false
 
-  defp shot_recently?(%State{last_shot: last_shot, t: t}) do
-    t - last_shot < 4
+  defp shot_recently?(%State{last_shot: last_shot, time: time}) do
+    time - last_shot < 4
   end
 
-  defp check_collisions(%State{t: t} = state) when rem(t, 5) == 0 do
+  defp check_collisions(%State{time: t} = state) when rem(t, 5) == 0 do
     collisions(state)
     |> Enum.reduce(state, &handle_collision/2)
   end
