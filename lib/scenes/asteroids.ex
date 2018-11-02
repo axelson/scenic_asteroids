@@ -222,6 +222,11 @@ defmodule Play.Scene.Asteroids do
     System.stop(0)
   end
 
+  def do_handle_input({:key, {"I", :press, _}}, _viewport_context, state) do
+    IO.inspect(state.graph, label: "graph")
+    {:noreply, state}
+  end
+
   def do_handle_input(_input, _, state) do
     # IO.inspect(input, label: "#{__MODULE__} ignoring input")
     {:noreply, state}
