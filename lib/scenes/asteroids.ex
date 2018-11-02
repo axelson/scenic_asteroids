@@ -58,6 +58,8 @@ defmodule Play.Scene.Asteroids do
   # [x] Shoot the asteroids
   # [x] Press 'q' to quit
   # [x] Create protocols
+  # [x] Create more general Play.ScenicEntity protocol (instead of many specific
+  #     protocols)
   # [ ] Clean up scene to essentials of a scene and not gameplay
   # [ ] Asteroid move in vectors
   # [ ] Asteroid randomization
@@ -124,10 +126,8 @@ defmodule Play.Scene.Asteroids do
       |> tick_entities()
       |> check_collisions()
       # Update the rendering of each element in the graph
-      |> animate_player()
-      |> animate_asteroids()
-      |> animate_bullets()
-      |> animate_collision_boxes()
+      |> draw_player()
+      |> draw_entities()
       |> remove_dead_bullets()
       |> remove_dead_asteroids()
 
@@ -143,68 +143,36 @@ defmodule Play.Scene.Asteroids do
 
   defp tick_time(%State{t: t} = state), do: %{state | t: t + 1}
 
-  defp animate_player(%State{graph: graph, player_coords: player_coords} = state) do
+  defp draw_player(%State{graph: graph, player_coords: player_coords} = state) do
     graph = Graph.modify(graph, :player, &triangle(&1, @player_dimensions, t: player_coords))
     %{state | graph: graph}
   end
 
-  defp animate_asteroids(%State{graph: graph, asteroids: asteroids} = state) do
+  @spec draw_entities(State.t()) :: State.t()
+  defp draw_entities(%State{} = state) do
     graph =
-      asteroids
-      |> Enum.reduce(graph, fn
-        {:delete, id}, graph ->
-          Graph.delete(graph, id)
-
-        asteroid, graph ->
-          graph
-          |> Graph.modify(asteroid.id, &render_asteroid(&1, asteroid))
+      entities(state)
+      |> Enum.reduce(state.graph, fn asteroid, graph ->
+        Play.ScenicRenderer.draw(asteroid, graph)
       end)
 
     %{state | graph: graph}
   end
 
-  defp animate_bullets(%State{graph: graph, bullets: bullets} = state) do
-    graph =
-      bullets
-      |> Enum.reduce(graph, fn
-        {:delete, id}, graph ->
-          Graph.delete(graph, id)
-
-        bullet, graph ->
-          graph
-          |> Graph.modify(bullet.id, build_render_bullet(bullet))
-      end)
-
-    %{state | graph: graph}
-  end
-
-  defp animate_collision_boxes(%State{asteroids: asteroids, graph: graph} = state) do
-    graph =
-      asteroids
-      |> Enum.map(&Play.Collision.from/1)
-      |> Enum.reduce(graph, fn
-        %CollisionBox{} = collision_box, graph ->
-          case Graph.get(graph, collision_box.id) do
-            [] ->
-              render_collision_box(graph, collision_box)
-
-            [_] ->
-              graph
-              |> Graph.modify(collision_box.id, build_render_collision_box(collision_box))
-          end
-
-        {:delete, id}, graph ->
-          id = CollisionBox.id(id)
-          Graph.delete(graph, id)
-      end)
-
-    %{state | graph: graph}
+  @spec entities(State.t()) :: [Play.ScenicEntity.entity()]
+  defp entities(%State{} = state) do
+    Enum.concat([
+      state.asteroids,
+      Enum.map(state.asteroids, &Play.Collision.from(&1)),
+      state.bullets
+    ])
   end
 
   defp tick_entities(%State{} = state) do
-    %{state |
-      asteroids: Enum.map(state.asteroids, &Play.Tick.tick/1),
-      bullets: Enum.map(state.bullets, &Play.Tick.tick/1),
+    %{
+      state
+      | asteroids: Enum.map(state.asteroids, &Play.ScenicEntity.tick/1),
+        bullets: Enum.map(state.bullets, &Play.ScenicEntity.tick/1)
     }
   end
 
@@ -283,34 +251,12 @@ defmodule Play.Scene.Asteroids do
 
   @spec shoot(%State{}) :: %State{}
   defp shoot(state) do
-    %{bullets: bullets, graph: graph, player_coords: player_coords} = state
+    %{bullets: bullets, player_coords: player_coords} = state
     IO.puts("pew pew #{length(bullets)}")
 
     bullet = Play.Bullet.new(player_coords)
-    graph = render_bullet(graph, bullet)
 
-    %{state | bullets: [bullet | bullets], graph: graph, last_shot: state.t}
-  end
-
-  defp render_asteroid(graph, asteroid) do
-    circle(graph, asteroid.size, id: asteroid.id, stroke: {3, asteroid.color}, t: asteroid.t)
-  end
-
-  defp build_render_bullet(bullet) do
-    fn graph -> render_bullet(graph, bullet) end
-  end
-
-  defp build_render_collision_box(collision_box) do
-    fn graph -> render_collision_box(graph, collision_box) end
-  end
-
-  defp render_bullet(graph, bullet) do
-    circle(graph, bullet.size, id: bullet.id, t: bullet.t, stroke: {1, :white})
-  end
-
-  defp render_collision_box(graph, collision_box) do
-    size = collision_box.size
-    rectangle(graph, {size, size}, id: collision_box.id, t: collision_box.t, stroke: {1, :white})
+    %{state | bullets: [bullet | bullets], last_shot: state.t}
   end
 
   defp schedule_animations do

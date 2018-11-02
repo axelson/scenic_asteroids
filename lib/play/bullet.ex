@@ -9,7 +9,7 @@ defmodule Play.Bullet do
   @speed 5
 
   @type t :: %__MODULE__{
-    id: Play.Utils.id(),
+    id: Play.ScenicEntity.id(),
     t: Play.Scene.Asteroids.coords(),
     color: atom,
     size: integer
@@ -26,7 +26,9 @@ defmodule Play.Bullet do
 
   def speed, do: @speed
 
-  defimpl Play.Tick, for: __MODULE__ do
+  defimpl Play.ScenicEntity, for: __MODULE__ do
+    def id(%Bullet{id: id}), do: id
+
     def tick(%Bullet{} = bullet) do
       {width, height} = bullet.t
 
@@ -53,5 +55,9 @@ defmodule Play.Bullet do
       end
     end
 
+    def draw(%Bullet{} = bullet, graph) do
+      %{id: id, size: size, t: t} = bullet
+      Scenic.Primitives.circle(graph, size, id: id, t: t, stroke: {1, :white})
+    end
   end
 end

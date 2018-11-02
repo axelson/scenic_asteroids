@@ -3,8 +3,7 @@ defmodule Play.Utils do
   Misc utils
   """
 
-  @type id :: String.t()
-
+  @spec make_id() :: Play.ScenicEntity.id()
   def make_id do
     10
     |> :crypto.strong_rand_bytes()

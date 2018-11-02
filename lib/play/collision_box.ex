@@ -7,13 +7,27 @@ defmodule Play.CollisionBox do
   defstruct [:id, :entity_id, :t, :size]
 
   @type t :: %__MODULE__{
-          id: Play.Utils.id(),
-          entity_id: Play.Utils.id(),
+          id: Play.ScenicEntity.id(),
+          entity_id: Play.ScenicEntity.id(),
           t: Play.Scene.Asteroids.coords(),
           size: integer
         }
 
   def id(entity_id), do: entity_id <> "_collision_box"
+
+  defimpl Play.ScenicEntity, for: __MODULE__ do
+    alias Play.CollisionBox
+
+    def id(%CollisionBox{id: id}), do: id
+
+    # Should this be implemented?
+    def tick(%CollisionBox{} = box), do: box
+
+    def draw(%CollisionBox{} = box, graph) do
+      %{id: id, size: size, t: t} = box
+      Scenic.Primitives.rectangle(graph, {size, size}, id: id, t: t, stroke: {1, :white})
+    end
+  end
 end
 
 defprotocol Play.Collision do
@@ -23,5 +37,5 @@ defprotocol Play.Collision do
 end
 
 defimpl Play.Collision, for: Tuple do
-  def from({:delete, _} = tuple), do: tuple
+  def from({:delete, id}), do: {:delete, Play.CollisionBox.id(id)}
 end

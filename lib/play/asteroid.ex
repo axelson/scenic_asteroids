@@ -7,11 +7,11 @@ defmodule Play.Asteroid do
   alias Play.Asteroid
 
   @type t :: %__MODULE__{
-    id: Play.Utils.id(),
-    t: Play.Scene.Asteroids.coords(),
-    color: atom,
-    size: integer
-  }
+          id: Play.ScenicEntity.id(),
+          t: Play.Scene.Asteroids.coords(),
+          color: atom,
+          size: integer
+        }
 
   def new(coords, size) do
     %__MODULE__{
@@ -22,7 +22,9 @@ defmodule Play.Asteroid do
     }
   end
 
-  defimpl Play.Tick, for: __MODULE__ do
+  defimpl Play.ScenicEntity, for: __MODULE__ do
+    def id(%Asteroid{id: id}), do: id
+
     def tick(%Asteroid{} = asteroid) do
       {width, height} = asteroid.t
       %{asteroid | t: {tick_width(asteroid, width), height}}
@@ -33,6 +35,11 @@ defmodule Play.Asteroid do
         width - size > Play.Utils.screen_width() -> -size
         true -> width + 1
       end
+    end
+
+    def draw(%Asteroid{} = asteroid, graph) do
+      %{id: id, color: color, size: size, t: t} = asteroid
+      Scenic.Primitives.circle(graph, size, id: id, stroke: {3, color}, t: t)
     end
   end
 
