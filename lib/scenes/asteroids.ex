@@ -1,6 +1,38 @@
 defmodule Play.Scene.Asteroids do
   @moduledoc """
   Asteroids animation/game
+
+  Scene is responsible for:
+  * Rendering the graph
+  * Tracking key strokes and reacting to them (such as player movement)
+  * Rendering game state
+  * Updating the graph
+
+  Maybe should not be responsible for:
+  * Checking collisions
+  * Check if player is currently allowed to shoot
+  * Ticking game state
+  * Running the game loop
+
+  Questions:
+  * Who is responsible for knowing how to draw an entity? The entity or the
+    Scene? Or is it simply a protocol specific to the medium?
+  * Should tracking game state be done in a separate process from the drawing of
+    the game state? It would allow us to draw the game state at any point even
+    if computing the next state becomes expensive. But how do we transfer the
+    state between the processes? Maybe a drawable version of the state needs to
+    be sent from the game to the scene. Or maybe we should store the state in an
+    ETS table so that we don't block in the GenServer at all. If the game is
+    stored separately then we can render multiple views of it... Like a web one
+  * Should we extract out a Game module?
+  * Who is responsible for the game loop? The scene or the game? I'm leaning
+    towards the game
+  * Can I extract a GameEngine?
+    * Can be rendered to Scenic or to a Canvas (via d3?)
+  * Is the game a process or just a struct?
+
+  Thoughts:
+  * The scene is the view in MVC
   """
 
   use Scenic.Scene
@@ -65,6 +97,7 @@ defmodule Play.Scene.Asteroids do
   # [ ] Asteroid randomization
   # [ ] Asteroid spawning
   # [ ] Asteroid demolition into pieces
+  # [ ] Don't render on integer time, scale everything by time slices
 
   # Question: Should there be a process per asteroid?
   # Answer: No!
