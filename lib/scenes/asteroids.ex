@@ -98,23 +98,7 @@ defmodule Play.Scene.Asteroids do
       last_shot: :never
     }
 
-    initial_state = render_initial_graph(initial_state)
-
     {:ok, initial_state}
-  end
-
-  @spec render_initial_graph(%State{}) :: %State{}
-  defp render_initial_graph(state) do
-    %{graph: graph, asteroids: asteroids} = state
-
-    graph =
-      asteroids
-      |> Enum.reduce(graph, fn asteroid, graph ->
-        graph
-        |> circle(asteroid.size, id: asteroid.id, stroke: {3, asteroid.color}, t: asteroid.t)
-      end)
-
-    %{state | graph: graph}
   end
 
   def handle_info({:animate, _expected_run_time}, state) do
