@@ -112,8 +112,7 @@ defmodule Play.Scene.Asteroids do
       # Update the rendering of each element in the graph
       |> draw_player()
       |> draw_entities()
-      |> remove_dead_bullets()
-      |> remove_dead_asteroids()
+      |> remove_dead_entities()
 
     %{graph: graph} = state
     push_graph(graph)
@@ -160,19 +159,12 @@ defmodule Play.Scene.Asteroids do
     }
   end
 
-  defp remove_dead_bullets(%State{bullets: bullets} = state) do
-    bullets =
-      bullets
-      |> Enum.reject(fn
-        {:delete, _} -> true
-        _ -> false
-      end)
-
-    %{state | bullets: bullets}
-  end
-
-  defp remove_dead_asteroids(%State{asteroids: asteroids} = state) do
-    %{state | asteroids: Enum.reject(asteroids, &match?({:delete, _}, &1))}
+  defp remove_dead_entities(%State{} = state) do
+    reject_dead = &match?({:delete, _}, &1)
+    %{state |
+      asteroids: Enum.reject(state.asteroids, reject_dead),
+      bullets: Enum.reject(state.bullets, reject_dead)
+    }
   end
 
   @impl Scenic.Scene
