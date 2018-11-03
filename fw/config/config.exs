@@ -28,25 +28,26 @@ config :logger, backends: [RingLogger]
 # See https://hexdocs.pm/nerves_firmware_ssh/readme.html for more information
 # on configuring nerves_firmware_ssh.
 
-key = Path.join(System.user_home!, ".ssh/id_rsa.pub")
-unless File.exists?(key), do:
+key_paths =
+  [
+    ".ssh/id_rsa.pub",
+    ".ssh/id_desktop_rsa.pub"
+  ]
+  |> Enum.map(fn path -> Path.join(System.user_home!(), path) end)
+
+unless Enum.any?(key_paths, &File.exists?/1), do:
   Mix.raise("No SSH Keys found. Please generate an ssh key")
 
 config :nerves_firmware_ssh,
-  authorized_keys: [
-    File.read!(key)
-  ]
+  authorized_keys: Enum.map(key_paths, &File.read!/1)
 
 # Configure nerves_init_gadget.
 # See https://hexdocs.pm/nerves_init_gadget/readme.html for more information.
 
 config :nerves_init_gadget,
-  ifname: "usb0",
-  address_method: :dhcpd,
-  mdns_domain: "nerves.local",
-  node_name: nil,
-  node_host: :mdns_domain,
-  ssh_console_port: 22
+  ifname: "eth0",
+  address_method: :dhcp,
+  node_name: "murphy"
 
 # Import target specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
