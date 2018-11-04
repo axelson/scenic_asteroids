@@ -98,6 +98,9 @@ defmodule Play.Scene.Asteroids do
   # [ ] Asteroid spawning
   # [ ] Asteroid demolition into pieces
   # [ ] Don't render on integer time, scale everything by time slices
+  # [ ] Render circles where the mouse cusor is
+  # [ ] Shoot bullets towards the mouse cursor
+  # [ ] Tap on the screen to shoot
 
   # Question: Should there be a process per asteroid?
   # Answer: No!
