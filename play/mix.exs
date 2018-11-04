@@ -37,7 +37,7 @@ defmodule Play.MixProject do
 
       # deps to use AFTER it is released publicly
       # {:scenic, path: "../../forks/scenic", override: true},
-      {:scenic, "~> 0.8.0"},
+      {:scenic, "~> 0.9.0"},
 
       # These deps are optional and are included as they are often used.
       # If your app doesn't need them, they are safe to remove.

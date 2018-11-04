@@ -55,6 +55,16 @@ config :nerves_init_gadget,
   address_method: :dhcp,
   node_name: "murphy"
 
+config :play, :viewport, %{
+  size: {800, 480},
+  default_scene: {Sample.Scene.Simple, nil},
+  drivers: [
+    %{
+      module: Scenic.Driver.Nerves.Rpi
+    }
+  ]
+}
+
 # Import target specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 # Uncomment to use target specific configurations

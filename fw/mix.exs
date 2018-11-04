@@ -40,7 +40,8 @@ defmodule Fw.MixProject do
     [
       {:nerves, "~> 1.3", runtime: false},
       {:shoehorn, "~> 0.4"},
-      {:ring_logger, "~> 0.4"}
+      {:ring_logger, "~> 0.4"},
+      {:play, path: "../play"}
     ] ++ deps(@target)
   end
 
@@ -50,7 +51,8 @@ defmodule Fw.MixProject do
   defp deps(target) do
     [
       {:nerves_runtime, "~> 0.6"},
-      {:nerves_init_gadget, "~> 0.4"}
+      {:nerves_init_gadget, "~> 0.4"},
+      {:scenic_driver_nerves_rpi, "~> 0.9"}
     ] ++ system(target)
   end
 
