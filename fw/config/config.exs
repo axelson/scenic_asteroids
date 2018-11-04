@@ -31,15 +31,21 @@ config :logger, backends: [RingLogger]
 key_paths =
   [
     ".ssh/id_rsa.pub",
-    ".ssh/id_desktop_rsa.pub"
+    ".ssh/id_desktop_rsa.pub",
+    ".ssh/id_laptop_rsa.pub"
   ]
   |> Enum.map(fn path -> Path.join(System.user_home!(), path) end)
 
-unless Enum.any?(key_paths, &File.exists?/1), do:
-  Mix.raise("No SSH Keys found. Please generate an ssh key")
+authorized_keys =
+  key_paths
+  |> Enum.filter(&File.exists?/1)
+  |> Enum.map(&File.read!/1)
+
+if Enum.empty?(authorized_keys),
+  do: Mix.raise("No SSH Keys found. Please generate an ssh key")
 
 config :nerves_firmware_ssh,
-  authorized_keys: Enum.map(key_paths, &File.read!/1)
+  authorized_keys: authorized_keys
 
 # Configure nerves_init_gadget.
 # See https://hexdocs.pm/nerves_init_gadget/readme.html for more information.
