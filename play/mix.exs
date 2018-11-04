@@ -29,19 +29,15 @@ defmodule Play.MixProject do
   defp deps do
     [
       # Project deps
-      # {:sched_ex, "~> 1.0.2"},
-      {:sched_ex, path: "../forks/sched_ex"},
+      {:sched_ex, "~> 1.0.2"},
+      # {:sched_ex, path: "../../forks/sched_ex"},
 
       # Scenic default deps
       {:elixir_make, "~> 0.4"},
-      # {:exsync, "~> 0.2", only: :dev},
-      {:exsync, path: "../forks/exsync", only: :dev},
 
       # deps to use AFTER it is released publicly
-      {:scenic, path: "../forks/scenic", override: true},
-      # {:scenic, "~> 0.8.0"},
-      # {:scenic_driver_glfw, git: "git@github.com:boydm/scenic_driver_glfw.git"},
-      {:scenic_driver_glfw, "~> 0.8.0"},
+      # {:scenic, path: "../../forks/scenic", override: true},
+      {:scenic, "~> 0.8.0"},
 
       # These deps are optional and are included as they are often used.
       # If your app doesn't need them, they are safe to remove.
