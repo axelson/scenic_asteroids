@@ -61,8 +61,7 @@ defmodule Play.Scene.Asteroids do
 
     @type t :: %__MODULE__{
             time: Play.Scene.Asteroids.game_time(),
-            # graph: Scenic.Graph.t(),
-            graph: %Graph{},
+            graph: Scenic.Graph.t(),
             player_coords: Play.Scene.Asteroids.coords(),
             key_states: %{required(String.t()) => true},
             bullets: list(Play.Bullet.t()),
@@ -93,6 +92,8 @@ defmodule Play.Scene.Asteroids do
   # [x] Create protocols
   # [x] Create more general Play.ScenicEntity protocol (instead of many specific
   #     protocols)
+  # [ ] Track cursor pos in state
+  # [ ] Each frame, orient player to the cursor pos
   # [ ] Clean up scene to essentials of a scene and not gameplay
   # [ ] Asteroid move in vectors
   # [ ] Asteroid randomization
@@ -200,9 +201,11 @@ defmodule Play.Scene.Asteroids do
 
   defp remove_dead_entities(%State{} = state) do
     reject_dead = &match?({:delete, _}, &1)
-    %{state |
-      asteroids: Enum.reject(state.asteroids, reject_dead),
-      bullets: Enum.reject(state.bullets, reject_dead)
+
+    %{
+      state
+      | asteroids: Enum.reject(state.asteroids, reject_dead),
+        bullets: Enum.reject(state.bullets, reject_dead)
     }
   end
 
