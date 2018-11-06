@@ -2,6 +2,8 @@ defmodule Play.Scene.Asteroids do
   @moduledoc """
   Asteroids animation/game
 
+  Right now this module is like a God module, it knows and controls too much.
+
   Scene is responsible for:
   * Rendering the graph
   * Tracking key strokes and reacting to them (such as player movement)
@@ -96,6 +98,7 @@ defmodule Play.Scene.Asteroids do
   #     protocols)
   # [x] Track cursor pos in state
   # [x] Each frame, orient player to the cursor pos
+  # [ ] Add an explosion effect when the player collides with an asteroid
   # [ ] Clean up scene to essentials of a scene and not gameplay
   # [ ] Asteroid move in vectors
   # [ ] Asteroid randomization
