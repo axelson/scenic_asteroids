@@ -15,7 +15,7 @@ defmodule Play.Bullet do
     size: integer
   }
 
-  def new(coords) do
+  def new(%Play.Player{t: coords}) do
     %__MODULE__{
       id: Play.Utils.make_id(),
       t: coords,

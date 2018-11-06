@@ -52,7 +52,8 @@ defmodule Play.Scene.Asteroids do
     defstruct [
       :time,
       :graph,
-      :player_coords,
+      :player,
+      :cursor_coords,
       :key_states,
       :bullets,
       :asteroids,
@@ -62,7 +63,8 @@ defmodule Play.Scene.Asteroids do
     @type t :: %__MODULE__{
             time: Play.Scene.Asteroids.game_time(),
             graph: Scenic.Graph.t(),
-            player_coords: Play.Scene.Asteroids.coords(),
+            player: Play.Player.t(),
+            cursor_coords: Play.Scene.Asteroids.coords(),
             key_states: %{required(String.t()) => true},
             bullets: list(Play.Bullet.t()),
             asteroids: list(Play.Asteroid.t()),
@@ -92,8 +94,8 @@ defmodule Play.Scene.Asteroids do
   # [x] Create protocols
   # [x] Create more general Play.ScenicEntity protocol (instead of many specific
   #     protocols)
-  # [ ] Track cursor pos in state
-  # [ ] Each frame, orient player to the cursor pos
+  # [x] Track cursor pos in state
+  # [x] Each frame, orient player to the cursor pos
   # [ ] Clean up scene to essentials of a scene and not gameplay
   # [ ] Asteroid move in vectors
   # [ ] Asteroid randomization
@@ -112,9 +114,7 @@ defmodule Play.Scene.Asteroids do
   @keys_to_track @movement_keys ++ @firing_keys
   @max_bullets 5
 
-  @player_dimensions {{0, 0}, {-10, 30}, {10, 30}}
   @initial_graph Graph.build()
-                 |> triangle(@player_dimensions, id: :player, stroke: {1, :white})
                  |> rect({Play.Utils.screen_width(), Play.Utils.screen_height()})
 
   @impl Scenic.Scene
@@ -127,7 +127,8 @@ defmodule Play.Scene.Asteroids do
     initial_state = %State{
       graph: @initial_graph,
       time: 0,
-      player_coords: initial_player_coordinates(),
+      cursor_coords: {Play.Utils.screen_width() / 2, 0},
+      player: Play.Player.new(),
       key_states: %{},
       bullets: [],
       asteroids: [
@@ -148,18 +149,18 @@ defmodule Play.Scene.Asteroids do
       # Tick updates our internal representation of state
       |> tick_time()
       |> tick_entities()
+      |> update_player()
       |> check_collisions()
       # Update the rendering of each element in the graph
-      # Temporarily disabled until we have cursor tracking
-      # |> draw_player()
       |> draw_entities()
       |> remove_dead_entities()
 
     %{graph: graph} = state
     push_graph(graph)
 
-    # if rem(t, 100) == 0 do
+    # if rem(state.time, 100) == 0 do
     #   IO.inspect(graph, label: "graph")
+    #   # IO.inspect(state, label: "state")
     # end
 
     {:noreply, state}
@@ -167,9 +168,11 @@ defmodule Play.Scene.Asteroids do
 
   defp tick_time(%State{time: t} = state), do: %{state | time: t + 1}
 
-  defp draw_player(%State{graph: graph, player_coords: player_coords} = state) do
-    graph = Graph.modify(graph, :player, &triangle(&1, @player_dimensions, t: player_coords))
-    %{state | graph: graph}
+  @spec update_player(State.t()) :: State.t()
+  defp update_player(%State{} = state) do
+    %{graph: graph, player: player, cursor_coords: cursor_coords} = state
+    radians = Play.Utils.find_angle_to(player.t, cursor_coords)
+    %{state | player: %{player | rotate: radians}}
   end
 
   @spec draw_entities(State.t()) :: State.t()
@@ -186,6 +189,7 @@ defmodule Play.Scene.Asteroids do
   @spec entities(State.t()) :: [Play.ScenicEntity.entity()]
   defp entities(%State{} = state) do
     Enum.concat([
+      [state.player],
       state.asteroids,
       Enum.map(state.asteroids, &Play.Collision.from(&1)),
       state.bullets
@@ -221,6 +225,7 @@ defmodule Play.Scene.Asteroids do
   @impl Scenic.Scene
   def handle_input(input, viewport_context, state) do
     # IO.inspect(input, label: "#{__MODULE__} received input")
+    # Logger.info("Received input: #{inspect input}")
     do_handle_input(input, viewport_context, state)
   end
 
@@ -247,17 +252,7 @@ defmodule Play.Scene.Asteroids do
   end
 
   def do_handle_input({:cursor_pos, cursor_pos}, _viewport_context, state) do
-    radians = Play.Utils.find_angle_to(state.player_coords, cursor_pos)
-    graph =
-      Graph.modify(
-        state.graph,
-        :player,
-        &triangle(&1, @player_dimensions, t: state.player_coords, rotate: radians)
-      )
-
-    push_graph(graph)
-
-    {:noreply, %{state | graph: graph}}
+    {:noreply, %{state | cursor_coords: cursor_pos}}
   end
 
   def do_handle_input(input, _, state) do
@@ -289,10 +284,10 @@ defmodule Play.Scene.Asteroids do
 
   @spec shoot(%State{}) :: %State{}
   defp shoot(state) do
-    %{bullets: bullets, player_coords: player_coords} = state
+    %{bullets: bullets, player: player} = state
     IO.puts("pew pew #{length(bullets)}")
 
-    bullet = Play.Bullet.new(player_coords)
+    bullet = Play.Bullet.new(player)
 
     %{state | bullets: [bullet | bullets], last_shot: state.time}
   end
@@ -312,8 +307,11 @@ defmodule Play.Scene.Asteroids do
   defp key_to_direction("S"), do: :down
   defp key_to_direction("D"), do: :right
 
+  # TODO: Refactor this out of the scene
+  # It is like ticking the player but it requires additional input
+  # Maybe combine with update_player func
   defp update_player_coords(%State{} = state, direction) do
-    %{player_coords: {width, height}} = state
+    %{player: %{t: {width, height}}} = state
     dist = 5
 
     updated_coords =
@@ -325,11 +323,11 @@ defmodule Play.Scene.Asteroids do
       end
       |> constrain_player_to_screen()
 
-    %{state | player_coords: updated_coords}
+    %{state | player: %{state.player | t: updated_coords}}
   end
 
   defp constrain_player_to_screen({width, height}) do
-    {_, {player_width, _}, {_, player_height}} = @player_dimensions
+    {_, {player_width, _}, {_, player_height}} = Play.Player.player_dimensions()
 
     min_width = 0
     max_width = Play.Utils.screen_width() - player_width
@@ -394,7 +392,7 @@ defmodule Play.Scene.Asteroids do
   defp handle_collision(_, state), do: state
 
   defp collisions(%State{} = state) do
-    %{asteroids: asteroids, player_coords: player_coords} = state
+    %{asteroids: asteroids, player: %{t: player_coords}} = state
 
     asteroids
     |> Enum.flat_map(fn asteroid ->
@@ -443,12 +441,6 @@ defmodule Play.Scene.Asteroids do
   defp overlap(x, x1, x2), do: x > x1 && x < x2
 
   def handle_call(:reload_current_scene, _, _state), do: restart()
-
-  defp initial_player_coordinates do
-    width = Play.Utils.screen_width() / 2
-    height = Play.Utils.screen_height() / 2
-    {width, height}
-  end
 
   defp restart, do: Process.exit(self(), :kill)
 end
