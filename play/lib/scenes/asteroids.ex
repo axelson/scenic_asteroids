@@ -150,7 +150,8 @@ defmodule Play.Scene.Asteroids do
       |> tick_entities()
       |> check_collisions()
       # Update the rendering of each element in the graph
-      |> draw_player()
+      # Temporarily disabled until we have cursor tracking
+      # |> draw_player()
       |> draw_entities()
       |> remove_dead_entities()
 
