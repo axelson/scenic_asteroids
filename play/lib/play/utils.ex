@@ -26,4 +26,35 @@ defmodule Play.Utils do
     |> max(min)
   end
 
+  @doc """
+  Find the angle in radians from pos1 to pos2
+  """
+  def find_angle_to(pos1, pos2) do
+    {pos1_x, pos1_y} = pos1
+    {pos2_x, pos2_y} = pos2
+
+    # Steps:
+    # Get vector from player to cursor using math
+    # Adjust to flip the y coordinate to match math coordinates
+    # Normalize the vector to a unit vector
+    vector = {pos2_x - pos1_x, pos1_y - pos2_y}
+    unit_vector = Scenic.Math.Vector2.normalize(vector)
+    unit_vector_to_radians(unit_vector)
+  end
+
+  # Directly above
+  defp unit_vector_to_radians({0.0, 1.0}), do: 0
+
+  # Directly below
+  defp unit_vector_to_radians({0.0, -1.0}), do: :math.pi()
+
+  defp unit_vector_to_radians({a, b}) when a <= 1.0 and b <= 1.0 do
+    radians = :math.pi() / 2 - :math.atan(b / a)
+
+    if a < 0 do
+      radians + :math.pi()
+    else
+      radians
+    end
+  end
 end

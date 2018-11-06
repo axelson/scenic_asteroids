@@ -37,6 +37,7 @@ defmodule Play.Scene.Asteroids do
 
   use Scenic.Scene
   import Scenic.Primitives
+  require Logger
 
   alias Scenic.Graph
   alias Play.Asteroid
@@ -110,12 +111,14 @@ defmodule Play.Scene.Asteroids do
   @keys_to_track @movement_keys ++ @firing_keys
   @max_bullets 5
 
-  @player_dimensions {{0, 0}, {30, 0}, {15, 30}}
+  @player_dimensions {{0, 0}, {-10, 30}, {10, 30}}
   @initial_graph Graph.build()
                  |> triangle(@player_dimensions, id: :player, stroke: {1, :white})
+                 |> rect({Play.Utils.screen_width(), Play.Utils.screen_height()})
 
   @impl Scenic.Scene
-  def init(_, _opts) do
+  def init(args, opts) do
+    Logger.info("opts: #{inspect(opts)}")
     Process.register(self(), __MODULE__)
     push_graph(@initial_graph)
     schedule_animations()
@@ -239,8 +242,22 @@ defmodule Play.Scene.Asteroids do
     {:noreply, state}
   end
 
-  def do_handle_input(_input, _, state) do
-    # IO.inspect(input, label: "#{__MODULE__} ignoring input")
+  def do_handle_input({:cursor_pos, cursor_pos}, _viewport_context, state) do
+    radians = Play.Utils.find_angle_to(state.player_coords, cursor_pos)
+    graph =
+      Graph.modify(
+        state.graph,
+        :player,
+        &triangle(&1, @player_dimensions, t: state.player_coords, rotate: radians)
+      )
+
+    push_graph(graph)
+
+    {:noreply, %{state | graph: graph}}
+  end
+
+  def do_handle_input(input, _, state) do
+    IO.inspect(input, label: "#{__MODULE__} ignoring input")
     {:noreply, state}
   end
 
