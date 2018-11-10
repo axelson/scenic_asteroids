@@ -48,6 +48,8 @@ defmodule Play.Scene.Asteroids do
 
   @type game_time :: integer
   @type coords :: {width :: integer, height :: integer}
+  @type unit_vector :: {float, float}
+  @type direction :: unit_vector
 
   defmodule State do
     @moduledoc false
@@ -106,7 +108,7 @@ defmodule Play.Scene.Asteroids do
   # [ ] Asteroid demolition into pieces
   # [ ] Don't render on integer time, scale everything by time slices
   # [ ] Render circles where the mouse cusor is
-  # [ ] Shoot bullets towards the mouse cursor
+  # [x] Shoot bullets towards the mouse cursor
   # [ ] Tap on the screen to shoot
 
   # Question: Should there be a process per asteroid?
@@ -174,8 +176,9 @@ defmodule Play.Scene.Asteroids do
   @spec update_player(State.t()) :: State.t()
   defp update_player(%State{} = state) do
     %{graph: graph, player: player, cursor_coords: cursor_coords} = state
-    radians = Play.Utils.find_angle_to(player.t, cursor_coords)
-    %{state | player: %{player | rotate: radians}}
+    direction = Play.Utils.find_angle_to(player.t, cursor_coords)
+
+    %{state | player: %{player | direction: direction}}
   end
 
   @spec draw_entities(State.t()) :: State.t()
@@ -266,7 +269,7 @@ defmodule Play.Scene.Asteroids do
   end
 
   def do_handle_input(input, _, state) do
-    IO.inspect(input, label: "#{__MODULE__} ignoring input")
+    # IO.inspect(input, label: "#{__MODULE__} ignoring input")
     {:noreply, state}
   end
 

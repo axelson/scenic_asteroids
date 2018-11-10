@@ -26,9 +26,16 @@ defmodule Play.Utils do
     |> max(min)
   end
 
+  def scenic_radians(vector) do
+    Scenic.Math.Vector2.normalize(vector)
+    |> unit_vector_to_radians()
+  end
+
   @doc """
   Find the angle in radians from pos1 to pos2
   """
+  @spec find_angle_to(Play.Scene.Asteroids.coords(), Play.Scene.Asteroids.coords()) ::
+          Play.Scene.Asteroids.direction()
   def find_angle_to(pos1, pos2) do
     {pos1_x, pos1_y} = pos1
     {pos2_x, pos2_y} = pos2
@@ -38,8 +45,7 @@ defmodule Play.Utils do
     # Adjust to flip the y coordinate to match math coordinates
     # Normalize the vector to a unit vector
     vector = {pos2_x - pos1_x, pos1_y - pos2_y}
-    unit_vector = Scenic.Math.Vector2.normalize(vector)
-    unit_vector_to_radians(unit_vector)
+    Scenic.Math.Vector2.normalize(vector)
   end
 
   # Directly above

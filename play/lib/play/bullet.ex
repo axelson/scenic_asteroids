@@ -4,21 +4,23 @@ defmodule Play.Bullet do
   """
   alias Play.Bullet
 
-  defstruct [:id, :t, :color, :size]
+  defstruct [:id, :t, :direction, :color, :size]
 
   @speed 5
 
   @type t :: %__MODULE__{
     id: Play.ScenicEntity.id(),
     t: Play.Scene.Asteroids.coords(),
+    direction: Play.Scene.Asteroids.direction(),
     color: atom,
     size: integer
   }
 
-  def new(%Play.Player{t: coords}) do
+  def new(%Play.Player{t: coords, direction: direction}) do
     %__MODULE__{
       id: Play.Utils.make_id(),
       t: coords,
+      direction: direction,
       color: :white,
       size: 5
     }
@@ -30,9 +32,15 @@ defmodule Play.Bullet do
     def id(%Bullet{id: id}), do: id
 
     def tick(%Bullet{} = bullet) do
-      {width, height} = bullet.t
+      alias Scenic.Math.Vector2
 
-      new_bullet = %{bullet | t: {width, height - Bullet.speed()}}
+      %{direction: direction, t: current_pos} = bullet
+
+      {dx, dy} = Vector2.mul(direction, Bullet.speed())
+      # TODO: Handle the -dy conversion better
+      new_pos = Vector2.add(current_pos, {dx, -dy})
+
+      new_bullet = %{bullet | t: new_pos}
 
       if offscreen?(new_bullet) do
         {:delete, bullet.id}

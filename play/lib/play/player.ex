@@ -2,14 +2,14 @@ defmodule Play.Player do
   @moduledoc """
   Represents the player
   """
-  defstruct [:id, :t, :rotate]
+  defstruct [:id, :t, :direction]
 
   alias Play.Player
 
   @type t :: %__MODULE__{
           id: Play.ScenicEntity.id(),
           t: Play.Scene.Asteroids.coords(),
-          rotate: float()
+          direction: Play.Scene.Asteroids.direction()
         }
 
   @player_dimensions {{0, 0}, {-10, 30}, {10, 30}}
@@ -18,7 +18,7 @@ defmodule Play.Player do
     %__MODULE__{
       id: :player,
       t: initial_player_coordinates(),
-      rotate: 0
+      direction: 0
     }
   end
 
@@ -40,7 +40,7 @@ defmodule Play.Player do
       Scenic.Primitives.triangle(graph, Player.player_dimensions(),
         id: player.id,
         t: player.t,
-        rotate: player.rotate,
+        rotate: Play.Utils.scenic_radians(player.direction),
         stroke: {1, :white}
       )
     end
