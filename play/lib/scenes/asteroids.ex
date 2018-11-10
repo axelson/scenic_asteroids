@@ -254,7 +254,14 @@ defmodule Play.Scene.Asteroids do
     {:noreply, state}
   end
 
+  # Mouse/Touchscreen drag input
   def do_handle_input({:cursor_pos, cursor_pos}, _viewport_context, state) do
+    {:noreply, %{state | cursor_coords: cursor_pos}}
+  end
+
+  # Mouse Click/Touchscreen tap input
+  def do_handle_input({:cursor_button, {:left, :press, _, cursor_pos}}, _viewport_context, state) do
+    state = try_to_shoot(state)
     {:noreply, %{state | cursor_coords: cursor_pos}}
   end
 
