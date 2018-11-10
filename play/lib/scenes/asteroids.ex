@@ -154,7 +154,7 @@ defmodule Play.Scene.Asteroids do
       # Tick updates our internal representation of state
       |> tick_time()
       |> tick_entities()
-      |> update_player()
+      |> update_player_direction()
       |> check_collisions()
       # Update the rendering of each element in the graph
       |> draw_entities()
@@ -173,8 +173,8 @@ defmodule Play.Scene.Asteroids do
 
   defp tick_time(%State{time: t} = state), do: %{state | time: t + 1}
 
-  @spec update_player(State.t()) :: State.t()
-  defp update_player(%State{} = state) do
+  @spec update_player_direction(State.t()) :: State.t()
+  defp update_player_direction(%State{} = state) do
     %{graph: graph, player: player, cursor_coords: cursor_coords} = state
     direction = Play.Utils.find_angle_to(player.t, cursor_coords)
 
@@ -258,14 +258,20 @@ defmodule Play.Scene.Asteroids do
   end
 
   # Mouse/Touchscreen drag input
-  def do_handle_input({:cursor_pos, cursor_pos}, _viewport_context, state) do
-    {:noreply, %{state | cursor_coords: cursor_pos}}
+  def do_handle_input({:cursor_pos, cursor_coords}, _viewport_context, state) do
+    {:noreply, update_cursor_coords(state, cursor_coords)}
   end
 
   # Mouse Click/Touchscreen tap input
-  def do_handle_input({:cursor_button, {:left, :press, _, cursor_pos}}, _viewport_context, state) do
-    state = try_to_shoot(state)
-    {:noreply, %{state | cursor_coords: cursor_pos}}
+  def do_handle_input({:cursor_button, {:left, :press, _, cursor_coords}}, _viewport_context, state) do
+    # TODO: Maybe we shouldn't handle this immediately but instead handle it in the animation loop
+    state =
+      state
+      |> update_cursor_coords(cursor_coords)
+      |> update_player_direction()
+      |> try_to_shoot()
+
+    {:noreply, state}
   end
 
   def do_handle_input(input, _, state) do
@@ -284,6 +290,11 @@ defmodule Play.Scene.Asteroids do
       end
 
     %{state | key_states: key_states}
+  end
+
+  @spec update_cursor_coords(%State{}, coords()) :: %State{}
+  defp update_cursor_coords(state, cursor_coords) do
+    %{state | cursor_coords: cursor_coords}
   end
 
   @spec try_to_shoot(%State{}) :: %State{}
@@ -322,7 +333,7 @@ defmodule Play.Scene.Asteroids do
 
   # TODO: Refactor this out of the scene
   # It is like ticking the player but it requires additional input
-  # Maybe combine with update_player func
+  # Maybe combine with update_player_direction func
   defp update_player_coords(%State{} = state, direction) do
     %{player: %{t: {width, height}}} = state
     dist = 5
