@@ -1,4 +1,5 @@
 language: elixir
+sudo: required
 elixir:
   - 1.7.3
 otp_release:
