@@ -3,6 +3,11 @@ elixir:
   - 1.7.3
 otp_release:
   21.0.8
+install:
+  - cd play_ui
+  - mix local.rebar --force
+  - mix local.hex --force
+  - mix deps.get
 script:
   - cd play_ui
   - mix deps.compile
