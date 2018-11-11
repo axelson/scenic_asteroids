@@ -41,6 +41,7 @@ defmodule Fw.MixProject do
       {:nerves, "~> 1.3", runtime: false},
       {:shoehorn, "~> 0.4"},
       {:ring_logger, "~> 0.4"},
+      {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:play, path: "../play"}
     ] ++ deps(@target)
   end
