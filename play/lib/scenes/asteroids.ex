@@ -102,14 +102,13 @@ defmodule Play.Scene.Asteroids do
   # [x] Each frame, orient player to the cursor pos
   # [ ] Add an explosion effect when the player collides with an asteroid
   # [ ] Clean up scene to essentials of a scene and not gameplay
-  # [ ] Asteroid move in vectors
-  # [ ] Asteroid randomization
-  # [ ] Asteroid spawning
-  # [ ] Asteroid demolition into pieces
+  # [x] Asteroid move in vectors
+  # [x] Asteroid randomization
+  # [x] Asteroid spawning
   # [ ] Don't render on integer time, scale everything by time slices
   # [ ] Render circles where the mouse cusor is
   # [x] Shoot bullets towards the mouse cursor
-  # [ ] Tap on the screen to shoot
+  # [x] Tap on the screen to shoot
 
   # Question: Should there be a process per asteroid?
   # Answer: No!
@@ -118,6 +117,7 @@ defmodule Play.Scene.Asteroids do
   @firing_keys [" "]
   @keys_to_track @movement_keys ++ @firing_keys
   @max_bullets 5
+  @new_asteroid_chance_per_second 0.3
 
   @initial_graph Graph.build()
                  |> rect({Play.Utils.screen_width(), Play.Utils.screen_height()})
@@ -136,11 +136,7 @@ defmodule Play.Scene.Asteroids do
       player: Play.Player.new(),
       key_states: %{},
       bullets: [],
-      asteroids: [
-        Play.Asteroid.new({100, 31}, 30, {0, 1}, 3),
-        Play.Asteroid.new({100, 200}, 27, {0, 1}, 1),
-        Play.Asteroid.new({100, 300}, 12, {0.5, 0.5}, 1)
-      ],
+      asteroids: 1..7 |> Enum.map(fn _ -> new_asteroid() end),
       last_shot: :never
     }
 
@@ -154,6 +150,7 @@ defmodule Play.Scene.Asteroids do
       # Tick updates our internal representation of state
       |> tick_time()
       |> tick_entities()
+      |> maybe_add_asteroid()
       |> update_player_direction()
       |> check_collisions()
       # Update the rendering of each element in the graph
@@ -208,6 +205,42 @@ defmodule Play.Scene.Asteroids do
       | asteroids: Enum.map(state.asteroids, &Play.ScenicEntity.tick/1),
         bullets: Enum.map(state.bullets, &Play.ScenicEntity.tick/1)
     }
+  end
+
+  defp maybe_add_asteroid(%State{} = state) do
+    if add_asteroid? do
+      %{state | asteroids: [new_asteroid() | state.asteroids]}
+    else
+      state
+    end
+  end
+
+  defp new_asteroid() do
+    screen_width = Play.Utils.screen_width()
+    screen_height = Play.Utils.screen_height()
+    rand_x = :rand.uniform(screen_width)
+    rand_y = :rand.uniform(screen_height)
+
+    {min_size, max_size} = {10, 45}
+    size = min_size + :rand.uniform(max_size - min_size)
+
+    {x, y} =
+      case Enum.random([:north, :east, :south, :west]) do
+        :north -> {rand_x, 0 - size}
+        :east -> {screen_width + size, rand_y}
+        :south -> {rand_x, screen_height + size}
+        :west -> {0 - size, rand_y}
+      end
+
+    direction = {:rand.uniform(), :rand.uniform}
+    speed = :rand.uniform(2)
+
+    Play.Asteroid.new({x, y}, size, direction, speed)
+  end
+
+  defp add_asteroid? do
+    fps = Play.GameTimer.speed
+    :rand.uniform() < @new_asteroid_chance_per_second / fps
   end
 
   defp remove_dead_entities(%State{} = state) do
