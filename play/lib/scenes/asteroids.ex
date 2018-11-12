@@ -61,7 +61,8 @@ defmodule Play.Scene.Asteroids do
       :key_states,
       :bullets,
       :asteroids,
-      :last_shot
+      :last_shot,
+      :viewport
     ]
 
     @type t :: %__MODULE__{
@@ -72,7 +73,8 @@ defmodule Play.Scene.Asteroids do
             key_states: %{required(String.t()) => true},
             bullets: list(Play.Bullet.t()),
             asteroids: list(Play.Asteroid.t()),
-            last_shot: Play.Scene.Asteroids.game_time()
+            last_shot: Play.Scene.Asteroids.game_time(),
+            viewport: pid
           }
   end
 
@@ -137,7 +139,8 @@ defmodule Play.Scene.Asteroids do
       key_states: %{},
       bullets: [],
       asteroids: 1..7 |> Enum.map(fn _ -> new_asteroid() end),
-      last_shot: :never
+      last_shot: :never,
+      viewport: Keyword.get(opts, :viewport)
     }
 
     {:ok, initial_state}
@@ -152,10 +155,10 @@ defmodule Play.Scene.Asteroids do
       |> tick_entities()
       |> maybe_add_asteroid()
       |> update_player_direction()
-      |> check_collisions()
       # Update the rendering of each element in the graph
       |> draw_entities()
       |> remove_dead_entities()
+      |> check_collisions()
 
     %{graph: graph} = state
     push_graph(graph)
@@ -425,7 +428,7 @@ defmodule Play.Scene.Asteroids do
 
   defp check_collisions(state), do: state
 
-  defp handle_collision({:player, :asteroid}, _state), do: raise("Boom")
+  defp handle_collision({:player, :asteroid}, state), do: player_death(state)
 
   defp handle_collision(
          {:bullet, %Bullet{id: bullet_id}, :asteroid, %CollisionBox{entity_id: asteroid_id}},
@@ -493,6 +496,12 @@ defmodule Play.Scene.Asteroids do
     overlap_y = overlap(height, box_height, box_height + collision_box.size)
 
     overlap_x && overlap_y
+  end
+
+  defp player_death(state) do
+    IO.puts("Player lost!")
+    Scenic.ViewPort.set_root(state.viewport, {Play.Scene.PlayerDeath, state.player.t})
+    state
   end
 
   defp overlap(x, x1, x2), do: x > x1 && x < x2
