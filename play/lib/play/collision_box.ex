@@ -32,7 +32,7 @@ end
 
 defprotocol Play.Collision do
   @doc "Convert this data structure into a collision box"
-  @spec from(any) :: Play.CollisionBox.t()
+  @spec from(any) :: Play.CollisionBox.t() | Play.ScenicEntity.entity_pending_destruction()
   def from(data)
 end
 

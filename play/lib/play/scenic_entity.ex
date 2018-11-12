@@ -1,5 +1,6 @@
 defprotocol Play.ScenicEntity do
   @type id :: String.t()
+  @type entity_pending_destruction :: {:delete, id}
 
   @typedoc "Any entity that can be drawn onto the graph"
   @type entity :: any
