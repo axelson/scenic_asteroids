@@ -27,6 +27,7 @@ defmodule PlayUi.MixProject do
       # {:scenic, "~> 0.8.0"},
       # {:scenic_driver_glfw, git: "git@github.com:boydm/scenic_driver_glfw.git"},
       {:scenic_driver_glfw, "~> 0.8.0"},
+      {:dialyxir, "1.0.0-rc.4", only: :dev, runtime: false},
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:play, path: "../play"},
     ]

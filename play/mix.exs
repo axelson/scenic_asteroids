@@ -44,9 +44,7 @@ defmodule Play.MixProject do
       {:scenic_sensor, "~> 0.7.0"},
       {:scenic_clock, ">= 0.0.0"},
 
-      # {:dialyxir, "1.0.0-rc.3", only: :dev, runtime: false},
-      {:dialyxir, github: "jeremyjh/dialyxir", only: :dev, runtime: false},
-      {:erlex, github: "asummers/erlex", only: :dev, runtime: false, override: true},
+      {:dialyxir, "1.0.0-rc.4", only: :dev, runtime: false},
       {:credo, "~> 0.10.0", only: [:dev, :test], runtime: false},
 
       # the https versions
