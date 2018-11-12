@@ -137,9 +137,9 @@ defmodule Play.Scene.Asteroids do
       key_states: %{},
       bullets: [],
       asteroids: [
-        Play.Asteroid.new({100, 31}, 30),
-        Play.Asteroid.new({100, 200}, 27),
-        Play.Asteroid.new({100, 300}, 12)
+        Play.Asteroid.new({100, 31}, 30, {0, 1}, 3),
+        Play.Asteroid.new({100, 200}, 27, {0, 1}, 1),
+        Play.Asteroid.new({100, 300}, 12, {0.5, 0.5}, 1)
       ],
       last_shot: :never
     }

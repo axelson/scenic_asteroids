@@ -2,21 +2,26 @@ defmodule Play.Asteroid do
   @moduledoc """
   Represents an asteroid in the game
   """
-  defstruct [:id, :t, :color, :size]
+  defstruct [:id, :t, :direction, :speed, :color, :size]
 
+  alias Scenic.Math.Vector2
   alias Play.Asteroid
 
   @type t :: %__MODULE__{
           id: Play.ScenicEntity.id(),
           t: Play.Scene.Asteroids.coords(),
+          direction: Play.Scene.Asteroids.direction(),
+          speed: float,
           color: atom,
           size: integer
         }
 
-  def new(coords, size) do
+  def new(coords, size, direction, speed) do
     %__MODULE__{
       id: Play.Utils.make_id(),
       t: coords,
+      direction: Vector2.normalize(direction),
+      speed: speed,
       color: :white,
       size: size
     }
@@ -26,20 +31,47 @@ defmodule Play.Asteroid do
     def id(%Asteroid{id: id}), do: id
 
     def tick(%Asteroid{} = asteroid) do
-      {width, height} = asteroid.t
-      %{asteroid | t: {tick_width(asteroid, width), height}}
-    end
-
-    defp tick_width(%Asteroid{size: size} = _asteroid, width) do
-      cond do
-        width - size > Play.Utils.screen_width() -> -size
-        true -> width + 1
-      end
+      %{asteroid | t: new_position(asteroid)}
     end
 
     def draw(%Asteroid{} = asteroid, graph) do
       %{id: id, color: color, size: size, t: t} = asteroid
       Scenic.Primitives.circle(graph, size, id: id, stroke: {3, color}, t: t)
+    end
+
+    defp new_position(%Asteroid{} = asteroid) do
+      {x, y} = asteroid.t
+      size = asteroid.size
+
+      screen_width = Play.Utils.screen_width()
+      screen_height = Play.Utils.screen_height()
+
+      case offscreen(asteroid) do
+        :north -> {x, screen_height + size}
+        :east -> {0 - size, y}
+        :south -> {x, 0 - size}
+        :west -> {screen_width + size, y}
+        :onscreen -> next_tick_onscreen_pos(asteroid)
+      end
+    end
+
+    defp next_tick_onscreen_pos(%Asteroid{} = asteroid) do
+      %{t: t, direction: direction, speed: speed} = asteroid
+      Vector2.add(t, Vector2.mul(direction, speed))
+    end
+
+    defp offscreen(%Asteroid{} = asteroid) do
+      {width, height} = asteroid.t
+      screen_width = Play.Utils.screen_width()
+      screen_height = Play.Utils.screen_height()
+
+      cond do
+        width - asteroid.size > screen_width -> :east
+        width + asteroid.size < 0 -> :west
+        height - asteroid.size > screen_height -> :south
+        height + asteroid.size < 0 -> :north
+        true -> :onscreen
+      end
     end
   end
 
