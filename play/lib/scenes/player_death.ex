@@ -17,17 +17,18 @@ defmodule Play.Scene.PlayerDeath do
   end
 
   def init({x, y}, opts) do
-    Process.register(self(), __MODULE__)
+    IO.puts "INIT"
+    # Process.register(self(), __MODULE__)
     size = 3
 
     graph =
       @initial_graph
-      |> circle(size, t: {x, y}, id: :circle, stroke: {3, :white}, fill: :white)
+      |> circle(size, t: {x, y}, id: :circle, stroke: {30, :white}, fill: :white)
       |> push_graph()
 
     state = %{graph: graph, size: size, time: 0, viewport: opts[:viewport]}
 
-    Process.send_after(self(), :animate, 10)
+    # Process.send_after(self(), :animate, 10)
 
     {:ok, state}
   end

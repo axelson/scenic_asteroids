@@ -109,6 +109,6 @@ defmodule Play.Scene.Splash do
 
   # --------------------------------------------------------
   defp go_to_first_scene(%{viewport: vp, first_scene: first_scene}) do
-    ViewPort.set_root(vp, {first_scene, nil})
+    ViewPort.set_root(vp, {first_scene, {100, 100}})
   end
 end
