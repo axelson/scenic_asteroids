@@ -122,6 +122,7 @@ defmodule Play.Scene.Asteroids do
   @new_asteroid_chance_per_second 0.3
 
   @initial_graph Graph.build()
+                 # Rectangle used for capturing input for the scene
                  |> rect({Play.Utils.screen_width(), Play.Utils.screen_height()})
 
   @impl Scenic.Scene
@@ -235,14 +236,14 @@ defmodule Play.Scene.Asteroids do
         :west -> {0 - size, rand_y}
       end
 
-    direction = {:rand.uniform(), :rand.uniform}
+    direction = {:rand.uniform(), :rand.uniform()}
     speed = :rand.uniform(2)
 
     Play.Asteroid.new({x, y}, size, direction, speed)
   end
 
   defp add_asteroid? do
-    fps = Play.GameTimer.speed
+    fps = Play.GameTimer.speed()
     :rand.uniform() < @new_asteroid_chance_per_second / fps
   end
 
@@ -299,7 +300,11 @@ defmodule Play.Scene.Asteroids do
   end
 
   # Mouse Click/Touchscreen tap input
-  def do_handle_input({:cursor_button, {:left, :press, _, cursor_coords}}, _viewport_context, state) do
+  def do_handle_input(
+        {:cursor_button, {:left, :press, _, cursor_coords}},
+        _viewport_context,
+        state
+      ) do
     # TODO: Maybe we shouldn't handle this immediately but instead handle it in the animation loop
     state =
       state
