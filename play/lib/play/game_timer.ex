@@ -3,7 +3,8 @@ defmodule Play.GameTimer do
   Uses `SchedEx` to control the timescale of the game
   """
 
-  @behaviour SchedEx.TimeScale
+  # This requires https://github.com/SchedEx/SchedEx/pull/8
+  # @behaviour SchedEx.TimeScale
   @fps 60
   @multiplier 1
 
