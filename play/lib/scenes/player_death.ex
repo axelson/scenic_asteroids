@@ -23,8 +23,11 @@ defmodule Play.Scene.PlayerDeath do
 
     graph =
       @initial_graph
-      |> circle(size, t: {x, y}, id: :circle, stroke: {30, :white}, fill: :white)
+      # Bad on Arch Linux, good on others
+      # |> circle(size, t: {x, y}, id: :circle, stroke: {30, :white})
+      |> circle(size, t: {x, y}, id: :circle, stroke: {30, :white}, fill: :clear)
       |> push_graph()
+    |> IO.inspect(label: "graph")
 
     state = %{graph: graph, size: size, time: 0, viewport: opts[:viewport]}
 
