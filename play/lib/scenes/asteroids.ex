@@ -126,10 +126,10 @@ defmodule Play.Scene.Asteroids do
   @initial_graph Graph.build()
                  # Rectangle used for capturing input for the scene
                  |> rect({Play.Utils.screen_width(), Play.Utils.screen_height()})
-                 |> Play.Components.HiddenButton.add_to_graph({20, 20},
+                 |> Play.Components.HiddenButton.add_to_graph({30, 30},
                    id: :pause_btn,
                    fill: :clear,
-                   t: {Play.Utils.screen_width() - 20, 0}
+                   t: {Play.Utils.screen_width() - 30, 0}
                  )
                  # |> text("Hello World",
                  #   id: :score,
