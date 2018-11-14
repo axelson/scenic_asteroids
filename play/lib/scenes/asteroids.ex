@@ -62,6 +62,7 @@ defmodule Play.Scene.Asteroids do
       :bullets,
       :asteroids,
       :last_shot,
+      :paused,
       :viewport
     ]
 
@@ -74,6 +75,7 @@ defmodule Play.Scene.Asteroids do
             bullets: list(Play.Bullet.t()),
             asteroids: list(Play.Asteroid.t()),
             last_shot: Play.Scene.Asteroids.game_time(),
+            paused: boolean,
             viewport: pid
           }
   end
@@ -124,7 +126,17 @@ defmodule Play.Scene.Asteroids do
   @initial_graph Graph.build()
                  # Rectangle used for capturing input for the scene
                  |> rect({Play.Utils.screen_width(), Play.Utils.screen_height()})
-                 |> text("Hello World", t: {Play.Utils.screen_width(), 15}, fill: :white, font: :roboto_mono, text_align: :right)
+                 |> Play.Components.HiddenButton.add_to_graph({20, 20},
+                   id: :pause_btn,
+                   fill: :white,
+                   t: {Play.Utils.screen_width() - 20, 0}
+                 )
+                 |> text("Hello World",
+                   t: {Play.Utils.screen_width(), 15},
+                   fill: :white,
+                   font: :roboto_mono,
+                   text_align: :right
+                 )
 
   @impl Scenic.Scene
   def init(args, opts) do
@@ -140,13 +152,16 @@ defmodule Play.Scene.Asteroids do
       player: Play.Player.new(),
       key_states: %{},
       bullets: [],
-      asteroids: 1..7 |> Enum.map(fn _ -> new_asteroid() end),
+      asteroids: 1..2 |> Enum.map(fn _ -> new_asteroid() end),
       last_shot: :never,
+      paused: false,
       viewport: Keyword.get(opts, :viewport)
     }
 
     {:ok, initial_state}
   end
+
+  def handle_info({:animate, _}, %{paused: true} = state), do: {:noreply, state}
 
   def handle_info({:animate, _expected_run_time}, state) do
     state =
@@ -259,6 +274,11 @@ defmodule Play.Scene.Asteroids do
   end
 
   @impl Scenic.Scene
+  def filter_event({:click, :pause_btn}, _, %State{} = state) do
+    state = %{state | paused: !state.paused}
+    {:stop, state}
+  end
+
   def filter_event(event, sec, state) do
     IO.inspect(event, label: "event")
     IO.inspect(sec, label: "sec")
