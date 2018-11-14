@@ -128,15 +128,16 @@ defmodule Play.Scene.Asteroids do
                  |> rect({Play.Utils.screen_width(), Play.Utils.screen_height()})
                  |> Play.Components.HiddenButton.add_to_graph({20, 20},
                    id: :pause_btn,
-                   fill: :white,
+                   fill: :clear,
                    t: {Play.Utils.screen_width() - 20, 0}
                  )
-                 |> text("Hello World",
-                   t: {Play.Utils.screen_width(), 15},
-                   fill: :white,
-                   font: :roboto_mono,
-                   text_align: :right
-                 )
+                 # |> text("Hello World",
+                 #   id: :score,
+                 #   t: {Play.Utils.screen_width(), 15},
+                 #   fill: :white,
+                 #   font: :roboto_mono,
+                 #   text_align: :right
+                 # )
 
   @impl Scenic.Scene
   def init(args, opts) do
@@ -275,7 +276,7 @@ defmodule Play.Scene.Asteroids do
 
   @impl Scenic.Scene
   def filter_event({:click, :pause_btn}, _, %State{} = state) do
-    state = %{state | paused: !state.paused}
+    state = pause(state)
     {:stop, state}
   end
 
@@ -392,6 +393,12 @@ defmodule Play.Scene.Asteroids do
   defp key_to_direction("A"), do: :left
   defp key_to_direction("S"), do: :down
   defp key_to_direction("D"), do: :right
+
+  defp pause(%State{} = state) do
+    state = %{state | paused: !state.paused}
+    push_graph(@initial_graph)
+    state
+  end
 
   # TODO: Refactor this out of the scene
   # It is like ticking the player but it requires additional input
