@@ -57,7 +57,8 @@ config :nerves_init_gadget,
 
 config :play, :viewport, %{
   size: {800, 480},
-  default_scene: {Play.Scene.Splash, Play.Scene.Asteroids},
+  # default_scene: {Play.Scene.Splash, Play.Scene.Asteroids},
+  default_scene: {Play.Scene.Splash, Play.Scene.PlayerDeath},
   drivers: [
     %{
       module: Scenic.Driver.Nerves.Rpi

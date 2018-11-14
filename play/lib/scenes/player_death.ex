@@ -19,13 +19,13 @@ defmodule Play.Scene.PlayerDeath do
   def init({x, y}, opts) do
     IO.puts "INIT"
     # Process.register(self(), __MODULE__)
-    size = 3
+    size = 45
 
     graph =
       @initial_graph
       # Bad on Arch Linux, good on others
       # |> circle(size, t: {x, y}, id: :circle, stroke: {30, :white})
-      |> circle(size, t: {x, y}, id: :circle, stroke: {30, :white}, fill: :clear)
+      |> circle(size, t: {x, y}, id: :circle, stroke: {3, :white}, fill: :clear)
       |> push_graph()
     |> IO.inspect(label: "graph")
 
@@ -43,6 +43,8 @@ defmodule Play.Scene.PlayerDeath do
 
   def handle_info(:animate, state) do
     %{graph: graph, size: size} = state
+
+    IO.puts "UPDATE SIZE"
 
     graph =
       graph
