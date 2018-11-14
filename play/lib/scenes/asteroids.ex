@@ -124,6 +124,7 @@ defmodule Play.Scene.Asteroids do
   @initial_graph Graph.build()
                  # Rectangle used for capturing input for the scene
                  |> rect({Play.Utils.screen_width(), Play.Utils.screen_height()})
+                 |> text("Hello World", t: {Play.Utils.screen_width(), 15}, fill: :white, font: :roboto_mono, text_align: :right)
 
   @impl Scenic.Scene
   def init(args, opts) do
