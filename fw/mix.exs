@@ -41,6 +41,7 @@ defmodule Fw.MixProject do
       {:nerves, "~> 1.3", runtime: false},
       {:shoehorn, "~> 0.4"},
       {:ring_logger, "~> 0.4"},
+      {:toolshed, "~> 0.2"},
 
       {:dialyxir, "1.0.0-rc.4", only: :dev, runtime: false},
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
