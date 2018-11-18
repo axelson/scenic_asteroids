@@ -11,6 +11,7 @@ defmodule Play.Utils do
   end
 
   def screen_width do
+    # TODO: This should be moved to the play_ui project
     {width, _height} = Application.get_env(:play, :viewport)[:size]
     width
   end
