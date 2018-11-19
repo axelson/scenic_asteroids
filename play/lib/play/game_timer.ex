@@ -4,7 +4,7 @@ defmodule Play.GameTimer do
   """
 
   # This requires https://github.com/SchedEx/SchedEx/pull/8
-  # @behaviour SchedEx.TimeScale
+  @behaviour SchedEx.TimeScale
   @fps 60
   @multiplier 1
 
