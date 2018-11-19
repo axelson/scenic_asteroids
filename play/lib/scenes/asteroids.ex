@@ -115,6 +115,8 @@ defmodule Play.Scene.Asteroids do
   # [ ] Render circles where the mouse cusor is
   # [x] Shoot bullets towards the mouse cursor
   # [x] Tap on the screen to shoot
+  # [x] Press 'p' to pause
+  # [x] Time-based difficulty increasing
 
   # Question: Should there be a process per asteroid?
   # Answer: No!
@@ -235,7 +237,7 @@ defmodule Play.Scene.Asteroids do
   end
 
   defp maybe_add_asteroid(%State{} = state) do
-    if add_asteroid? do
+    if add_asteroid?(state) do
       %{state | asteroids: [new_asteroid() | state.asteroids]}
     else
       state
@@ -265,9 +267,15 @@ defmodule Play.Scene.Asteroids do
     Play.Asteroid.new({x, y}, size, direction, speed)
   end
 
-  defp add_asteroid? do
+  defp add_asteroid?(%State{} = state) do
+    %{time: t} = state
     fps = Play.GameTimer.speed()
-    :rand.uniform() < @new_asteroid_chance_per_second / fps
+    base_chance = @new_asteroid_chance_per_second / fps
+    scaling_factor = :math.log2(t) / 400
+
+    chance = base_chance + scaling_factor
+
+    :rand.uniform() < chance
   end
 
   defp remove_dead_entities(%State{} = state) do
@@ -550,7 +558,7 @@ defmodule Play.Scene.Asteroids do
 
   defp update_score(%State{} = state) do
     %{graph: graph, num_asteroids_destroyed: num_asteroids_destroyed} = state
-    graph = Graph.modify(graph, :score, & text(&1, "score: #{num_asteroids_destroyed}"))
+    graph = Graph.modify(graph, :score, &text(&1, "score: #{num_asteroids_destroyed}"))
     %{state | graph: graph}
   end
 
