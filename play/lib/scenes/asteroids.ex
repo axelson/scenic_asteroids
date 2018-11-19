@@ -54,28 +54,28 @@ defmodule Play.Scene.Asteroids do
   defmodule State do
     @moduledoc false
     defstruct [
-      :time,
-      :graph,
-      :player,
-      :cursor_coords,
-      :key_states,
-      :bullets,
       :asteroids,
+      :bullets,
+      :cursor_coords,
+      :graph,
+      :key_states,
       :last_shot,
       :paused,
+      :player,
+      :time,
       :viewport
     ]
 
     @type t :: %__MODULE__{
-            time: Play.Scene.Asteroids.game_time(),
-            graph: Scenic.Graph.t(),
-            player: Play.Player.t(),
-            cursor_coords: Play.Scene.Asteroids.coords(),
-            key_states: %{required(String.t()) => true},
-            bullets: list(Play.Bullet.t()),
             asteroids: list(Play.Asteroid.t()),
+            bullets: list(Play.Bullet.t()),
+            cursor_coords: Play.Scene.Asteroids.coords(),
+            graph: Scenic.Graph.t(),
+            key_states: %{required(String.t()) => true},
             last_shot: Play.Scene.Asteroids.game_time(),
             paused: boolean,
+            player: Play.Player.t(),
+            time: Play.Scene.Asteroids.game_time(),
             viewport: pid
           }
   end
@@ -147,15 +147,15 @@ defmodule Play.Scene.Asteroids do
     schedule_animations()
 
     initial_state = %State{
-      graph: @initial_graph,
-      time: 0,
-      cursor_coords: {Play.Utils.screen_width() / 2, 0},
-      player: Play.Player.new(),
-      key_states: %{},
-      bullets: [],
       asteroids: 1..2 |> Enum.map(fn _ -> new_asteroid() end),
+      bullets: [],
+      cursor_coords: {Play.Utils.screen_width() / 2, 0},
+      graph: @initial_graph,
+      key_states: %{},
       last_shot: :never,
       paused: false,
+      player: Play.Player.new(),
+      time: 0,
       viewport: Keyword.get(opts, :viewport)
     }
 
