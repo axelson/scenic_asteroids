@@ -557,16 +557,25 @@ defmodule Play.Scene.Asteroids do
   end
 
   defp update_score(%State{} = state) do
-    %{graph: graph, num_asteroids_destroyed: num_asteroids_destroyed} = state
-    graph = Graph.modify(graph, :score, &text(&1, "score: #{num_asteroids_destroyed}"))
+    %{graph: graph} = state
+    score = score(state)
+    graph = Graph.modify(graph, :score, &text(&1, "score: #{score}"))
     %{state | graph: graph}
   end
 
   defp player_death(state) do
+    %{player: player, num_asteroids_destroyed: num_asteroids_destroyed} = state
     IO.puts("Player lost!")
-    Scenic.ViewPort.set_root(state.viewport, {Play.Scene.PlayerDeath, state.player.t})
+
+    Scenic.ViewPort.set_root(
+      state.viewport,
+      {Play.Scene.PlayerDeath, {player.t, num_asteroids_destroyed}}
+    )
+
     state
   end
+
+  defp score(%State{num_asteroids_destroyed: n}), do: n
 
   defp overlap(x, x1, x2), do: x > x1 && x < x2
 
