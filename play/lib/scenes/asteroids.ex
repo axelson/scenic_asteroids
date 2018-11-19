@@ -106,13 +106,11 @@ defmodule Play.Scene.Asteroids do
   #     protocols)
   # [x] Track cursor pos in state
   # [x] Each frame, orient player to the cursor pos
-  # [ ] Add an explosion effect when the player collides with an asteroid
+  # [x] Add an explosion effect when the player collides with an asteroid
   # [ ] Clean up scene to essentials of a scene and not gameplay
   # [x] Asteroid move in vectors
   # [x] Asteroid randomization
   # [x] Asteroid spawning
-  # [ ] Don't render on integer time, scale everything by time slices
-  # [ ] Render circles where the mouse cusor is
   # [x] Shoot bullets towards the mouse cursor
   # [x] Tap on the screen to shoot
   # [x] Press 'p' to pause
