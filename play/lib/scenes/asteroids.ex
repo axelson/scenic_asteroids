@@ -317,6 +317,10 @@ defmodule Play.Scene.Asteroids do
     System.stop(0)
   end
 
+  def do_handle_input({:key, {"P", :press, _}}, _viewport_context, state) do
+    {:noreply, pause(state)}
+  end
+
   def do_handle_input({:key, {"I", :press, _}}, _viewport_context, state) do
     IO.inspect(state.graph, label: "graph")
     {:noreply, state}
@@ -402,7 +406,7 @@ defmodule Play.Scene.Asteroids do
 
   defp pause(%State{} = state) do
     state = %{state | paused: !state.paused}
-    push_graph(@initial_graph)
+    push_graph(Graph.build())
     state
   end
 
