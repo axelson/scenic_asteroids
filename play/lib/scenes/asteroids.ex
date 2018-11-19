@@ -142,13 +142,13 @@ defmodule Play.Scene.Asteroids do
                  )
 
   @impl Scenic.Scene
-  def init(args, opts) do
-    Logger.info("opts: #{inspect(opts)}")
+  def init(_args, scenic_opts) do
+    # Logger.info("scenic_opts: #{inspect(scenic_opts)}")
     Process.register(self(), __MODULE__)
     push_graph(@initial_graph)
     schedule_animations()
 
-    {:ok, initial_state(opts)}
+    {:ok, initial_state(scenic_opts)}
   end
 
   defp initial_state(opts) do
@@ -199,7 +199,7 @@ defmodule Play.Scene.Asteroids do
 
   @spec update_player_direction(State.t()) :: State.t()
   defp update_player_direction(%State{} = state) do
-    %{graph: graph, player: player, cursor_coords: cursor_coords} = state
+    %{player: player, cursor_coords: cursor_coords} = state
     direction = Play.Utils.find_angle_to(player.t, cursor_coords)
 
     %{state | player: %{player | direction: direction}}
@@ -353,7 +353,7 @@ defmodule Play.Scene.Asteroids do
     {:noreply, state}
   end
 
-  def do_handle_input(input, _, state) do
+  def do_handle_input(_input, _, state) do
     # IO.inspect(input, label: "#{__MODULE__} ignoring input")
     {:noreply, state}
   end

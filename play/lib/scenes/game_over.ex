@@ -23,7 +23,6 @@ defmodule Play.Scene.GameOver do
 
   @impl Scenic.Scene
   def init(score, scenic_opts) do
-    scenic_opts
     state = %State{viewport: scenic_opts[:viewport]}
 
     show_score(score)
