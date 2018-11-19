@@ -60,6 +60,7 @@ defmodule Play.Scene.Asteroids do
       :graph,
       :key_states,
       :last_shot,
+      :num_asteroids_destroyed,
       :paused,
       :player,
       :time,
@@ -73,6 +74,7 @@ defmodule Play.Scene.Asteroids do
             graph: Scenic.Graph.t(),
             key_states: %{required(String.t()) => true},
             last_shot: Play.Scene.Asteroids.game_time(),
+            num_asteroids_destroyed: non_neg_integer,
             paused: boolean,
             player: Play.Player.t(),
             time: Play.Scene.Asteroids.game_time(),
@@ -131,13 +133,13 @@ defmodule Play.Scene.Asteroids do
                    fill: :clear,
                    t: {Play.Utils.screen_width() - 30, 0}
                  )
-                 # |> text("Hello World",
-                 #   id: :score,
-                 #   t: {Play.Utils.screen_width(), 15},
-                 #   fill: :white,
-                 #   font: :roboto_mono,
-                 #   text_align: :right
-                 # )
+                 |> text("Score: 0",
+                   id: :score,
+                   t: {Play.Utils.screen_width(), 15},
+                   fill: :white,
+                   font: :roboto_mono,
+                   text_align: :right
+                 )
 
   @impl Scenic.Scene
   def init(args, opts) do
@@ -146,20 +148,23 @@ defmodule Play.Scene.Asteroids do
     push_graph(@initial_graph)
     schedule_animations()
 
-    initial_state = %State{
+    {:ok, initial_state(opts)}
+  end
+
+  defp initial_state(opts) do
+    %State{
       asteroids: 1..2 |> Enum.map(fn _ -> new_asteroid() end),
       bullets: [],
       cursor_coords: {Play.Utils.screen_width() / 2, 0},
       graph: @initial_graph,
       key_states: %{},
       last_shot: :never,
+      num_asteroids_destroyed: 0,
       paused: false,
       player: Play.Player.new(),
       time: 0,
       viewport: Keyword.get(opts, :viewport)
     }
-
-    {:ok, initial_state}
   end
 
   def handle_info({:animate, _}, %{paused: true} = state), do: {:noreply, state}
@@ -177,6 +182,7 @@ defmodule Play.Scene.Asteroids do
       |> draw_entities()
       |> remove_dead_entities()
       |> check_collisions()
+      |> update_score()
 
     %{graph: graph} = state
     push_graph(graph)
@@ -467,6 +473,8 @@ defmodule Play.Scene.Asteroids do
          {:bullet, %Bullet{id: bullet_id}, :asteroid, %CollisionBox{entity_id: asteroid_id}},
          state
        ) do
+    %{num_asteroids_destroyed: num_asteroids_destroyed} = state
+
     asteroids =
       Enum.map(state.asteroids, fn
         %Asteroid{id: ^asteroid_id} -> {:delete, asteroid_id}
@@ -479,7 +487,12 @@ defmodule Play.Scene.Asteroids do
         bullet -> bullet
       end)
 
-    %{state | asteroids: asteroids, bullets: bullets}
+    %{
+      state
+      | asteroids: asteroids,
+        bullets: bullets,
+        num_asteroids_destroyed: num_asteroids_destroyed + 1
+    }
   end
 
   defp handle_collision(_, state), do: state
@@ -529,6 +542,12 @@ defmodule Play.Scene.Asteroids do
     overlap_y = overlap(height, box_height, box_height + collision_box.size)
 
     overlap_x && overlap_y
+  end
+
+  defp update_score(%State{} = state) do
+    %{graph: graph, num_asteroids_destroyed: num_asteroids_destroyed} = state
+    graph = Graph.modify(graph, :score, & text(&1, "score: #{num_asteroids_destroyed}"))
+    %{state | graph: graph}
   end
 
   defp player_death(state) do
