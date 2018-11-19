@@ -29,7 +29,7 @@ defmodule Play.Components.HiddenButton do
     {:ok, data}
   end
 
-  def handle_input({:cursor_button, {:left, :press, _, _}}, context, state) do
+  def handle_input({:cursor_button, {:left, :press, _, _}}, _context, state) do
     %{id: id} = state
     send_event({:click, id})
 

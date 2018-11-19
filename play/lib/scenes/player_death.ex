@@ -39,7 +39,7 @@ defmodule Play.Scene.PlayerDeath do
     {:ok, state}
   end
 
-  @impl Scenic.Scene
+  # @impl Scenic.Scene
   def handle_info(:animate, %{time: t} = state) when t >= 150 do
     %{score: score} = state
     Scenic.ViewPort.set_root(state.viewport, {Play.Scene.GameOver, score})
