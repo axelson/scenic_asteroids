@@ -15,6 +15,17 @@ From the root of the repository run the following commands:
 * `mix deps.get`
 * `iex -S mix`
 
+Keys:
+* `W` - Move up
+* `A` - Move left
+* `S` - Move down
+* `D` - Move right
+* `SPC` - Shoot an asteroid
+
+Use the mouse to target the asteroids
+
+Have fun!
+
 ## Implementation Notes
 
 [SchedEx](https://github.com/SchedEx/SchedEx) is used to implement the core
