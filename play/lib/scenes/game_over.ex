@@ -8,6 +8,8 @@ defmodule Play.Scene.GameOver do
   alias Scenic.Graph
 
   @initial_graph Graph.build()
+                 # Rectangle used for capturing input for the scene
+                 |> rect({Play.Utils.screen_width(), Play.Utils.screen_height()})
                  |> text("",
                    id: :score,
                    t: {Play.Utils.screen_width() / 2, Play.Utils.screen_height() / 2},
@@ -36,8 +38,20 @@ defmodule Play.Scene.GameOver do
     {:noreply, state}
   end
 
-  def handle_input({:key, _}, _context, state) do
-    restart_game(state)
+  def handle_input({:key, {key, _, _}}, _context, state) do
+    case String.to_charlist(key) do
+      [char] when char in ?A..?Z or key in [" "] ->
+        restart_game(state)
+
+      _ ->
+        nil
+    end
+
+    {:noreply, state}
+  end
+
+  def handle_input(key, _, state) do
+    # IO.inspect(key, label: "ignore key")
     {:noreply, state}
   end
 
