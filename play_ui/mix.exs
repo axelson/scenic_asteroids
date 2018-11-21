@@ -24,7 +24,9 @@ defmodule PlayUi.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:exsync, "~> 0.2", only: :dev},
+      # {:exsync, "~> 0.2", only: :dev},
+      # {:exsync, path: "../../forks/exsync"},
+      {:exsync, github: "axelson/exsync", branch: "my-full-changes", only: :dev},
       {:scenic_driver_glfw, "~> 0.9"},
       {:dialyxir, "1.0.0-rc.4", only: :dev, runtime: false},
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
