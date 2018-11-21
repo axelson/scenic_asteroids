@@ -47,6 +47,7 @@ defmodule Play.Scene.Splash do
   # --------------------------------------------------------
   def init(first_scene, opts) do
     viewport = opts[:viewport]
+    Play.SceneReloader.set_viewport(viewport)
 
     # calculate the transform that centers the logo in the viewport
     {:ok, %ViewPort.Status{size: {vp_width, vp_height}}} = ViewPort.info(viewport)

@@ -18,7 +18,8 @@ case Mix.env() do
   :dev ->
     config :exsync,
       reload_timeout: 75,
-      reload_callback: {GenServer, :call, [Play.Scene.Asteroids, :reload_current_scene]}
+      #reload_callback: {GenServer, :call, [Play.Scene.Asteroids, :reload_current_scene]}
+       reload_callback: {GenServer, :call, [Play.SceneReloader, :reload_current_scene]}
 
   _ -> nil
 end

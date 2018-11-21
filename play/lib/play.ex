@@ -13,6 +13,7 @@ defmodule Play do
     children = [
       {DynamicSupervisor, name: Play.GameSupervisor, strategy: :one_for_one},
       supervisor(Scenic, viewports: [main_viewport_config]),
+      Play.SceneReloader,
     ]
 
     Supervisor.start_link(children, strategy: :one_for_one)
