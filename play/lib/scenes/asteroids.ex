@@ -153,7 +153,7 @@ defmodule Play.Scene.Asteroids do
 
   defp initial_state(opts) do
     %State{
-      asteroids: 1..2 |> Enum.map(fn _ -> new_asteroid() end),
+      asteroids: 1..7 |> Enum.map(fn _ -> new_asteroid() end),
       bullets: [],
       cursor_coords: {Play.Utils.screen_width() / 2, 0},
       graph: @initial_graph,
@@ -188,7 +188,8 @@ defmodule Play.Scene.Asteroids do
     push_graph(graph)
 
     # if rem(state.time, 100) == 0 do
-    #   IO.inspect(graph, label: "graph")
+    #   # IO.inspect(Graph.get!(graph, :_root_), label: "Graph.get!(graph, :_root_)")
+    #   # IO.inspect(graph, label: "graph")
     #   # IO.inspect(state, label: "state")
     # end
 
