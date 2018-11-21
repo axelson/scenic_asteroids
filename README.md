@@ -6,8 +6,15 @@ relatively simple, I hope that it can serve as an example for Scenic, Nerves,
 and as a simple [poncho
 project](https://embedded-elixir.com/post/2017-05-19-poncho-projects/).
 
+## Implementation Notes
+
 [SchedEx](https://github.com/SchedEx/SchedEx) is used to implement the core
 animation timer which runs at a rate of 60 frames per second.
+
+Collision detection is incredibly basic and non-performant. Ideally either
+scenic or a cooperating library would implement some collision detector helpers.
+If you're interested in collision detection then please contribute to Scenic
+[issue #91](https://github.com/boydm/scenic/issues/91).
 
 # Projects
 
