@@ -8,6 +8,13 @@ relatively simple, I hope that it can serve as an example for Scenic, Nerves,
 and as a simple [poncho
 project](https://embedded-elixir.com/post/2017-05-19-poncho-projects/).
 
+## Instructions
+
+From the root of the repository run the following commands:
+* `cd play_ui`
+* `mix deps.get`
+* `iex -S mix`
+
 ## Implementation Notes
 
 [SchedEx](https://github.com/SchedEx/SchedEx) is used to implement the core
