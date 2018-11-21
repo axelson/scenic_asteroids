@@ -1,5 +1,7 @@
 # Asteroids
 
+![Screenshot of Gameplay](screenshot.png)
+
 This is an Asteroids clone written in Elixir with Nerves, more for fun and
 learning than for anything else. Also since the code (and behavior) is
 relatively simple, I hope that it can serve as an example for Scenic, Nerves,
