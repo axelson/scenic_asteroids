@@ -115,6 +115,7 @@ defmodule Play.Scene.Asteroids do
   # [x] Tap on the screen to shoot
   # [x] Press 'p' to pause
   # [x] Time-based difficulty increasing
+  # [ ] Press 'i' to show collision boxes
 
   # Question: Should there be a process per asteroid?
   # Answer: No!
@@ -222,7 +223,8 @@ defmodule Play.Scene.Asteroids do
     Enum.concat([
       [state.player],
       state.asteroids,
-      Enum.map(state.asteroids, &Play.Collision.from(&1)),
+      # TODO: Re-enable this dynamically
+      # Enum.map(state.asteroids, &Play.Collision.from(&1)),
       state.bullets
     ])
   end
