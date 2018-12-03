@@ -12,18 +12,20 @@ defmodule Play.Scene.Splash do
   alias Scenic.ViewPort
   import Scenic.Primitives, only: [{:rect, 3}, {:update_opts, 2}]
 
-  @parrot_hash "UfHCVlANI2cFbwSpJey64FxjT-0"
-  @parrot_path :code.priv_dir(:play)
-               |> Path.join("/static/images/scenic_parrot.png")
+  @logo_path :code.priv_dir(:play)
+               |> Path.join("logo.png")
 
-  @parrot_width 62
-  @parrot_height 114
+  @parrot_hash "UfHCVlANI2cFbwSpJey64FxjT-0"
+  @logo_hash Scenic.Cache.Hash.file!(@logo_path, :sha)
+
+  @logo_width 515
+  @logo_height 181
 
   @graph Graph.build()
          |> rect(
-           {@parrot_width, @parrot_height},
-           id: :parrot,
-           fill: {:image, {@parrot_hash, 0}}
+           {@logo_width, @logo_height},
+           id: :logo,
+           fill: {:image, @logo_hash}
          )
 
   @animate_ms 10
@@ -33,20 +35,20 @@ defmodule Play.Scene.Splash do
   def init(first_scene, opts) do
     viewport = opts[:viewport]
 
-    # calculate the transform that centers the parrot in the viewport
+    # calculate the transform that centers the logo in the viewport
     {:ok, %ViewPort.Status{size: {vp_width, vp_height}}} = ViewPort.info(viewport)
 
     move = {
-      vp_width / 2 - @parrot_width / 2,
-      vp_height / 2 - @parrot_height / 2
+      vp_width / 2 - @logo_width / 2,
+      vp_height / 2 - @logo_height / 2
     }
 
-    # load the parrot texture into the cache
-    Scenic.Cache.File.load(@parrot_path, @parrot_hash)
+    # load the logo texture into the cache
+    {:ok, _hash} = Scenic.Cache.File.load(@logo_path, @logo_hash)
 
-    # move the parrot into the right location
+    # move the logo into the right location
     graph =
-      Graph.modify(@graph, :parrot, &update_opts(&1, translate: move))
+      Graph.modify(@graph, :logo, &update_opts(&1, translate: move))
       |> push_graph()
 
     # start a very simple animation timer
@@ -67,7 +69,7 @@ defmodule Play.Scene.Splash do
 
   # --------------------------------------------------------
   # A very simple animation. A timer runs, which increments a counter. The counter
-  # Is applied as an alpha channel to the parrot png.
+  # Is applied as an alpha channel to the logo png.
   # When it is fully saturated, transition to the first real scene
   def handle_info(
         :animate,
@@ -87,7 +89,7 @@ defmodule Play.Scene.Splash do
   def handle_info(:animate, %{alpha: alpha, graph: graph} = state) do
     graph =
       graph
-      |> Graph.modify(:parrot, &update_opts(&1, fill: {:image, {@parrot_hash, alpha}}))
+      |> Graph.modify(:logo, &update_opts(&1, fill: {:image, @logo_hash}))
       |> push_graph()
 
     {:noreply, %{state | graph: graph, alpha: alpha + 2}}
