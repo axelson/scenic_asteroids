@@ -80,6 +80,7 @@ defmodule Play.Scene.Splash do
       final_y_coord: final_y_coord
     }
 
+    # Why am I pushing this twice?
     push_graph(graph)
 
     {:ok, state}
