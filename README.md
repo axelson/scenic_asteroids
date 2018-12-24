@@ -10,7 +10,7 @@ __)(_ (/_| | | (_
         \/     \/            \/                     \/    \/ 
 ```
 
-# Asteroids
+# Scenic Asteroids
 
 ![Demo of Gameplay](game_demo.gif)
 
