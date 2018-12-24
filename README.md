@@ -12,7 +12,7 @@ __)(_ (/_| | | (_
 
 # Asteroids
 
-![Screenshot of Gameplay](screenshot.png)
+![Demo of Gameplay](game_demo.gif)
 
 This is an Asteroids clone written in Elixir with Nerves, more for fun and
 learning than for anything else. Also since the code (and behavior) is
