@@ -34,7 +34,8 @@ Keys:
 * `D` - Move right
 * `SPC` - Shoot an asteroid
 
-Use the mouse to target the asteroids
+Use the mouse to target the asteroids (or your finger if you're running with a
+Nerves touch screen)
 
 Have fun!
 
