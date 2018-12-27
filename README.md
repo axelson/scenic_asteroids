@@ -20,6 +20,8 @@ relatively simple, I hope that it can serve as an example for Scenic, Nerves,
 and as a simple [poncho
 project](https://embedded-elixir.com/post/2017-05-19-poncho-projects/).
 
+It is licensed under the 3-clause BSD license (see LICENSE) for details.
+
 ## Instructions
 
 From the root of the repository run the following commands:
