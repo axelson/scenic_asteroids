@@ -25,6 +25,7 @@ It is licensed under the 3-clause BSD license (see LICENSE) for details.
 ## Instructions
 
 From the root of the repository run the following commands:
+* Install [scenic pre-requisites](https://github.com/boydm/scenic_new#install-prerequisites)
 * `cd play_ui`
 * `mix deps.get`
 * `iex -S mix`
