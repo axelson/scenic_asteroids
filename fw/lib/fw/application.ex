@@ -4,6 +4,7 @@ defmodule Fw.Application do
   @moduledoc false
 
   @target Mix.Project.config()[:target]
+  # @all_targets [:rpi0, :rpi3, :rpi]
 
   use Application
 
@@ -26,6 +27,7 @@ defmodule Fw.Application do
     [
       # Starts a worker by calling: Fw.Worker.start_link(arg)
       # {Fw.Worker, arg},
+      Fw.Backlight
     ]
   end
 end
