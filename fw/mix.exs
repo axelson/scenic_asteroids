@@ -1,7 +1,7 @@
 defmodule Fw.MixProject do
   use Mix.Project
 
-  @all_targets [:rpi3, :custom_rpi3]
+  @all_targets [:rpi3]
 
   def project do
     [
@@ -49,8 +49,7 @@ defmodule Fw.MixProject do
       {:nerves_init_gadget, "~> 0.4", targets: @all_targets},
       {:scenic_driver_nerves_rpi, "~> 0.9", targets: @all_targets},
       {:scenic_driver_nerves_touch, "~> 0.9", targets: @all_targets},
-      # {:nerves_system_rpi3, "~> 1.0", runtime: false, targets: :rpi3}
-      {:nerves_system_custom_rpi3, path: "~/dev/forks/nerves_system_rpi3", runtime: false, targets: :custom_rpi3}
+      {:nerves_system_rpi3, "~> 1.0", runtime: false, targets: :rpi3}
     ]
   end
 end
