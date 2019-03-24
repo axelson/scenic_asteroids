@@ -13,6 +13,7 @@ defmodule Play.ScenicRenderer do
 
   def draw(entity, graph) do
     id = ScenicEntity.id(entity)
+
     case Graph.get(graph, id) do
       [] ->
         ScenicEntity.draw(entity, graph)

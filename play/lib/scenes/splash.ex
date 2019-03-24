@@ -14,7 +14,7 @@ defmodule Play.Scene.Splash do
 
   # Beware: this path is only valid at compile-time, not run-time
   @logo_path :code.priv_dir(:play)
-               |> Path.join("logo.png")
+             |> Path.join("logo.png")
 
   @logo_hash Scenic.Cache.Hash.file!(@logo_path, :sha)
 

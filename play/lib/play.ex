@@ -12,7 +12,7 @@ defmodule Play do
     # start the application with the viewport
     children = [
       {DynamicSupervisor, name: Play.GameSupervisor, strategy: :one_for_one},
-      supervisor(Scenic, viewports: [main_viewport_config]),
+      supervisor(Scenic, viewports: [main_viewport_config])
     ]
 
     Supervisor.start_link(children, strategy: :one_for_one)
