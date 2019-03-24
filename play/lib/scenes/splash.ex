@@ -12,6 +12,7 @@ defmodule Play.Scene.Splash do
   alias Scenic.ViewPort
   import Scenic.Primitives, only: [{:rect, 3}, {:update_opts, 2}]
 
+  # Beware: this path is only valid at compile-time, not run-time
   @logo_path :code.priv_dir(:play)
                |> Path.join("logo.png")
 
@@ -20,13 +21,6 @@ defmodule Play.Scene.Splash do
   @logo_width 515
   @logo_height 181
   @initial_y_coord 0
-
-  @graph Graph.build()
-         |> rect(
-           {@logo_width, @logo_height},
-           id: :logo,
-           fill: {:image, @logo_hash}
-         )
 
   @animate_ms 10
   @finish_delay_ms 750
@@ -60,11 +54,20 @@ defmodule Play.Scene.Splash do
     }
 
     # load the logo texture into the cache
-    {:ok, _hash} = Scenic.Cache.File.load(@logo_path, @logo_hash)
+    logo_path = :code.priv_dir(:play) |> Path.join("logo.png")
+    {:ok, _hash} = Scenic.Cache.File.load(logo_path, @logo_hash)
+
+    graph =
+      Graph.build()
+      |> rect(
+        {@logo_width, @logo_height},
+        id: :logo,
+        fill: {:image, @logo_hash}
+      )
 
     # move the logo into the right location
     graph =
-      Graph.modify(@graph, :logo, &update_opts(&1, translate: move))
+      Graph.modify(graph, :logo, &update_opts(&1, translate: move))
       |> push_graph()
 
     # start a very simple animation timer
@@ -106,7 +109,13 @@ defmodule Play.Scene.Splash do
   end
 
   def handle_info(:animate, %State{} = state) do
-    %State{graph: graph, counter: counter, final_x_coord: final_x_coord, final_y_coord: final_y_coord} = state
+    %State{
+      graph: graph,
+      counter: counter,
+      final_x_coord: final_x_coord,
+      final_y_coord: final_y_coord
+    } = state
+
     y_coord = counter / 255 * final_y_coord
     t = {final_x_coord, y_coord}
 

@@ -6,3 +6,5 @@ To run the Nerves app:
   * Install dependencies with `mix deps.get`
   * Create firmware with `mix firmware`
   * Burn to an SD card with `mix firmware.burn`
+
+To update an already running project

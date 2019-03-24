@@ -50,11 +50,6 @@ defmodule Play.Scene.GameOver do
     {:noreply, state}
   end
 
-  def handle_input(key, _, state) do
-    # IO.inspect(key, label: "ignore key")
-    {:noreply, state}
-  end
-
   def handle_input(_, _, state), do: {:noreply, state}
 
   defp restart_game(%State{viewport: vp}) do
