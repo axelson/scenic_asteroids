@@ -142,6 +142,15 @@ defmodule Play.Scene.Asteroids do
                    text_align: :right
                  )
 
+  @paused_graph Graph.build()
+                # Rectangle used for capturing input for the scene
+                |> rect({Play.Utils.screen_width(), Play.Utils.screen_height()})
+                |> text("Game Paused",
+                  t: {Play.Utils.screen_width() / 2, Play.Utils.screen_height() / 2},
+                  fill: :white,
+                  text_align: :center
+                )
+
   @impl Scenic.Scene
   def init(_args, scenic_opts) do
     # Logger.info("scenic_opts: #{inspect(scenic_opts)}")
@@ -268,7 +277,9 @@ defmodule Play.Scene.Asteroids do
     Play.Asteroid.new({x, y}, size, direction, speed)
   end
 
-  defp add_asteroid?(%State{} = state) do
+  defp add_asteroid?(%State{asteroids: asteroids}) when length(asteroids) > 20, do: false
+
+  defp add_asteroid?(%State{asteroids: asteroids} = state) do
     %{time: t} = state
     fps = Play.GameTimer.speed()
     base_chance = @new_asteroid_chance_per_second / fps
@@ -291,6 +302,7 @@ defmodule Play.Scene.Asteroids do
 
   @impl Scenic.Scene
   def filter_event({:click, :pause_btn}, _, %State{} = state) do
+    Logger.info("Pausing by click on pause_btn")
     state = pause(state)
     {:stop, state}
   end
@@ -303,6 +315,24 @@ defmodule Play.Scene.Asteroids do
   end
 
   @impl Scenic.Scene
+  def handle_input(input, viewport_context, %State{paused: true} = state) do
+    unpause =
+      case input do
+        # Only unpause on key press (not release)
+        {:key, {_, :press, _}} -> true
+        {:cursor_button, {_, :press, _, _}} -> true
+        _ -> false
+      end
+
+    if unpause do
+      Logger.info("Unpausing from input: #{inspect(input)}")
+      state = %State{state | paused: false}
+      {:noreply, state}
+    else
+      {:noreply, state}
+    end
+  end
+
   def handle_input(input, viewport_context, state) do
     # IO.inspect(input, label: "#{__MODULE__} received input")
     # Logger.info("Received input: #{inspect input}")
@@ -327,6 +357,7 @@ defmodule Play.Scene.Asteroids do
   end
 
   def do_handle_input({:key, {"P", :press, _}}, _viewport_context, state) do
+    Logger.info("Pausing by pressing P")
     {:noreply, pause(state)}
   end
 
@@ -415,7 +446,7 @@ defmodule Play.Scene.Asteroids do
 
   defp pause(%State{} = state) do
     state = %{state | paused: !state.paused}
-    push_graph(Graph.build())
+    push_graph(@paused_graph)
     state
   end
 
