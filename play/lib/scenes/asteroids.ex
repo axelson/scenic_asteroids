@@ -279,7 +279,7 @@ defmodule Play.Scene.Asteroids do
 
   defp add_asteroid?(%State{asteroids: asteroids}) when length(asteroids) > 20, do: false
 
-  defp add_asteroid?(%State{asteroids: asteroids} = state) do
+  defp add_asteroid?(%State{} = state) do
     %{time: t} = state
     fps = Play.GameTimer.speed()
     base_chance = @new_asteroid_chance_per_second / fps
@@ -315,7 +315,7 @@ defmodule Play.Scene.Asteroids do
   end
 
   @impl Scenic.Scene
-  def handle_input(input, viewport_context, %State{paused: true} = state) do
+  def handle_input(input, _viewport_context, %State{paused: true} = state) do
     unpause =
       case input do
         # Only unpause on key press (not release)
