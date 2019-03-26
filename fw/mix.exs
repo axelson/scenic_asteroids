@@ -47,8 +47,8 @@ defmodule Fw.MixProject do
 
       {:nerves_runtime, "~> 0.6", targets: @all_targets},
       {:nerves_init_gadget, "~> 0.4", targets: @all_targets},
-      {:scenic_driver_nerves_rpi, "~> 0.9", targets: @all_targets},
-      {:scenic_driver_nerves_touch, "~> 0.9", targets: @all_targets},
+      {:scenic_driver_nerves_rpi, "0.10.0", targets: @all_targets},
+      {:scenic_driver_nerves_touch, "0.10.0", targets: @all_targets},
       {:nerves_system_rpi3, "~> 1.0", runtime: false, targets: :rpi3}
     ]
   end

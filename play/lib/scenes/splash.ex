@@ -16,7 +16,7 @@ defmodule Play.Scene.Splash do
   @logo_path :code.priv_dir(:play)
              |> Path.join("logo.png")
 
-  @logo_hash Scenic.Cache.Hash.file!(@logo_path, :sha)
+  @logo_hash Scenic.Cache.Support.Hash.file!(@logo_path, :sha)
 
   @logo_width 515
   @logo_height 181
@@ -55,7 +55,7 @@ defmodule Play.Scene.Splash do
 
     # load the logo texture into the cache
     logo_path = :code.priv_dir(:play) |> Path.join("logo.png")
-    {:ok, _hash} = Scenic.Cache.File.load(logo_path, @logo_hash)
+    {:ok, _hash} = Scenic.Cache.Static.Texture.load(logo_path, @logo_hash)
 
     graph =
       Graph.build()
