@@ -62,17 +62,3 @@ If you're interested in collision detection then please contribute to Scenic
 TODO:
 * [x] Get basic nerves install working on network
 * [x] Run scenic play application on nerves!
-
-mix archive.install hex nerves_bootstrap
-mix archive.install hex nerves_bootstrap
-mix archive.install hex nerves_bootstrap
-
-00:00:35.048 [error] GenServer #PID<0.18620.0> terminating
-** (MatchError) no match of right hand side value: {:error, :enoent}                                                                 
-    (play) lib/scenes/splash.ex:63: Play.Scene.Splash.init/2
-    (scenic) lib/scenic/scene.ex:611: Scenic.Scene.handle_cast/2
-    (stdlib) gen_server.erl:637: :gen_server.try_dispatch/4
-    (stdlib) gen_server.erl:711: :gen_server.handle_msg/6
-    (stdlib) proc_lib.erl:249: :proc_lib.init_p_do_apply/3
-Last message: {:"$gen_cast", {:after_init, Play.Scene.Splash, Play.Scene.Asteroids, [scene_ref: #Reference<0.2407746728.805306372.131064>, parent: nil, vp_dynamic_root: #PID<0.18613.0>, viewport: #PID<0.18613.0>, styles: %{}]}}                                        
-State: %{activation: :__not_activated__, children: %{}, dyn_scene_keys: %{}, dyn_scene_pids: %{}, dynamic_children_pid: nil, parent_pid: nil, raw_scene_refs: %{}, scene_module: Play.Scene.Splash, scene_ref: #Reference<0.2407746728.805306372.131064>, supervisor_pid: nil, viewport: #PID<0.18613.0>}
