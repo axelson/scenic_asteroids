@@ -9,12 +9,12 @@ defmodule Play.Bullet do
   @speed 5
 
   @type t :: %__MODULE__{
-    id: Play.ScenicEntity.id(),
-    t: Play.Scene.Asteroids.coords(),
-    direction: Play.Scene.Asteroids.direction(),
-    color: atom,
-    size: integer
-  }
+          id: Play.ScenicEntity.id(),
+          t: Play.Scene.Asteroids.coords(),
+          direction: Play.Scene.Asteroids.direction(),
+          color: atom,
+          size: integer
+        }
 
   def new(%Play.Player{t: coords, direction: direction}) do
     %__MODULE__{
