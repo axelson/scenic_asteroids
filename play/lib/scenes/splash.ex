@@ -19,7 +19,7 @@ defmodule Play.Scene.Splash do
   @logo_hash Scenic.Cache.Support.Hash.file!(@logo_path, :sha)
 
   @logo_width 515
-  @logo_height 181
+  @logo_height 211
   @initial_y_coord 0
 
   @animate_ms 10
