@@ -27,9 +27,9 @@ defmodule Play.Scene.GameOver do
   def init(score, scenic_opts) do
     state = %State{viewport: scenic_opts[:viewport]}
 
-    show_score(score)
+    graph = show_score(score)
 
-    {:ok, state}
+    {:ok, state, push: graph}
   end
 
   @impl Scenic.Scene
@@ -61,6 +61,5 @@ defmodule Play.Scene.GameOver do
 
     @initial_graph
     |> Graph.modify(:score, &Scenic.Primitives.text(&1, message))
-    |> push_graph()
   end
 end

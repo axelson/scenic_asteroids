@@ -19,9 +19,7 @@ defmodule Play.Components.HiddenButton do
       id: id
     }
 
-    push_graph(graph)
-
-    {:ok, state}
+    {:ok, state, push: graph}
   end
 
   def verify(data) do

@@ -67,9 +67,7 @@ defmodule Play.Scene.Splash do
       )
 
     # move the logo into the right location
-    graph =
-      Graph.modify(graph, :logo, &update_opts(&1, translate: move))
-      |> push_graph()
+    graph = Graph.modify(graph, :logo, &update_opts(&1, translate: move))
 
     # start a very simple animation timer
     {:ok, timer} = :timer.send_interval(@animate_ms, :animate)
@@ -84,10 +82,7 @@ defmodule Play.Scene.Splash do
       final_y_coord: final_y_coord
     }
 
-    # Why am I pushing this twice?
-    push_graph(graph)
-
-    {:ok, state}
+    {:ok, state, push: graph}
   end
 
   # --------------------------------------------------------
@@ -123,9 +118,8 @@ defmodule Play.Scene.Splash do
     graph =
       graph
       |> Graph.modify(:logo, &update_opts(&1, fill: {:image, @logo_hash}, translate: t))
-      |> push_graph()
 
-    {:noreply, %State{state | graph: graph, counter: counter + 1}}
+    {:noreply, %State{state | graph: graph, counter: counter + 1}, push: graph}
   end
 
   # --------------------------------------------------------

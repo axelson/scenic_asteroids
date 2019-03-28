@@ -155,10 +155,9 @@ defmodule Play.Scene.Asteroids do
   def init(_args, scenic_opts) do
     # Logger.info("scenic_opts: #{inspect(scenic_opts)}")
     Process.register(self(), __MODULE__)
-    push_graph(@initial_graph)
     schedule_animations()
 
-    {:ok, initial_state(scenic_opts)}
+    {:ok, initial_state(scenic_opts), push: @initial_graph}
   end
 
   defp initial_state(opts) do
@@ -195,7 +194,6 @@ defmodule Play.Scene.Asteroids do
       |> update_score()
 
     %{graph: graph} = state
-    push_graph(graph)
 
     # if rem(state.time, 100) == 0 do
     #   # IO.inspect(Graph.get!(graph, :_root_), label: "Graph.get!(graph, :_root_)")
@@ -203,7 +201,7 @@ defmodule Play.Scene.Asteroids do
     #   # IO.inspect(state, label: "state")
     # end
 
-    {:noreply, state}
+    {:noreply, state, push: graph}
   end
 
   defp tick_time(%State{time: t} = state), do: %{state | time: t + 1}
@@ -304,7 +302,7 @@ defmodule Play.Scene.Asteroids do
   def filter_event({:click, :pause_btn}, _, %State{} = state) do
     Logger.info("Pausing by click on pause_btn")
     state = pause(state)
-    {:stop, state}
+    {:stop, state, push: graph(state)}
   end
 
   def filter_event(event, sec, state) do
@@ -358,7 +356,8 @@ defmodule Play.Scene.Asteroids do
 
   def do_handle_input({:key, {"P", :press, _}}, _viewport_context, state) do
     Logger.info("Pausing by pressing P")
-    {:noreply, pause(state)}
+    state = pause(state)
+    {:noreply, state, push: graph(state)}
   end
 
   def do_handle_input({:key, {"I", :press, _}}, _viewport_context, state) do
@@ -444,11 +443,7 @@ defmodule Play.Scene.Asteroids do
   defp key_to_direction("S"), do: :down
   defp key_to_direction("D"), do: :right
 
-  defp pause(%State{} = state) do
-    state = %{state | paused: !state.paused}
-    push_graph(@paused_graph)
-    state
-  end
+  defp pause(%State{} = state), do: %{state | paused: !state.paused}
 
   # TODO: Refactor this out of the scene
   # It is like ticking the player but it requires additional input
@@ -608,6 +603,9 @@ defmodule Play.Scene.Asteroids do
   end
 
   defp score(%State{num_asteroids_destroyed: n}), do: n
+
+  defp graph(%State{paused: true}), do: @paused_graph
+  defp graph(%State{graph: graph}), do: graph
 
   defp overlap(x, x1, x2), do: x > x1 && x < x2
 
