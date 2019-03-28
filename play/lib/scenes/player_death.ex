@@ -24,7 +24,6 @@ defmodule Play.Scene.PlayerDeath do
     graph =
       @initial_graph
       |> circle(size, t: {x, y}, id: :circle, stroke: {3, :white}, fill: :white)
-      |> push_graph()
 
     state = %State{
       graph: graph,
@@ -36,7 +35,7 @@ defmodule Play.Scene.PlayerDeath do
 
     Process.send_after(self(), :animate, 10)
 
-    {:ok, state}
+    {:ok, state, push: graph(state)}
   end
 
   # @impl Scenic.Scene
@@ -52,15 +51,16 @@ defmodule Play.Scene.PlayerDeath do
     graph =
       graph
       |> Graph.modify(:circle, &circle(&1, size))
-      |> push_graph()
 
     Process.send_after(self(), :animate, 10)
     state = %{state | graph: graph, size: size + 1, time: state.time + 1}
 
-    {:noreply, state}
+    {:noreply, state, push: graph(state)}
   end
 
   def handle_call(:reload_current_scene, _, _state), do: restart()
+
+  defp graph(%State{graph: graph}), do: graph
 
   defp restart, do: Process.exit(self(), :kill)
 end
