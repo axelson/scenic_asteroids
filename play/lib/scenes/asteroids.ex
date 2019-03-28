@@ -275,13 +275,13 @@ defmodule Play.Scene.Asteroids do
     Play.Asteroid.new({x, y}, size, direction, speed)
   end
 
-  defp add_asteroid?(%State{asteroids: asteroids}) when length(asteroids) > 20, do: false
+  defp add_asteroid?(%State{asteroids: asteroids}) when length(asteroids) > 100, do: false
 
   defp add_asteroid?(%State{} = state) do
     %{time: t} = state
     fps = Play.GameTimer.speed()
     base_chance = @new_asteroid_chance_per_second / fps
-    scaling_factor = :math.log2(t) / 400
+    scaling_factor = :math.log2(t) / 200
 
     chance = base_chance + scaling_factor
 
