@@ -40,6 +40,7 @@ defmodule Play.Scene.Splash do
 
   # --------------------------------------------------------
   def init(first_scene, opts) do
+    Process.register(self(), __MODULE__)
     viewport = opts[:viewport]
 
     # calculate the transform that centers the logo in the viewport
@@ -145,4 +146,8 @@ defmodule Play.Scene.Splash do
   defp go_to_first_scene(%{viewport: vp, first_scene: first_scene}) do
     ViewPort.set_root(vp, {first_scene, nil})
   end
+
+  def handle_call(:reload_current_scene, _, _state), do: restart()
+
+  defp restart, do: Process.exit(self(), :kill)
 end
