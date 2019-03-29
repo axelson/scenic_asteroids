@@ -30,6 +30,7 @@ defmodule PlayUi.MixProject do
       {:scenic_driver_glfw, "0.10.0"},
       {:dialyxir, "1.0.0-rc.4", only: :dev, runtime: false},
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
+      {:scenic_live_reload, path: "../scenic_live_reload"},
       {:play, path: "../play"},
     ]
   end
