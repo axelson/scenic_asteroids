@@ -154,7 +154,6 @@ defmodule Play.Scene.Asteroids do
   @impl Scenic.Scene
   def init(_args, scenic_opts) do
     # Logger.info("scenic_opts: #{inspect(scenic_opts)}")
-    Process.register(self(), __MODULE__)
     schedule_animations()
 
     {:ok, initial_state(scenic_opts), push: @initial_graph}
@@ -619,8 +618,6 @@ defmodule Play.Scene.Asteroids do
   defp graph(%State{graph: graph}), do: graph
 
   defp overlap(x, x1, x2), do: x > x1 && x < x2
-
-  def handle_call(:reload_current_scene, _, _state), do: restart()
 
   defp restart, do: Process.exit(self(), :kill)
 end
