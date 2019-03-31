@@ -44,6 +44,7 @@ defmodule Fw.MixProject do
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
 
       {:play, path: "../play"},
+      {:launcher, path: "../launcher"},
 
       {:nerves_runtime, "~> 0.6", targets: @all_targets},
       {:nerves_init_gadget, "~> 0.4", targets: @all_targets},

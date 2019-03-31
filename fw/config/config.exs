@@ -55,9 +55,12 @@ config :nerves_init_gadget,
   address_method: :dhcp,
   node_name: "murphy"
 
+config :launcher, :backlight_module, Fw.Backlight
+
 config :play, :viewport, %{
   size: {800, 480},
-  default_scene: {Play.Scene.Splash, Play.Scene.Asteroids},
+  # default_scene: {Play.Scene.Splash, Play.Scene.Asteroids},
+  default_scene: {Launcher.Scene.Home, :nil},
   drivers: [
     %{
       module: Scenic.Driver.Nerves.Rpi
