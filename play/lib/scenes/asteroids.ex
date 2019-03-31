@@ -300,9 +300,9 @@ defmodule Play.Scene.Asteroids do
 
   @impl Scenic.Scene
   def filter_event({:click, :pause_btn}, _, %State{} = state) do
-    Logger.info("Pausing by click on pause_btn")
-    state = pause(state)
-    {:stop, state, push: graph(state)}
+    Logger.info("Home button clicked")
+    go_home(state.viewport)
+    {:halt, state}
   end
 
   def filter_event(event, sec, state) do
@@ -335,6 +335,12 @@ defmodule Play.Scene.Asteroids do
     # IO.inspect(input, label: "#{__MODULE__} received input")
     # Logger.info("Received input: #{inspect input}")
     do_handle_input(input, viewport_context, state)
+  end
+
+  def do_handle_input({:key, {"H", :press, _}}, _viewport_context, state) do
+    go_home(state.viewport)
+
+    {:noreply, state}
   end
 
   def do_handle_input({:key, {"R", :press, _}}, _viewport_context, state) do
@@ -600,6 +606,11 @@ defmodule Play.Scene.Asteroids do
     )
 
     state
+  end
+
+  defp go_home(viewport) do
+    %{default_scene: default_scene} = Application.get_env(:play, :viewport)
+    Scenic.ViewPort.set_root(viewport, default_scene)
   end
 
   defp score(%State{num_asteroids_destroyed: n}), do: n

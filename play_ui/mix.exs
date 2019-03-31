@@ -32,6 +32,7 @@ defmodule PlayUi.MixProject do
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:scenic_live_reload, path: "../scenic_live_reload"},
       {:play, path: "../play"},
+      {:launcher, path: "../launcher"},
     ]
   end
 end
