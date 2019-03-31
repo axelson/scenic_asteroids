@@ -313,15 +313,7 @@ defmodule Play.Scene.Asteroids do
 
   @impl Scenic.Scene
   def handle_input(input, _viewport_context, %State{paused: true} = state) do
-    unpause =
-      case input do
-        # Only unpause on key press (not release)
-        {:key, {_, :press, _}} -> true
-        {:cursor_button, {_, :press, _, _}} -> true
-        _ -> false
-      end
-
-    if unpause do
+    if unpause_from_input(input) do
       Logger.info("Unpausing from input: #{inspect(input)}")
       state = %State{state | paused: false}
       {:noreply, state}
@@ -611,6 +603,12 @@ defmodule Play.Scene.Asteroids do
     %{default_scene: default_scene} = Application.get_env(:play, :viewport)
     Scenic.ViewPort.set_root(viewport, default_scene)
   end
+
+  defp unpause_from_input({:key, {"left_alt", :press, 0}}), do: false
+  defp unpause_from_input({:cursor_button, {_, :press, _, _}}), do: true
+  # Only unpause on key press (not release)
+  defp unpause_from_input({:key, {_, :press, _}}), do: true
+  defp unpause_from_input(_), do: false
 
   defp score(%State{num_asteroids_destroyed: n}), do: n
 
