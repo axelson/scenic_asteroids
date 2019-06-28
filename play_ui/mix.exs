@@ -28,7 +28,7 @@ defmodule PlayUi.MixProject do
       # {:exsync, path: "../../forks/exsync"},
       {:exsync, github: "axelson/exsync", branch: "my-full-changes", only: :dev},
       {:scenic_driver_glfw, "0.10.0"},
-      {:dialyxir, "1.0.0-rc.4", only: :dev, runtime: false},
+      {:dialyxir, "1.0.0-rc.6", only: :dev, runtime: false},
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:scenic_live_reload, path: "../scenic_live_reload"},
       {:play, path: "../play"},

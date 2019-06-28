@@ -29,9 +29,9 @@ defmodule Play.MixProject do
   defp deps do
     [
       {:elixir_make, "~> 0.4"},
-      {:scenic, "0.10.0"},
-      {:sched_ex, "~> 1.0.2"},
-      {:dialyxir, "1.0.0-rc.4", only: :dev, runtime: false},
+      {:scenic, "0.10.2"},
+      {:sched_ex, "~> 1.1.1"},
+      {:dialyxir, "1.0.0-rc.6", only: :dev, runtime: false},
       {:credo, "~> 0.10.0", only: [:dev, :test], runtime: false},
     ]
   end
