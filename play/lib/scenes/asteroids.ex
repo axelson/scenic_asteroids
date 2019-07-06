@@ -217,8 +217,8 @@ defmodule Play.Scene.Asteroids do
   defp draw_entities(%State{} = state) do
     graph =
       entities(state)
-      |> Enum.reduce(state.graph, fn asteroid, graph ->
-        Play.ScenicRenderer.draw(asteroid, graph)
+      |> Enum.reduce(state.graph, fn entity, graph ->
+        Play.ScenicRenderer.draw(entity, graph)
       end)
 
     %{state | graph: graph}
