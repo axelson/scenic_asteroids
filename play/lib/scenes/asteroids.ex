@@ -171,6 +171,7 @@ defmodule Play.Scene.Asteroids do
     }
   end
 
+  @impl Scenic.Scene
   def handle_info({:animate, _}, %{paused: true} = state), do: {:noreply, state}
 
   def handle_info({:animate, _expected_run_time}, state) do
@@ -294,17 +295,11 @@ defmodule Play.Scene.Asteroids do
   end
 
   @impl Scenic.Scene
-  def filter_event({:click, :pause_btn}, _, %State{} = state) do
-    Logger.info("Home button clicked")
-    go_home(state.viewport)
-    {:halt, state}
-  end
-
   def filter_event(event, sec, state) do
     IO.inspect(event, label: "event")
     IO.inspect(sec, label: "sec")
 
-    {:continue, event, state}
+    {:cont, event, state}
   end
 
   @impl Scenic.Scene
