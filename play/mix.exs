@@ -31,6 +31,7 @@ defmodule Play.MixProject do
       {:elixir_make, "~> 0.4"},
       {:scenic, "0.10.2"},
       {:sched_ex, "~> 1.1.1"},
+      {:launcher, path: "../launcher"},
       {:dialyxir, "1.0.0-rc.6", only: :dev, runtime: false},
       {:credo, "~> 1.0", only: [:dev, :test], runtime: false},
     ]

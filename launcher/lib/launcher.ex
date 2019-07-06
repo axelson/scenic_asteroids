@@ -3,16 +3,13 @@ defmodule Launcher do
   Documentation for Launcher.
   """
 
+  alias Scenic.ViewPort
+
   @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Launcher.hello()
-      :world
-
+  Switches to the main launcher screen
   """
-  def hello do
-    :world
+  def switch_to_launcher(viewport) do
+    IO.puts "Switching to launcher!"
+    ViewPort.set_root(viewport, {Launcher.Scene.Home, nil})
   end
 end

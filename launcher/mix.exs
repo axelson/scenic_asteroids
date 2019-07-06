@@ -21,7 +21,6 @@ defmodule Launcher.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:play, path: "../play"},
       {:scenic, "~> 0.10"}
     ]
   end

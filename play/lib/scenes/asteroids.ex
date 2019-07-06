@@ -129,11 +129,6 @@ defmodule Play.Scene.Asteroids do
   @initial_graph Graph.build()
                  # Rectangle used for capturing input for the scene
                  |> rect({Play.Utils.screen_width(), Play.Utils.screen_height()})
-                 |> Play.Components.HiddenButton.add_to_graph({30, 30},
-                   id: :pause_btn,
-                   fill: :clear,
-                   t: {Play.Utils.screen_width() - 30, 0}
-                 )
                  |> text("Score: 0",
                    id: :score,
                    t: {Play.Utils.screen_width(), 15},
@@ -141,6 +136,7 @@ defmodule Play.Scene.Asteroids do
                    font: :roboto_mono,
                    text_align: :right
                  )
+                 |> Launcher.HiddenHomeButton.add_to_graph([])
 
   @paused_graph Graph.build()
                 # Rectangle used for capturing input for the scene
@@ -329,7 +325,7 @@ defmodule Play.Scene.Asteroids do
   end
 
   def do_handle_input({:key, {"H", :press, _}}, _viewport_context, state) do
-    go_home(state.viewport)
+    Launcher.switch_to_launcher(state.viewport)
 
     {:noreply, state}
   end
