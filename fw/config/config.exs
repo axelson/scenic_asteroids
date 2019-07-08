@@ -57,6 +57,10 @@ config :nerves_init_gadget,
 
 config :launcher, :backlight_module, Fw.Backlight
 
+# Cannot write update files to a read-only file system. Plus we don't need
+# accurate timezones
+config :tzdata, :autoupdate, :disabled
+
 config :play, :viewport, %{
   size: {800, 480},
   # default_scene: {Play.Scene.Splash, Play.Scene.Asteroids},
