@@ -4,6 +4,8 @@ use Mix.Config
 config :play, :viewport, %{
   name: :main_viewport,
   size: {500, 500},
+  # default_scene: {Timer.Scene.Home, nil},
+  # default_scene: {Play.Scene.Asteroids, nil},
   # default_scene: {Play.Scene.Splash, Play.Scene.Asteroids},
   default_scene: {Launcher.Scene.Home, :nil},
   drivers: [

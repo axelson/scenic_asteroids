@@ -25,6 +25,7 @@ defmodule Launcher.Scene.Home do
       # Rectangle used for capturing input for the scene
       |> Scenic.Primitives.rect({Play.Utils.screen_width(), Play.Utils.screen_height()})
       |> Scenic.Components.button("Asteroids", id: :btn_start_asteroids, t: {10, 10})
+      |> Scenic.Components.button("Pomodoro", id: :btn_start_pomodoro, t: {10, 60})
       |> Scenic.Components.button("Sleep Screen",
         id: :btn_sleep_screen,
         t: {10, screen_height - 50}
@@ -59,6 +60,11 @@ defmodule Launcher.Scene.Home do
     {:halt, state}
   end
 
+  def filter_event({:click, :btn_start_pomodoro}, _from, state) do
+    launch_pomodoro(state.viewport)
+    {:halt, state}
+  end
+
   def filter_event({:click, :btn_sleep_screen}, _from, state) do
     state = sleep_screen(state)
     {:halt, state}
@@ -71,6 +77,10 @@ defmodule Launcher.Scene.Home do
 
   defp launch_asteroids(viewport) do
     ViewPort.set_root(viewport, {Play.Scene.Splash, Play.Scene.Asteroids})
+  end
+
+  defp launch_pomodoro(viewport) do
+    ViewPort.set_root(viewport, {Timer.Scene.Home, nil})
   end
 
   defp sleep_screen(state) do

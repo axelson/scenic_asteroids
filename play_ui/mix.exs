@@ -25,9 +25,10 @@ defmodule PlayUi.MixProject do
   defp deps do
     [
       # {:exsync, "~> 0.2", only: :dev},
-      # {:exsync, path: "../../forks/exsync"},
-      {:exsync, github: "axelson/exsync", branch: "my-full-changes", only: :dev},
-      {:scenic_driver_glfw, "0.10.0"},
+      {:exsync, path: "../../forks/exsync"},
+      # {:exsync, github: "axelson/exsync", branch: "my-full-changes", only: :dev},
+      {:timer_ui, path: "../../pomodoro/timer_ui"},
+      {:scenic_driver_glfw, "~> 0.10", targets: :host},
       {:dialyxir, "1.0.0-rc.6", only: :dev, runtime: false},
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:scenic_live_reload, path: "../scenic_live_reload"},
