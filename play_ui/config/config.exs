@@ -7,7 +7,7 @@ config :play, :viewport, %{
   # default_scene: {Timer.Scene.Home, nil},
   # default_scene: {Play.Scene.Asteroids, nil},
   # default_scene: {Play.Scene.Splash, Play.Scene.Asteroids},
-  default_scene: {Launcher.Scene.Home, :nil},
+  default_scene: {Launcher.Scene.Home, nil},
   drivers: [
     %{
       module: Scenic.Driver.Glfw,
@@ -23,5 +23,6 @@ case Mix.env() do
       reload_timeout: 75,
       reload_callback: {GenServer, :call, [ScenicLiveReload, :reload_current_scene]}
 
-  _ -> nil
+  _ ->
+    nil
 end

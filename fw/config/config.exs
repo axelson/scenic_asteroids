@@ -65,7 +65,7 @@ config :tzdata, :autoupdate, :disabled
 config :play, :viewport, %{
   size: {800, 480},
   # default_scene: {Play.Scene.Splash, Play.Scene.Asteroids},
-  default_scene: {Launcher.Scene.Home, :nil},
+  default_scene: {Launcher.Scene.Home, nil},
   drivers: [
     %{
       module: Scenic.Driver.Nerves.Rpi
@@ -84,4 +84,4 @@ config :play, :viewport, %{
 # of this file so it overrides the configuration defined above.
 # Uncomment to use target specific configurations
 
-#import_config "#{Mix.target()}.exs"
+# import_config "#{Mix.target()}.exs"

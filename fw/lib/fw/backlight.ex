@@ -29,7 +29,7 @@ defmodule Fw.Backlight do
   end
 
   def external_brightness(value) when value >= 0 and value <= 255 do
-    IO.puts "external broadcast..."
+    IO.puts("external broadcast...")
     IO.inspect(value, label: "value")
     Logger.debug("Received external brightness #{value} on #{Node.self()}")
 
@@ -53,7 +53,7 @@ defmodule Fw.Backlight do
   # GenServer Callbacks
 
   def init(_) do
-    IO.puts "backlight init!"
+    IO.puts("backlight init!")
     Logger.info("backlight init!")
     {:ok, @default_brightness}
   end
