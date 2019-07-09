@@ -30,6 +30,7 @@ defmodule Launcher.Scene.Home do
         id: :btn_sleep_screen,
         t: {10, screen_height - 50}
       )
+      |> Scenic.Components.button("Reboot", id: :btn_reboot, t: {150, screen_height - 50})
 
     {:ok, state, push: graph}
   end
@@ -62,6 +63,11 @@ defmodule Launcher.Scene.Home do
 
   def filter_event({:click, :btn_start_pomodoro}, _from, state) do
     launch_pomodoro(state.viewport)
+    {:halt, state}
+  end
+
+  def filter_event({:click, :btn_reboot}, _from, state) do
+    reboot()
     {:halt, state}
   end
 
@@ -99,5 +105,12 @@ defmodule Launcher.Scene.Home do
       backlight.brightness(255)
     end
     %{state | sleep: false}
+  end
+
+  defp reboot do
+    case Application.get_env(:launcher, :reboot_mfa) do
+      nil -> Logger.info("No reboot mfa set")
+      {mod, fun, args} -> apply(mod, fun, args)
+    end
   end
 end

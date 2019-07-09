@@ -56,6 +56,7 @@ config :nerves_init_gadget,
   node_name: "murphy"
 
 config :launcher, :backlight_module, Fw.Backlight
+config :launcher, :reboot_mfa, {Nerves.Runtime, :reboot, []}
 
 # Cannot write update files to a read-only file system. Plus we don't need
 # accurate timezones
