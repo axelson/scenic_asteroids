@@ -34,25 +34,22 @@ defmodule Fw.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
+      {:dialyxir, "1.0.0-rc.4", only: :dev, runtime: false},
+      {:launcher, path: "../launcher"},
       {:nerves, "~> 1.3", runtime: false, targets: @all_targets},
       {:nerves_firmware_ssh, ">= 0.0.0", targets: @all_targets},
-      {:shoehorn, "~> 0.4"},
-      {:ring_logger, "~> 0.4"},
-      {:toolshed, "~> 0.2"},
-
-      {:dialyxir, "1.0.0-rc.4", only: :dev, runtime: false},
-      {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
-
-      {:launcher, path: "../launcher"},
-      {:play, path: "../play"},
-      {:timer, path: "../../pomodoro/timer"},
-
-      {:nerves_runtime, "~> 0.6", targets: @all_targets},
       {:nerves_init_gadget, "~> 0.4", targets: @all_targets},
+      {:nerves_runtime, "~> 0.6", targets: @all_targets},
+      # {:nerves_system_custom_rpi3, path: "~/dev/forks/nerves_system_rpi3", runtime: false, targets: :custom_rpi3}
+      {:nerves_system_rpi3, "1.7.2", runtime: false, targets: :rpi3}
+      {:play, path: "../play"},
+      {:ring_logger, "~> 0.4"},
       {:scenic_driver_nerves_rpi, "0.10.0", targets: @all_targets},
       {:scenic_driver_nerves_touch, "0.10.0", targets: @all_targets},
-      {:nerves_system_rpi3, "1.7.2", runtime: false, targets: :rpi3}
-      #{:nerves_system_custom_rpi3, path: "~/dev/forks/nerves_system_rpi3", runtime: false, targets: :custom_rpi3}
+      {:shoehorn, "~> 0.4"},
+      {:timer, path: "../../pomodoro/timer"},
+      {:toolshed, "~> 0.2"},
     ]
   end
 end
