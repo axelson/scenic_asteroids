@@ -27,16 +27,19 @@ defmodule PlayUi.MixProject do
     [
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "1.0.0-rc.6", only: :dev, runtime: false},
-      exsync_dep(:path),
       {:launcher, path: "../../launcher"},
       {:play, path: "../play"},
       {:scenic_driver_glfw, "~> 0.10", targets: :host},
-      {:scenic_live_reload, path: "../scenic_live_reload"},
+      scenic_live_reload_dep(:github),
       {:timer, path: "../../pomodoro/timer"}
     ]
   end
 
-  defp exsync_dep(:hex), do: {:exsync, "~> 0.2", only: :dev}
-  defp exsync_dep(:github), do: {:exsync, github: "falood/exsync", only: :dev}
-  defp exsync_dep(:path), do: {:exsync, path: "../../forks/exsync", only: :dev}
+  defp scenic_live_reload_dep(:hex), do: {:scenic_live_reload, "~> 0.1", only: :dev}
+
+  defp scenic_live_reload_dep(:github),
+    do: {:scenic_live_reload, github: "axelson/scenic_live_reload", only: :dev}
+
+  defp scenic_live_reload_dep(:path),
+    do: {:scenic_live_reload, path: "../../scenic_live_reload", only: :dev}
 end
