@@ -36,7 +36,7 @@ defmodule Fw.MixProject do
     [
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "1.0.0-rc.4", only: :dev, runtime: false},
-      {:launcher, path: "../launcher"},
+      {:launcher, path: "../../launcher"},
       {:nerves, "~> 1.3", runtime: false, targets: @all_targets},
       {:nerves_firmware_ssh, ">= 0.0.0", targets: @all_targets},
       {:nerves_init_gadget, "~> 0.4", targets: @all_targets},

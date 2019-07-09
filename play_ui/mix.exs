@@ -28,7 +28,7 @@ defmodule PlayUi.MixProject do
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "1.0.0-rc.6", only: :dev, runtime: false},
       exsync_dep(:path),
-      {:launcher, path: "../launcher"},
+      {:launcher, path: "../../launcher"},
       {:play, path: "../play"},
       {:scenic_driver_glfw, "~> 0.10", targets: :host},
       {:scenic_live_reload, path: "../scenic_live_reload"},

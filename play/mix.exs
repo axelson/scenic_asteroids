@@ -32,7 +32,7 @@ defmodule Play.MixProject do
       {:credo, "~> 1.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "1.0.0-rc.6", only: :dev, runtime: false},
       {:elixir_make, "~> 0.4"},
-      {:launcher, path: "../launcher"},
+      {:launcher, path: "../../launcher"},
       {:scenic, "0.10.2"},
       {:sched_ex, "~> 1.1.1"}
     ]
