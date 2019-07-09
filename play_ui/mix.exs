@@ -27,7 +27,7 @@ defmodule PlayUi.MixProject do
       # {:exsync, "~> 0.2", only: :dev},
       {:exsync, path: "../../forks/exsync"},
       # {:exsync, github: "axelson/exsync", branch: "my-full-changes", only: :dev},
-      {:timer_ui, path: "../../pomodoro/timer_ui"},
+      {:timer, path: "../../pomodoro/timer"},
       {:scenic_driver_glfw, "~> 0.10", targets: :host},
       {:dialyxir, "1.0.0-rc.6", only: :dev, runtime: false},
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
