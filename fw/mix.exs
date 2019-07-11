@@ -2,17 +2,29 @@ defmodule Fw.MixProject do
   use Mix.Project
 
   @all_targets [:rpi3]
+  @app :fw
 
   def project do
     [
-      app: :fw,
+      app: @app,
       version: "0.1.0",
       elixir: "~> 1.6",
-      archives: [nerves_bootstrap: "~> 1.0"],
+      archives: [nerves_bootstrap: "~> 1.6"],
       start_permanent: Mix.env() == :prod,
       build_embedded: Mix.target() != :host,
       aliases: [loadconfig: [&bootstrap/1]],
-      deps: deps()
+      deps: deps(),
+      releases: [{@app, release()}],
+      preferred_cli_target: [run: :host, test: :host]
+    ]
+  end
+
+  def release do
+    [
+      overwrite: true,
+      cookie: "#{@app}_cookie",
+      include_erts: &Nerves.Release.erts/0,
+      steps: [&Nerves.Release.init/1, :assemble]
     ]
   end
 
@@ -37,12 +49,12 @@ defmodule Fw.MixProject do
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "1.0.0-rc.4", only: :dev, runtime: false},
       {:launcher, path: "../../launcher"},
-      {:nerves, "~> 1.3", runtime: false, targets: @all_targets},
+      {:nerves, "~> 1.5", runtime: false, targets: @all_targets},
       {:nerves_firmware_ssh, ">= 0.0.0", targets: @all_targets},
       {:nerves_init_gadget, "~> 0.4", targets: @all_targets},
       {:nerves_runtime, "~> 0.6", targets: @all_targets},
       # {:nerves_system_custom_rpi3, path: "~/dev/forks/nerves_system_rpi3", runtime: false, targets: :custom_rpi3}
-      {:nerves_system_rpi3, "1.7.2", runtime: false, targets: :rpi3},
+      {:nerves_system_rpi3, "~> 1.8", runtime: false, targets: :rpi3},
       {:play, path: "../play"},
       {:ring_logger, "~> 0.4"},
       {:scenic_driver_nerves_rpi, "0.10.0", targets: @all_targets},
