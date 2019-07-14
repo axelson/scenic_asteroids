@@ -590,11 +590,6 @@ defmodule Play.Scene.Asteroids do
     state
   end
 
-  defp go_home(viewport) do
-    %{default_scene: default_scene} = Application.get_env(:play, :viewport)
-    Scenic.ViewPort.set_root(viewport, default_scene)
-  end
-
   defp unpause_from_input({:key, {"left_alt", :press, 0}}), do: false
   defp unpause_from_input({:cursor_button, {_, :press, _, _}}), do: true
   # Only unpause on key press (not release)

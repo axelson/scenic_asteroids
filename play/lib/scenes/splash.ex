@@ -145,6 +145,4 @@ defmodule Play.Scene.Splash do
   end
 
   defp image, do: {:image, @logo_hash}
-
-  defp restart, do: Process.exit(__MODULE__, :kill)
 end
