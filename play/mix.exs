@@ -33,9 +33,12 @@ defmodule Play.MixProject do
       {:dialyxir, "1.0.0-rc.6", only: :dev, runtime: false},
       {:elixir_make, "~> 0.4"},
       {:inch_ex, github: "rrrene/inch_ex", only: [:dev, :test]},
-      {:launcher, path: "../../launcher"},
+      dep(:launcher, :github),
       {:scenic, "0.10.2"},
       {:sched_ex, "~> 1.1.1"}
     ]
   end
+
+  defp dep(:launcher, :path), do: {:launcher, path: "../../launcher"}
+  defp dep(:launcher, :github), do: {:launcher, github: "axelson/scenic_launcher"}
 end

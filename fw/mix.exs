@@ -48,7 +48,7 @@ defmodule Fw.MixProject do
     [
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "1.0.0-rc.6", only: :dev, runtime: false},
-      {:launcher, path: "../../launcher"},
+      dep(:launcher, :github),
       {:nerves, "~> 1.5", runtime: false, targets: @all_targets},
       {:nerves_firmware_ssh, ">= 0.0.0", targets: @all_targets},
       {:nerves_init_gadget, "~> 0.4", targets: @all_targets},
@@ -60,8 +60,13 @@ defmodule Fw.MixProject do
       {:scenic_driver_nerves_rpi, "0.10.0", targets: @all_targets},
       {:scenic_driver_nerves_touch, "0.10.0", targets: @all_targets},
       {:shoehorn, "~> 0.4"},
-      {:timer, path: "../../pomodoro/timer"},
+      dep(:timer, :github),
       {:toolshed, "~> 0.2"}
     ]
   end
+
+  defp dep(:launcher, :path), do: {:launcher, path: "../../launcher"}
+  defp dep(:launcher, :github), do: {:launcher, github: "axelson/scenic_launcher"}
+  defp dep(:timer, :path), do: {:timer, path: "../../pomodoro/timer"}
+  defp dep(:timer, :github), do: {:timer, github: "axelson/pomodoro"}
 end
