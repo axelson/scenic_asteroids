@@ -33,12 +33,24 @@ defmodule PlayUi.MixProject do
       dep(:scenic_live_reload, :github),
       dep(:timer, :github)
     ]
+    |> List.flatten()
   end
 
-  defp dep(:launcher, :path), do: {:launcher, path: "../../launcher"}
+  defp dep(:launcher, :path), do: {:launcher, path: "../../launcher", override: true}
   defp dep(:launcher, :github), do: {:launcher, github: "axelson/scenic_launcher"}
+
   defp dep(:timer, :path), do: {:timer, path: "../../pomodoro/timer"}
-  defp dep(:timer, :github), do: {:timer, github: "axelson/pomodoro"}
+
+  # Use two sparse deps to same repository to work around:
+  # https://groups.google.com/forum/#!topic/elixir-lang-core/cSjjCLcr-YQ
+  # NOTE: Ensure that they both reference the same commit
+  defp dep(:timer, :github) do
+    [
+      {:timer, git: "https://github.com/axelson/pomodoro.git", sparse: "timer"},
+      {:timer_core,
+       git: "https://github.com/axelson/pomodoro.git", sparse: "timer_core", override: true}
+    ]
+  end
 
   defp dep(:scenic_live_reload, :hex), do: {:scenic_live_reload, "~> 0.1", only: :dev}
 

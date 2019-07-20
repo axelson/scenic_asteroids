@@ -11,6 +11,10 @@
 ## break handler and possibly exiting the VM.
 +Bc
 
+# Allow time warps
+# https://github.com/fhunleth/nerves_time
++C multi_time_warp
+
 ## Load code at system startup
 ## See http://erlang.org/doc/system_principles/system_principles.html#code-loading-strategy
 -mode embedded
