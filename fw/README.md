@@ -8,3 +8,10 @@ To run the Nerves app:
   * Burn to an SD card with `mix firmware.burn`
 
 To update an already running project
+
+Note: if scenic doesn't launch then you may be affected by the bug https://github.com/boydm/scenic_new/issues/36 to fix it run the following:
+```
+rm -rf _build
+mix firmware
+mix firmware.burn
+```

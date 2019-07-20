@@ -20,6 +20,8 @@ From the root of the repository run the following commands:
 * `mix deps.get`
 * `iex -S mix`
 
+Note: if scenic doesn't launch then you may be affected by the bug https://github.com/boydm/scenic_new/issues/36
+
 Keys:
 * `W` - Move up
 * `A` - Move left
