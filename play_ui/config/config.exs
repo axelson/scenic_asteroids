@@ -17,6 +17,9 @@ config :play, :viewport, %{
   ]
 }
 
+# Disable tzdata automatic updates
+config :tzdata, :autoupdate, :disabled
+
 case Mix.env() do
   :dev ->
     config :exsync,
