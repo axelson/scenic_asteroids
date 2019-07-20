@@ -9,8 +9,9 @@ install:
   - mix local.rebar --force
   - mix local.hex --force
   - mix deps.get
-  - mix compile
   # Workaround scenic bug
+  # use || true to ignore error status
+  - mix compile || true
   - rm -rf _build
   - mix compile
 script:
