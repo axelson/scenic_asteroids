@@ -23,3 +23,8 @@ addons:
     packages:
       - cmake-data
       - cmake
+      - pkgconf
+      - libglfw3
+      - libglfw3-dev
+      - libglew1.13
+      - libglew-dev
