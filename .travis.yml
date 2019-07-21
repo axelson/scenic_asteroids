@@ -9,11 +9,6 @@ install:
   - mix local.rebar --force
   - mix local.hex --force
   - mix deps.get
-  # Workaround scenic bug
-  # use || true to ignore error status
-  - mix compile || true
-  - rm -rf _build
-  - mix compile
 script:
   - mix deps.compile
   - mix compile --warnings-as-errors
@@ -21,8 +16,6 @@ script:
 addons:
   apt:
     packages:
-      - cmake-data
-      - cmake
       - pkgconf
       - libglfw3
       - libglfw3-dev
