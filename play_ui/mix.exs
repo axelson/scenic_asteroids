@@ -29,6 +29,7 @@ defmodule PlayUi.MixProject do
       {:dialyxir, "1.0.0-rc.6", only: :dev, runtime: false},
       dep(:launcher, :github),
       {:play, path: "../play"},
+      {:play_web, path: "../play_web"},
       # {:scenic_driver_glfw, "~> 0.10", targets: :host},
       {:scenic_driver_glfw, github: "boydm/scenic_driver_glfw", override: true, targets: :host},
       dep(:scenic_live_reload, :github),
