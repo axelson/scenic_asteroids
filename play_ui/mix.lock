@@ -23,7 +23,7 @@
   "poison": {:hex, :poison, "3.1.0", "d9eb636610e096f86f25d9a46f35a9facac35609a7591b3be3326e99a0484665", [:mix], [], "hexpm"},
   "scenic": {:hex, :scenic, "0.10.2", "f4f0a00eed677ac50a7b297375c0323d03f4273580f17c50b877abfaf0c6dc1f", [:make, :mix], [{:elixir_make, "~> 0.5", [hex: :elixir_make, repo: "hexpm", optional: false]}, {:font_metrics, "~> 0.3", [hex: :font_metrics, repo: "hexpm", optional: false]}], "hexpm"},
   "scenic_clock": {:hex, :scenic_clock, "0.8.0", "fc1444307062411a3c741c505ae349f2dfd7f5cb71787dfc2fc1b4298daee042", [:mix], [{:scenic, "~> 0.8", [hex: :scenic, repo: "hexpm", optional: false]}, {:timex, "~> 3.3", [hex: :timex, repo: "hexpm", optional: false]}], "hexpm"},
-  "scenic_driver_glfw": {:git, "https://github.com/ejc123/scenic_driver_glfw.git", "d78949d2ce9cc86c0a72854c122d88fd3db014c8", []},
+  "scenic_driver_glfw": {:git, "https://github.com/boydm/scenic_driver_glfw.git", "b99ab4fc6b704031fe828678750561932b8ce6fc", []},
   "scenic_live_reload": {:git, "https://github.com/axelson/scenic_live_reload.git", "3258eaeadff233925d66bbfeae969e650a736768", []},
   "scenic_sensor": {:hex, :scenic_sensor, "0.7.0", "a12aed7596fbab025a535f912325da5a087ff704e96f7acb274c3034d832f9ce", [:mix], [], "hexpm"},
   "sched_ex": {:hex, :sched_ex, "1.1.1", "e2e8e136ae0a8c19d882031a528b4ea98c55fe88da74e948836bde22c90dcfc4", [:mix], [{:crontab, "~> 1.1.2", [hex: :crontab, repo: "hexpm", optional: false]}, {:timex, "~> 3.1", [hex: :timex, repo: "hexpm", optional: false]}], "hexpm"},

@@ -30,8 +30,7 @@ defmodule PlayUi.MixProject do
       dep(:launcher, :github),
       {:play, path: "../play"},
       # {:scenic_driver_glfw, "~> 0.10", targets: :host},
-      {:scenic_driver_glfw,
-       git: "https://github.com/ejc123/scenic_driver_glfw.git", override: true, targets: :host},
+      {:scenic_driver_glfw, github: "boydm/scenic_driver_glfw", override: true, targets: :host},
       dep(:scenic_live_reload, :github),
       dep(:timer, :github)
     ]
