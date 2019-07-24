@@ -27,9 +27,10 @@ defmodule PlayUi.MixProject do
     [
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "1.0.0-rc.6", only: :dev, runtime: false},
-      dep(:launcher, :github),
+      {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:play, path: "../play"},
       {:play_web, path: "../play_web"},
+      dep(:launcher, :github),
       # {:scenic_driver_glfw, "~> 0.10", targets: :host},
       {:scenic_driver_glfw, github: "boydm/scenic_driver_glfw", override: true, targets: :host},
       dep(:scenic_live_reload, :github),
