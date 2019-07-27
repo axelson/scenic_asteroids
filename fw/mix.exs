@@ -60,6 +60,8 @@ defmodule Fw.MixProject do
       {:play, path: "../play"},
       {:ring_logger, "~> 0.4"},
       {:scenic_driver_nerves_rpi, "0.10.0", targets: @all_targets},
+      # For trying to fix scenic makefile bug
+      # {:scenic_driver_nerves_rpi, path: "~/dev/forks/scenic_driver_nerves_rpi", targets: @all_targets},
       {:scenic_driver_nerves_touch, "0.10.0", targets: @all_targets},
       {:shoehorn, "~> 0.4"},
       dep(:timer, :github),
