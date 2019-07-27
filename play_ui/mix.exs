@@ -34,8 +34,7 @@ defmodule PlayUi.MixProject do
       # Need master for fix of: https://github.com/boydm/scenic_driver_glfw/issues/25
       # {:scenic_driver_glfw, "~> 0.10", targets: :host},
       {:scenic_driver_glfw, github: "boydm/scenic_driver_glfw", override: true, targets: :host},
-      dep(:scenic_live_reload, :github),
-      dep(:timer, :github)
+      dep(:scenic_live_reload, :github)
     ]
     |> List.flatten()
   end
@@ -47,19 +46,6 @@ defmodule PlayUi.MixProject do
     do: {:phoenix_live_reload, path: "../../forks/phoenix_live_reload", only: :dev}
 
   defp dep(:phoenix_live_reload, :github), do: {:phoenix_live_reload, "~> 1.2", only: :dev}
-
-  defp dep(:timer, :path), do: {:timer, path: "../../pomodoro/timer"}
-
-  # Use two sparse deps to same repository to work around:
-  # https://groups.google.com/forum/#!topic/elixir-lang-core/cSjjCLcr-YQ
-  # NOTE: Ensure that they both reference the same commit
-  defp dep(:timer, :github) do
-    [
-      {:timer, git: "https://github.com/axelson/pomodoro.git", sparse: "timer"},
-      {:timer_core,
-       git: "https://github.com/axelson/pomodoro.git", sparse: "timer_core", override: true}
-    ]
-  end
 
   defp dep(:scenic_live_reload, :hex), do: {:scenic_live_reload, "~> 0.1", only: :dev}
 

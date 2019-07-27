@@ -64,8 +64,7 @@ config :tzdata, :autoupdate, :disabled
 
 config :play, :viewport, %{
   size: {800, 480},
-  # default_scene: {Play.Scene.Splash, Play.Scene.Asteroids},
-  default_scene: {Launcher.Scene.Home, nil},
+  default_scene: {Play.Scene.Splash, Play.Scene.Asteroids},
   drivers: [
     %{
       module: Scenic.Driver.Nerves.Rpi

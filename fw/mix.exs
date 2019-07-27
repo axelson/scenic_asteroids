@@ -55,8 +55,6 @@ defmodule Fw.MixProject do
       {:nerves_runtime, "~> 0.6", targets: @all_targets},
       # {:nerves_system_custom_rpi3, path: "~/dev/forks/nerves_system_rpi3", runtime: false, targets: :custom_rpi3}
       {:nerves_system_rpi3, "~> 1.8", runtime: false, targets: :rpi3},
-      # Needed for semi-accurate time for SSL certificates (for requests made by elixir-slack in timer)
-      {:nerves_time, "~> 0.2"},
       {:play, path: "../play"},
       {:ring_logger, "~> 0.4"},
       {:scenic_driver_nerves_rpi, "0.10.0", targets: @all_targets},
@@ -64,7 +62,6 @@ defmodule Fw.MixProject do
       # {:scenic_driver_nerves_rpi, path: "~/dev/forks/scenic_driver_nerves_rpi", targets: @all_targets},
       {:scenic_driver_nerves_touch, "0.10.0", targets: @all_targets},
       {:shoehorn, "~> 0.4"},
-      dep(:timer, :github),
       {:toolshed, "~> 0.2"}
     ]
     |> List.flatten()
@@ -72,17 +69,4 @@ defmodule Fw.MixProject do
 
   defp dep(:launcher, :path), do: {:launcher, path: "../../launcher", override: true}
   defp dep(:launcher, :github), do: {:launcher, github: "axelson/scenic_launcher"}
-
-  defp dep(:timer, :path), do: {:timer, path: "../../pomodoro/timer"}
-
-  defp dep(:timer, :github) do
-    # Use two sparse deps to same repository to work around:
-    # https://groups.google.com/forum/#!topic/elixir-lang-core/cSjjCLcr-YQ
-    # NOTE: Ensure that they both reference the same commit
-    [
-      {:timer, git: "https://github.com/axelson/pomodoro.git", sparse: "timer"},
-      {:timer_core,
-       git: "https://github.com/axelson/pomodoro.git", sparse: "timer_core", override: true}
-    ]
-  end
 end
