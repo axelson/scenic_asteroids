@@ -51,6 +51,8 @@ If you're interested in collision detection then please contribute to Scenic
 * `fw/` - Run on a Nerves device with a touchscreen
   * Official Raspberry PI touch screen is supported
 
+# JS Multiplayer (in progress)
+
 TODO:
 * [x] Get basic nerves install working on network
 * [x] Run scenic play application on nerves!
@@ -58,9 +60,12 @@ TODO:
   * [ ] Add single player control via browser
   * [ ] Ask for player name
   * [ ] Add a waiting screen/lobby
-  
-  
-  
+* [ ] Splash screen add option to choose single player or multiplayer
+  * Logo will come down and then the options appear
+  * [ ] Pressing "SPC" or "s" will start single player immediately
+  * [ ] Pressing "m" will start multi player immediately
+* [ ] Test possibility of rendering the current scene to an html canvas
+
 The player javascript will record action states (not key states)
 Actions:
 * move_aim_direction (vector)
