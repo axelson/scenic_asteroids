@@ -31,6 +31,7 @@ defmodule PlayUi.MixProject do
       {:play, path: "../play"},
       {:play_web, path: "../play_web"},
       dep(:launcher, :github),
+      # Need master for fix of: https://github.com/boydm/scenic_driver_glfw/issues/25
       # {:scenic_driver_glfw, "~> 0.10", targets: :host},
       {:scenic_driver_glfw, github: "boydm/scenic_driver_glfw", override: true, targets: :host},
       dep(:scenic_live_reload, :github),
