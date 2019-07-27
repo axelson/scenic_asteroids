@@ -27,7 +27,7 @@ defmodule PlayUi.MixProject do
     [
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "1.0.0-rc.6", only: :dev, runtime: false},
-      {:phoenix_live_reload, "~> 1.2", only: :dev},
+      dep(:phoenix_live_reload, :github),
       {:play, path: "../play"},
       {:play_web, path: "../play_web"},
       dep(:launcher, :github),
@@ -41,6 +41,11 @@ defmodule PlayUi.MixProject do
 
   defp dep(:launcher, :path), do: {:launcher, path: "../../launcher", override: true}
   defp dep(:launcher, :github), do: {:launcher, github: "axelson/scenic_launcher"}
+
+  defp dep(:phoenix_live_reload, :path),
+    do: {:phoenix_live_reload, path: "../../forks/phoenix_live_reload", only: :dev}
+
+  defp dep(:phoenix_live_reload, :github), do: {:phoenix_live_reload, "~> 1.2", only: :dev}
 
   defp dep(:timer, :path), do: {:timer, path: "../../pomodoro/timer"}
 
