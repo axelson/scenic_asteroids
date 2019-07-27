@@ -18,7 +18,6 @@ defmodule Play.Scene.PlayerDeath do
 
   @impl Scenic.Scene
   def init({{x, y}, score}, scenic_opts) do
-    Process.register(self(), __MODULE__)
     size = 3
 
     graph =
@@ -38,7 +37,7 @@ defmodule Play.Scene.PlayerDeath do
     {:ok, state, push: graph(state)}
   end
 
-  # @impl Scenic.Scene
+  @impl Scenic.Scene
   def handle_info(:animate, %{time: t} = state) when t >= 150 do
     %{score: score} = state
     Scenic.ViewPort.set_root(state.viewport, {Play.Scene.GameOver, score})
@@ -58,9 +57,5 @@ defmodule Play.Scene.PlayerDeath do
     {:noreply, state, push: graph(state)}
   end
 
-  def handle_call(:reload_current_scene, _, _state), do: restart()
-
   defp graph(%State{graph: graph}), do: graph
-
-  defp restart, do: Process.exit(self(), :kill)
 end

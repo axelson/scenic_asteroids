@@ -129,11 +129,6 @@ defmodule Play.Scene.Asteroids do
   @initial_graph Graph.build()
                  # Rectangle used for capturing input for the scene
                  |> rect({Play.Utils.screen_width(), Play.Utils.screen_height()})
-                 |> Play.Components.HiddenButton.add_to_graph({30, 30},
-                   id: :pause_btn,
-                   fill: :clear,
-                   t: {Play.Utils.screen_width() - 30, 0}
-                 )
                  |> text("Score: 0",
                    id: :score,
                    t: {Play.Utils.screen_width(), 15},
@@ -141,6 +136,7 @@ defmodule Play.Scene.Asteroids do
                    font: :roboto_mono,
                    text_align: :right
                  )
+                 |> Launcher.HiddenHomeButton.add_to_graph([])
 
   @paused_graph Graph.build()
                 # Rectangle used for capturing input for the scene
@@ -154,7 +150,6 @@ defmodule Play.Scene.Asteroids do
   @impl Scenic.Scene
   def init(_args, scenic_opts) do
     # Logger.info("scenic_opts: #{inspect(scenic_opts)}")
-    Process.register(self(), __MODULE__)
     schedule_animations()
 
     {:ok, initial_state(scenic_opts), push: @initial_graph}
@@ -176,6 +171,7 @@ defmodule Play.Scene.Asteroids do
     }
   end
 
+  @impl Scenic.Scene
   def handle_info({:animate, _}, %{paused: true} = state), do: {:noreply, state}
 
   def handle_info({:animate, _expected_run_time}, state) do
@@ -218,8 +214,8 @@ defmodule Play.Scene.Asteroids do
   defp draw_entities(%State{} = state) do
     graph =
       entities(state)
-      |> Enum.reduce(state.graph, fn asteroid, graph ->
-        Play.ScenicRenderer.draw(asteroid, graph)
+      |> Enum.reduce(state.graph, fn entity, graph ->
+        Play.ScenicRenderer.draw(entity, graph)
       end)
 
     %{state | graph: graph}
@@ -299,30 +295,16 @@ defmodule Play.Scene.Asteroids do
   end
 
   @impl Scenic.Scene
-  def filter_event({:click, :pause_btn}, _, %State{} = state) do
-    Logger.info("Pausing by click on pause_btn")
-    state = pause(state)
-    {:stop, state, push: graph(state)}
-  end
-
   def filter_event(event, sec, state) do
     IO.inspect(event, label: "event")
     IO.inspect(sec, label: "sec")
 
-    {:continue, event, state}
+    {:cont, event, state}
   end
 
   @impl Scenic.Scene
   def handle_input(input, _viewport_context, %State{paused: true} = state) do
-    unpause =
-      case input do
-        # Only unpause on key press (not release)
-        {:key, {_, :press, _}} -> true
-        {:cursor_button, {_, :press, _, _}} -> true
-        _ -> false
-      end
-
-    if unpause do
+    if unpause_from_input(input) do
       Logger.info("Unpausing from input: #{inspect(input)}")
       state = %State{state | paused: false}
       {:noreply, state}
@@ -335,6 +317,12 @@ defmodule Play.Scene.Asteroids do
     # IO.inspect(input, label: "#{__MODULE__} received input")
     # Logger.info("Received input: #{inspect input}")
     do_handle_input(input, viewport_context, state)
+  end
+
+  def do_handle_input({:key, {"H", :press, _}}, _viewport_context, state) do
+    Launcher.switch_to_launcher(state.viewport)
+
+    {:noreply, state}
   end
 
   def do_handle_input({:key, {"R", :press, _}}, _viewport_context, state) do
@@ -602,14 +590,18 @@ defmodule Play.Scene.Asteroids do
     state
   end
 
+  defp unpause_from_input({:key, {"left_alt", :press, 0}}), do: false
+  defp unpause_from_input({:cursor_button, {_, :press, _, _}}), do: true
+  # Only unpause on key press (not release)
+  defp unpause_from_input({:key, {_, :press, _}}), do: true
+  defp unpause_from_input(_), do: false
+
   defp score(%State{num_asteroids_destroyed: n}), do: n
 
   defp graph(%State{paused: true}), do: @paused_graph
   defp graph(%State{graph: graph}), do: graph
 
   defp overlap(x, x1, x2), do: x > x1 && x < x2
-
-  def handle_call(:reload_current_scene, _, _state), do: restart()
 
   defp restart, do: Process.exit(self(), :kill)
 end

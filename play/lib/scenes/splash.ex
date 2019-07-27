@@ -40,7 +40,6 @@ defmodule Play.Scene.Splash do
 
   # --------------------------------------------------------
   def init(first_scene, opts) do
-    Process.register(self(), __MODULE__)
     viewport = opts[:viewport]
 
     # calculate the transform that centers the logo in the viewport
@@ -63,7 +62,7 @@ defmodule Play.Scene.Splash do
       |> rect(
         {@logo_width, @logo_height},
         id: :logo,
-        fill: {:image, @logo_hash}
+        fill: image()
       )
 
     # move the logo into the right location
@@ -115,9 +114,13 @@ defmodule Play.Scene.Splash do
     y_coord = counter / 255 * final_y_coord
     t = {final_x_coord, y_coord}
 
+    # Only needed for reloading (can put this in a on-reload?)
+    logo_path = :code.priv_dir(:play) |> Path.join("logo.png")
+    {:ok, _hash} = Scenic.Cache.Static.Texture.load(logo_path, @logo_hash)
+
     graph =
       graph
-      |> Graph.modify(:logo, &update_opts(&1, fill: {:image, @logo_hash}, translate: t))
+      |> Graph.modify(:logo, &update_opts(&1, fill: image(), translate: t))
 
     {:noreply, %State{state | graph: graph, counter: counter + 1}, push: graph}
   end
@@ -141,7 +144,5 @@ defmodule Play.Scene.Splash do
     ViewPort.set_root(vp, {first_scene, nil})
   end
 
-  def handle_call(:reload_current_scene, _, _state), do: restart()
-
-  defp restart, do: Process.exit(self(), :kill)
+  defp image, do: {:image, @logo_hash}
 end

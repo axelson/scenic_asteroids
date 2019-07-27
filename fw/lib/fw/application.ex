@@ -27,6 +27,7 @@ defmodule Fw.Application do
     [
       # Starts a worker by calling: Fw.Worker.start_link(arg)
       # {Fw.Worker, arg},
+      Fw.Backlight
     ]
   end
 end

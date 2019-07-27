@@ -20,6 +20,8 @@ From the root of the repository run the following commands:
 * `mix deps.get`
 * `iex -S mix`
 
+Note: if scenic doesn't launch then you may be affected by the bug https://github.com/boydm/scenic_new/issues/36
+
 Keys:
 * `W` - Move up
 * `A` - Move left
@@ -52,3 +54,29 @@ If you're interested in collision detection then please contribute to Scenic
 TODO:
 * [x] Get basic nerves install working on network
 * [x] Run scenic play application on nerves!
+* [ ] Add multiplayer via Phoenix channels
+  * [ ] Add single player control via browser
+  * [ ] Ask for player name
+  * [ ] Add a waiting screen/lobby
+  
+  
+  
+The player javascript will record action states (not key states)
+Actions:
+* move_aim_direction (vector)
+  * Note: This will also be used for aiming direction
+* move_up
+* move_right
+* move_down
+* move_left
+* aim_direction (vector)
+* shoot
+
+NOTE: if `move_aim_direction` is used then the other move and aim actions should
+not be used. This will be enforced on the server-side.
+
+* Channel actions
+  * `set:actions`
+    * When the channel receives this it will do a `GenServer.cast` to the Asteroids scene to update that players currently set actions
+    * If the channel process goes down, the scene will clear all actions for that player
+      * Perhaps this can be accomplished with a process link?

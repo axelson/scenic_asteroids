@@ -55,6 +55,13 @@ config :nerves_init_gadget,
   address_method: :dhcp,
   node_name: "murphy"
 
+config :launcher, :backlight_module, Fw.Backlight
+config :launcher, :reboot_mfa, {Nerves.Runtime, :reboot, []}
+
+# Cannot write update files to a read-only file system. Plus we don't need
+# accurate timezones
+config :tzdata, :autoupdate, :disabled
+
 config :play, :viewport, %{
   size: {800, 480},
   default_scene: {Play.Scene.Splash, Play.Scene.Asteroids},
@@ -76,4 +83,4 @@ config :play, :viewport, %{
 # of this file so it overrides the configuration defined above.
 # Uncomment to use target specific configurations
 
-#import_config "#{Mix.target()}.exs"
+# import_config "#{Mix.target()}.exs"
