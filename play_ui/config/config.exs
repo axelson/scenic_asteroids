@@ -57,6 +57,19 @@ case Mix.env() do
         ]
       ]
 
+    config :play_web, PlayWeb.Endpoint,
+      live_reload: [
+        patterns: [
+          # TODO: Update these paths
+          ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
+          ~r"priv/gettext/.*(po)$",
+          ~r"lib/play_web/{live,views}/.*(ex)$",
+          ~r"lib/play_web/templates/.*(eex)$"
+        ]
+      ]
+
+    config :phoenix_live_reload, dirs: ["../play_web"]
+
   _ ->
     nil
 end
