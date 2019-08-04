@@ -17,6 +17,7 @@ config :play, :viewport, %{
 
 config :play_web, PlayWeb.Endpoint,
   url: [host: "localhost"],
+  reloadable_apps: [:play, :play_ui, :play_web],
   server: true,
   secret_key_base: "4m4EdLqbm138oXxQyvWMUy8CEiksqoNBPjoHZEwvhnGVML9SrFNCXtE57z6x8EV1",
   render_errors: [view: PlayWeb.ErrorView, accepts: ~w(html json)],
