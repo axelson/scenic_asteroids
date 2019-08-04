@@ -30,6 +30,12 @@
       <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
       <%= render @view_module, @view_template, assigns %>
     </main>
+
+    <%= if assigns[:username] do %>
+      <script>
+       var SocketExports = <%= raw %{token: @user_token} |> Jason.encode! %>;
+      </script>
+    <% end %>
     <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
   </body>
 </html>
