@@ -17,6 +17,8 @@ defmodule PlayWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+    post "/signin", PageController, :signin
+    post "/logout", PageController, :logout
   end
 
   # Other scopes may use custom stacks.

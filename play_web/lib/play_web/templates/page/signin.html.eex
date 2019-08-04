@@ -1,0 +1,6 @@
+<%= form_for @conn, Routes.page_path(@conn, :signin), [as: :user, id: "login-form"], fn f -> %>
+  <%= text_input f, :username, placeholder: "Username...", id: "username-input" %>
+  <%= submit "Play" %>
+<% end %>
+
+<div id="jason-login-btn">Sketch as Jason</div>
