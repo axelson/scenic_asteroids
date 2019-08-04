@@ -56,6 +56,7 @@ defmodule Fw.MixProject do
       # {:nerves_system_custom_rpi3, path: "~/dev/forks/nerves_system_rpi3", runtime: false, targets: :custom_rpi3}
       {:nerves_system_rpi3, "~> 1.8", runtime: false, targets: :rpi3},
       {:play, path: "../play"},
+      {:play_web, path: "../play_web"},
       {:ring_logger, "~> 0.4"},
       {:scenic_driver_nerves_rpi, "0.10.0", targets: @all_targets},
       # For trying to fix scenic makefile bug

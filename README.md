@@ -56,6 +56,7 @@ If you're interested in collision detection then please contribute to Scenic
 TODO:
 * [x] Get basic nerves install working on network
 * [x] Run scenic play application on nerves!
+* [x] Get scenic play web application working on nerves
 * [ ] Add multiplayer via Phoenix channels
   * [ ] Add single player control via browser
   * [ ] Ask for player name

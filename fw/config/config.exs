@@ -58,6 +58,17 @@ config :nerves_init_gadget,
 config :launcher, :backlight_module, Fw.Backlight
 config :launcher, :reboot_mfa, {Nerves.Runtime, :reboot, []}
 
+config :play_web, PlayWeb.Endpoint,
+  url: [host: "localhost"],
+  http: [port: 80],
+  server: true,
+  secret_key_base: System.fetch_env!("SECRET_KEY_BASE"),
+  render_errors: [view: PlayWeb.ErrorView, accepts: ~w(html json)],
+  pubsub: [name: PlayWeb.PubSub, adapter: Phoenix.PubSub.PG2]
+
+# Use Jason for JSON parsing in Phoenix
+config :phoenix, :json_library, Jason
+
 # Cannot write update files to a read-only file system. Plus we don't need
 # accurate timezones
 config :tzdata, :autoupdate, :disabled
