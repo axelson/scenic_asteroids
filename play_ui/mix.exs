@@ -27,7 +27,8 @@ defmodule PlayUi.MixProject do
     [
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "1.0.0-rc.6", only: :dev, runtime: false},
-      dep(:phoenix_live_reload, :github),
+      dep(:phoenix_live_reload, :path),
+      dep(:exsync, :github),
       {:play, path: "../play"},
       {:play_web, path: "../play_web"},
       dep(:launcher, :github),
@@ -38,6 +39,13 @@ defmodule PlayUi.MixProject do
     ]
     |> List.flatten()
   end
+
+  defp dep(:exsync, :hex), do: {:exsync, "~> 0.2"}
+
+  defp dep(:exsync, :github),
+    do: {:exsync, github: "axelson/exsync", branch: "log-errors-better", override: true}
+
+  defp dep(:exsync, :path), do: {:exsync, path: "../forks/exsync"}
 
   defp dep(:launcher, :path), do: {:launcher, path: "../../launcher", override: true}
   defp dep(:launcher, :github), do: {:launcher, github: "axelson/scenic_launcher"}
