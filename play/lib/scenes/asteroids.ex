@@ -151,6 +151,7 @@ defmodule Play.Scene.Asteroids do
   def init(_args, scenic_opts) do
     # Logger.info("scenic_opts: #{inspect(scenic_opts)}")
     schedule_animations()
+    Process.register(self(), __MODULE__)
 
     {:ok, initial_state(scenic_opts), push: @initial_graph}
   end
@@ -198,6 +199,50 @@ defmodule Play.Scene.Asteroids do
     # end
 
     {:noreply, state, push: graph}
+  end
+
+  def handle_info("action:left", state) do
+    IO.puts("GOT ACTION LEFT!")
+    IO.inspect(state.key_states, label: "state.key_states")
+    state = record_key_state(state, "A", :press)
+    IO.inspect(state.key_states, label: "state.key_states")
+    IO.puts("after\n")
+    {:noreply, state}
+  end
+
+  def handle_info("action:up", state) do
+    state = record_key_state(state, "W", :press)
+    {:noreply, state}
+  end
+
+  def handle_info("action:right", state) do
+    state = record_key_state(state, "D", :press)
+    {:noreply, state}
+  end
+
+  def handle_info("action:down", state) do
+    state = record_key_state(state, "S", :press)
+    {:noreply, state}
+  end
+
+  def handle_info("action:clear_player_direction:left", state) do
+    state = record_key_state(state, "A", :release)
+    {:noreply, state}
+  end
+
+  def handle_info("action:clear_player_direction:up", state) do
+    state = record_key_state(state, "W", :release)
+    {:noreply, state}
+  end
+
+  def handle_info("action:clear_player_direction:right", state) do
+    state = record_key_state(state, "D", :release)
+    {:noreply, state}
+  end
+
+  def handle_info("action:clear_player_direction:down", state) do
+    state = record_key_state(state, "S", :release)
+    {:noreply, state}
   end
 
   defp tick_time(%State{time: t} = state), do: %{state | time: t + 1}

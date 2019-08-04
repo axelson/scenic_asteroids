@@ -18,6 +18,17 @@ defmodule PlayWeb.LobbyChannel do
     end
   end
 
+  def handle_in("player_direction", msg, socket) do
+    send(Play.Scene.Asteroids, "action:#{msg["direction"]}")
+    {:noreply, socket}
+  end
+
+  def handle_in("clear_player_direction", msg, socket) do
+    IO.inspect(msg, label: "msg")
+    send(Play.Scene.Asteroids, "action:clear_player_direction:#{msg["direction"]}")
+    {:noreply, socket}
+  end
+
   def handle_in(event, msg, socket) do
     IO.puts("Unhandled event: #{event} with message: #{inspect(msg)}")
     IO.inspect(socket, label: "socket")

@@ -36,6 +36,7 @@
        var SocketExports = <%= raw %{token: @user_token} |> Jason.encode! %>;
       </script>
     <% end %>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.18.1/dist/phaser-arcade-physics.min.js"></script> 
     <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
   </body>
 </html>

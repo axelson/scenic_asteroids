@@ -17,6 +17,7 @@ defmodule PlayWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+    get "/play", PageController, :play
     post "/signin", PageController, :signin
     post "/logout", PageController, :logout
   end

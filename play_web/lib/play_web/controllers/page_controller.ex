@@ -9,6 +9,10 @@ defmodule PlayWeb.PageController do
     render(conn, "index.html")
   end
 
+  def play(conn, _params) do
+    render(conn, "play.html")
+  end
+
   def signin(conn, %{"user" => %{"username" => username}}) do
     conn
     |> put_session(:username, username)

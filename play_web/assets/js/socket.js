@@ -62,6 +62,27 @@ let onJoin = resp => {
   channel.push("hi", {})
 }
 
+function determineDirection(direction) {
+  switch(direction) {
+    case "left": return "left"
+    case "up": return "up"
+    case "right": return "right"
+    case "down": return "down"
+    default: throw `unhandled direction ${direction}`
+  }
+}
+
+window.onDirection = (direction) => {
+  direction = determineDirection(direction);
+  console.log(`Send direction: ${direction}`)
+  channel.push(`player_direction`, {direction: direction});
+}
+
+window.onClearDirection = (direction) => {
+  direction = determineDirection(direction);
+  channel.push(`clear_player_direction`, {direction: direction});
+}
+
 if (window.SocketExports) {
   channel.join()
     .receive("ok", onJoin)
