@@ -84,7 +84,7 @@ config :play, :viewport, %{
       module: Scenic.Driver.Nerves.Touch,
       opts: [
         device: "FT5406 memory based driver",
-        calibartion: {{1, 0, 0}, {1, 0, 0}}
+        calibration: {{1, 0, 0}, {1, 0, 0}}
       ]
     }
   ]
