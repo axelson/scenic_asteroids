@@ -5,7 +5,9 @@ var config = {
   physics: {
     default: 'arcade',
     arcade: {
-      gravity: { y: 200 }
+      gravity: {
+        y: 200
+      }
     }
   },
   scene: {
@@ -20,43 +22,44 @@ var keys;
 
 var game = new Phaser.Game(config);
 
-function preload ()
-{
-    this.load.setBaseURL('http://labs.phaser.io');
+function preload() {
+  this.load.setBaseURL('http://labs.phaser.io');
 
-    this.load.image('sky', 'assets/skies/space3.png');
-    this.load.image('logo', 'assets/sprites/phaser3-logo.png');
-    this.load.image('red', 'assets/particles/red.png');
+  this.load.image('sky', 'assets/skies/space3.png');
+  this.load.image('logo', 'assets/sprites/phaser3-logo.png');
+  this.load.image('red', 'assets/particles/red.png');
 }
 
-function create ()
-{
-    this.add.image(400, 300, 'sky');
+function create() {
+  this.add.image(400, 300, 'sky');
 
-    var particles = this.add.particles('red');
+  var particles = this.add.particles('red');
 
-    var emitter = particles.createEmitter({
-        speed: 100,
-        scale: { start: 1, end: 0 },
-        blendMode: 'ADD'
-    });
+  var emitter = particles.createEmitter({
+    speed: 100,
+    scale: {
+      start: 1,
+      end: 0
+    },
+    blendMode: 'ADD'
+  });
 
-    var logo = this.physics.add.image(400, 100, 'logo');
+  var logo = this.physics.add.image(400, 100, 'logo');
 
-    logo.setVelocity(100, 200);
-    logo.setBounce(1, 1);
-    logo.setCollideWorldBounds(true);
+  logo.setVelocity(100, 200);
+  logo.setBounce(1, 1);
+  logo.setCollideWorldBounds(true);
 
-    emitter.startFollow(logo);
+  emitter.startFollow(logo);
 
   cursors = this.input.keyboard.createCursorKeys();
   keys = {};
 }
 
-game.input.addPointer(3);
+// game.input.addPointer(3);
 
 // game.input.onDown.add(itemTouched, this);
-game.input.on('pointerdown', itemTouched, game);
+// game.input.on('pointerdown', itemTouched, game);
 
 function itemTouched(pointer) {
   console.log("item touched!!!!");
@@ -83,6 +86,12 @@ function update() {
   // console.log("keys", keys);
 
   // console.log("cursors.left", cursors.left)
+  var pointer = game.input.activePointer;
+  if (pointer.isDown) {
+    var touchX = pointer.x;
+    var touchY = pointer.y;
+    alert(`x: ${touchX} y:${touchY}`);
+  }
 
   if (cursors.left.isDown) {
     recordDirection('left');
