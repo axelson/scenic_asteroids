@@ -59,6 +59,7 @@ let channel = socket.channel("lobby", window.SocketExports)
 
 let onJoin = resp => {
   console.log("Joined!", resp)
+  // alert("joined!");
   channel.push("hi", {})
 }
 
@@ -86,7 +87,10 @@ window.onClearDirection = (direction) => {
 if (window.SocketExports) {
   channel.join()
     .receive("ok", onJoin)
-    .receive("error", resp => { console.log("Unable to join", resp) })
+    .receive("error", resp => {
+      console.log("Unable to join", resp)
+      alert('cannot join', resp);
+    })
 }
 
 export default socket

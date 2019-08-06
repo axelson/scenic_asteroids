@@ -19,79 +19,144 @@ var config = {
 
 var cursors;
 var keys;
+var platforms;
+var arrows;
+var game;
 
-var game = new Phaser.Game(config);
+window.onCreateGame = function() {
+  game = new Phaser.Game(config);
+}
 
 function preload() {
-  this.load.setBaseURL('http://labs.phaser.io');
-
-  this.load.image('sky', 'assets/skies/space3.png');
-  this.load.image('logo', 'assets/sprites/phaser3-logo.png');
-  this.load.image('red', 'assets/particles/red.png');
+  this.load.image('ground', '/images/platform.png');
+  this.load.image('sky', '/images/space3.png');
+  this.load.image('logo', '/images/phaser3-logo.png');
+  this.load.image('arrow', '/images/arrow.png');
 }
 
 function create() {
   this.add.image(400, 300, 'sky');
 
-  var particles = this.add.particles('red');
+  var logo = this.physics.add.image(400, 400, 'logo');
+  logo.setInteractive();
 
-  var emitter = particles.createEmitter({
-    speed: 100,
-    scale: {
-      start: 1,
-      end: 0
-    },
-    blendMode: 'ADD'
+  platforms = this.physics.add.staticGroup();
+
+  platforms.create(100, 200, 'ground').setScale(2).refreshBody().setInteractive();
+
+  arrows = this.physics.add.staticGroup();
+  createArrows(arrows);
+
+  var textConfig = {fontSize: '20px', color: '#ff0000', fontFamily: 'Arial'};
+  this.add.text(game.config.width / 2, game.config.height / 2, "SomeText", textConfig);
+
+  this.input.on('gameobjectdown', function(pointer, gameObject) {
+    if (isArrow(gameObject)) {
+      const direction = arrowToDirection(gameObject);
+      console.log("send", direction);
+
+      sendSetDirection(direction);
+    }
   });
 
-  var logo = this.physics.add.image(400, 100, 'logo');
+  this.input.on('gameobjectup', function(pointer, gameObject) {
+    if (isArrow(gameObject)) {
+      const direction = arrowToDirection(gameObject);
+      console.log("done", direction);
+      sendClearDirection(direction);
+    }
+  });
 
-  logo.setVelocity(100, 200);
-  logo.setBounce(1, 1);
   logo.setCollideWorldBounds(true);
 
-  emitter.startFollow(logo);
+  platforms = this.physics.add.staticGroup();
 
   cursors = this.input.keyboard.createCursorKeys();
   keys = {};
+
+  this.physics.add.collider(logo, platforms);
+}
+
+function arrowToDirection(gameObject) {
+  switch(gameObject.name) {
+    case 'right-arrow': return 'right';
+    case 'down-arrow': return 'down';
+    case 'left-arrow': return 'left';
+    case 'up-arrow': return 'up';
+    default: return false;
+  }
+}
+
+function isArrow(gameObject) {
+  return ['right-arrow', 'down-arrow', 'left-arrow', 'up-arrow'].indexOf(gameObject.name) !== -1
+}
+
+function createArrows() {
+  const baseX = 100;
+  const baseY = 100;
+  const offset = 50;
+
+  var rightArrow = arrows.create(baseX + offset, baseY, 'arrow').setInteractive();
+  rightArrow.name = "right-arrow";
+
+  var downArrow = arrows.create(baseX, baseY + offset, 'arrow').setInteractive();
+  downArrow.name = "down-arrow";
+  downArrow.angle = 90;
+
+  var leftArrow = arrows.create(baseX - offset, baseY, 'arrow').setInteractive();
+  leftArrow.name = "left-arrow";
+  leftArrow.angle = 180;
+
+  var upArrow = arrows.create(baseX, baseY - offset, 'arrow').setInteractive();
+  upArrow.name = "up-arrow";
+  upArrow.angle = 270;
 }
 
 // game.input.addPointer(3);
 
-// game.input.onDown.add(itemTouched, this);
-// game.input.on('pointerdown', itemTouched, game);
-
-function itemTouched(pointer) {
-  console.log("item touched!!!!");
-}
-
 function recordDirection(direction) {
+  // Need to keep track of if this key is currently pressed so we know when it
+  // transitions
   if (!keys[direction]) {
     console.log(`recording direction: ${direction}`)
     keys[direction] = true;
-    window.onDirection(direction);
+    sendSetDirection(direction);
   }
 }
 
 function unRecordDirection(direction) {
   if (keys[direction]) {
     keys[direction] = false;
-    console.log('pau ' + direction);
-    window.onClearDirection(direction);
+    console.log('unrecord ' + direction);
+    sendClearDirection(direction);
   }
 }
 
+function sendSetDirection(direction) {
+  window.onDirection(direction);
+}
+
+function sendClearDirection(direction) {
+  window.onClearDirection(direction);
+}
+
 function update() {
-  console.log('update!')
+  // console.log('update!')
   // console.log("keys", keys);
 
   // console.log("cursors.left", cursors.left)
-  var pointer = game.input.activePointer;
-  if (pointer.isDown) {
-    var touchX = pointer.x;
-    var touchY = pointer.y;
-    alert(`x: ${touchX} y:${touchY}`);
-  }
+
+  // var pointer = game.input.activePointer;
+  // if (pointer.isDown) {
+  //   var touchX = pointer.x;
+  //   var touchY = pointer.y;
+  //   console.log(`x: ${touchX} y:${touchY}`);
+  // }
+
+  // console.log("cursors.left.isDown", cursors.left.isDown);
+  // console.log("cursors.right.isDown", cursors.right.isDown);
+  // console.log("cursors.up.isDown", cursors.up.isDown);
+  // console.log("cursors.down.isDown", cursors.down.isDown);
 
   if (cursors.left.isDown) {
     recordDirection('left');

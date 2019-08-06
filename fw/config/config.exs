@@ -59,10 +59,12 @@ config :launcher, :backlight_module, Fw.Backlight
 config :launcher, :reboot_mfa, {Nerves.Runtime, :reboot, []}
 
 config :play_web, PlayWeb.Endpoint,
-  url: [host: "localhost"],
+  url: [host: "192.168.1.6"],
   http: [port: 80],
   server: true,
-  secret_key_base: System.get_env("SECRET_KEY_BASE") || "GMpxfjaCxeYki1QoUaK2ghoaSZFqaU4Q58AcnbeRQ3o+beajaYQICYtqv9BGUM/1",
+  secret_key_base:
+    System.get_env("SECRET_KEY_BASE") ||
+      "GMpxfjaCxeYki1QoUaK2ghoaSZFqaU4Q58AcnbeRQ3o+beajaYQICYtqv9BGUM/1",
   render_errors: [view: PlayWeb.ErrorView, accepts: ~w(html json)],
   pubsub: [name: PlayWeb.PubSub, adapter: Phoenix.PubSub.PG2]
 

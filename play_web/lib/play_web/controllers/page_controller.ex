@@ -16,7 +16,7 @@ defmodule PlayWeb.PageController do
   def signin(conn, %{"user" => %{"username" => username}}) do
     conn
     |> put_session(:username, username)
-    |> redirect(to: "/")
+    |> redirect(to: "/play")
   end
 
   def logout(conn, _) do

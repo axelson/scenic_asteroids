@@ -17,6 +17,9 @@
                 Hi <%= @username %>
                 <%= link "logout", to: "/logout", method: "post" %>
               </li>
+              <li>
+                <%= link "play", to: "/play" %>
+              </li>
             <% end %>
           </ul>
         </nav>

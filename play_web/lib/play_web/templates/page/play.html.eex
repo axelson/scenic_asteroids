@@ -3,4 +3,9 @@
   <div>
     hi5
   </div>
+  <script>
+   window.onload = function() {
+     window.onCreateGame();
+   };
+  </script>
 </section>

@@ -58,14 +58,17 @@ TODO:
 * [x] Run scenic play application on nerves!
 * [x] Get scenic play web application working on nerves
 * [ ] Add multiplayer via Phoenix channels
-  * [ ] Add single player control via browser
-  * [ ] Ask for player name
+  * [x] Add basic single player control via browser
+  * [ ] Add full single player control via browser
+  * [x] Ask for player name
+  * [ ] Extract out player control state tracking from the Asteroids scene
   * [ ] Add a waiting screen/lobby
 * [ ] Splash screen add option to choose single player or multiplayer
   * Logo will come down and then the options appear
   * [ ] Pressing "SPC" or "s" will start single player immediately
   * [ ] Pressing "m" will start multi player immediately
 * [ ] Test possibility of rendering the current scene to an html canvas
+* [ ] Set Phoenix Endpoint check_origin to a MFA tuple with Nerves.Network.status("wlan0").ipv4_address (and eth0, but preferring eth0)
 
 The player javascript will record action states (not key states)
 Actions:
@@ -77,6 +80,15 @@ Actions:
 * move_left
 * aim_direction (vector)
 * shoot
+
+Resources:
+* https://developer.mozilla.org/en-US/docs/Games/Techniques/Control_mechanisms
+  * Uses outdated version of phaser game library
+* Phaser docs: https://photonstorm.github.io/phaser3-docs/index.html
+* Simple phaser platformer game: https://www.phaser.io/examples/v3/view/games/firstgame/part7#
+* Phaser touch notes: https://rexrainbow.github.io/phaser3-rex-notes/docs/site/touchevents/
+* Phaser GameObject docs: https://photonstorm.github.io/phaser3-docs/Phaser.GameObjects.Image.html
+* Phaser basic tutorial: https://phasergames.com/phaser-3-basics-images-text-and-click/
 
 NOTE: if `move_aim_direction` is used then the other move and aim actions should
 not be used. This will be enforced on the server-side.
