@@ -1,11 +1,6 @@
-<section class="phx-hero">
-  <h1>Let's go</h1>
-  <div>
-    hi5
-  </div>
-  <script>
-   window.onload = function() {
-     window.onCreateGame();
-   };
-  </script>
-</section>
+<script>
+ window.onload = function() {
+   // Start the phaser game
+   window.onCreateGame();
+ };
+</script>
