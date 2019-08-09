@@ -245,12 +245,33 @@ defmodule Play.Scene.Asteroids do
     {:noreply, state}
   end
 
+  def handle_info({:try_shoot, x, y}, state) do
+    %{player: player} = state
+
+    # NOTE: This is a hacky way to get the player direction updated
+    # once the player state is extracted for true multiplayer this can be fixed
+    {player_x, player_y} = player.t
+    cursor_x = x + player_x
+    cursor_y = y + player_y
+    cursor_coords = {cursor_x, cursor_y}
+
+    state = %{state | cursor_coords: cursor_coords}
+
+    state =
+      state
+      |> update_player_direction()
+      |> try_to_shoot()
+
+    {:noreply, state}
+  end
+
   defp tick_time(%State{time: t} = state), do: %{state | time: t + 1}
 
   @spec update_player_direction(State.t()) :: State.t()
   defp update_player_direction(%State{} = state) do
     %{player: player, cursor_coords: cursor_coords} = state
     direction = Play.Utils.find_angle_to(player.t, cursor_coords)
+    # IO.inspect(direction, label: "direction")
 
     %{state | player: %{player | direction: direction}}
   end

@@ -60,7 +60,6 @@ let channel = socket.channel("lobby", window.SocketExports)
 let onJoin = resp => {
   console.log("Joined!", resp)
   // alert("joined!");
-  channel.push("hi", {})
 }
 
 function determineDirection(direction) {
@@ -82,6 +81,13 @@ window.onDirection = (direction) => {
 window.onClearDirection = (direction) => {
   direction = determineDirection(direction);
   channel.push(`clear_player_direction`, {direction: direction});
+}
+
+window.onSendShoot = (relX, relY) => {
+  var obj = {x: relX, y: relY}
+  console.log("obj", obj)
+
+  channel.push(`try_shoot`, obj);
 }
 
 if (window.SocketExports) {

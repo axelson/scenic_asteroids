@@ -59,7 +59,7 @@ TODO:
 * [x] Get scenic play web application working on nerves
 * [ ] Add multiplayer via Phoenix channels
   * [x] Add basic single player control via browser
-  * [ ] Add full single player control via browser
+  * [x] Add full single player control via browser
   * [x] Ask for player name
   * [ ] Extract out player control state tracking from the Asteroids scene
   * [ ] Add a waiting screen/lobby

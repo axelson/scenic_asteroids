@@ -29,6 +29,13 @@ defmodule PlayWeb.LobbyChannel do
     {:noreply, socket}
   end
 
+  def handle_in("try_shoot", msg, socket) do
+    %{"x" => x, "y" => y} = msg
+
+    send(Play.Scene.Asteroids, {:try_shoot, x, y})
+    {:noreply, socket}
+  end
+
   def handle_in(event, msg, socket) do
     IO.puts("Unhandled event: #{event} with message: #{inspect(msg)}")
     IO.inspect(socket, label: "socket")

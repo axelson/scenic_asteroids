@@ -23,6 +23,12 @@ var platforms;
 var arrows;
 var game;
 
+// Circle location is used to calculate the angle for firing
+const arrowBaseX = 100;
+const arrowBaseY = 100;
+const circleX = 400;
+const circleY = 100;
+
 window.onCreateGame = function() {
   game = new Phaser.Game(config);
 }
@@ -75,6 +81,31 @@ function create() {
   keys = {};
 
   this.physics.add.collider(logo, platforms);
+
+  var graphics = this.add.graphics({ fillStyle: { color: 0x00ff00 } });
+
+  var circle = new Phaser.Geom.Circle(circleX, circleY, 15);
+
+  function drawCircle () {
+    graphics.fillCircleShape(circle);
+  }
+
+  drawCircle(graphics, circle);
+
+  this.input.on('pointerdown', function (pointer) {
+    console.log('down!');
+    var touchX = pointer.x;
+    var touchY = pointer.y;
+    console.log(`x: ${touchX} y:${touchY}`);
+
+    var relX = touchX - circleX;
+    var relY = touchY - circleY;
+    // Only shoot if the touch is near the circle (ideally this area would be a
+    // circle but it isn't really that important)
+    if (Math.abs(relX) < 100 && Math.abs(relY) < 100) {
+      sendShoot(relX, relY);
+    }
+  });
 }
 
 function arrowToDirection(gameObject) {
@@ -92,22 +123,20 @@ function isArrow(gameObject) {
 }
 
 function createArrows() {
-  const baseX = 100;
-  const baseY = 100;
   const offset = 50;
 
-  var rightArrow = arrows.create(baseX + offset, baseY, 'arrow').setInteractive();
+  var rightArrow = arrows.create(arrowBaseX + offset, arrowBaseY, 'arrow').setInteractive();
   rightArrow.name = "right-arrow";
 
-  var downArrow = arrows.create(baseX, baseY + offset, 'arrow').setInteractive();
+  var downArrow = arrows.create(arrowBaseX, arrowBaseY + offset, 'arrow').setInteractive();
   downArrow.name = "down-arrow";
   downArrow.angle = 90;
 
-  var leftArrow = arrows.create(baseX - offset, baseY, 'arrow').setInteractive();
+  var leftArrow = arrows.create(arrowBaseX - offset, arrowBaseY, 'arrow').setInteractive();
   leftArrow.name = "left-arrow";
   leftArrow.angle = 180;
 
-  var upArrow = arrows.create(baseX, baseY - offset, 'arrow').setInteractive();
+  var upArrow = arrows.create(arrowBaseX, arrowBaseY - offset, 'arrow').setInteractive();
   upArrow.name = "up-arrow";
   upArrow.angle = 270;
 }
@@ -140,17 +169,26 @@ function sendClearDirection(direction) {
   window.onClearDirection(direction);
 }
 
+function sendShoot(relX, relY) {
+  window.onSendShoot(relX, relY);
+}
+
 function update() {
   // console.log('update!')
   // console.log("keys", keys);
 
   // console.log("cursors.left", cursors.left)
 
+  // TODO: Use this to periodically send the orientation of the ship
   // var pointer = game.input.activePointer;
   // if (pointer.isDown) {
   //   var touchX = pointer.x;
   //   var touchY = pointer.y;
   //   console.log(`x: ${touchX} y:${touchY}`);
+
+  //   var relX = arrowBaseX - touchX;
+  //   var relY = arrowBaseY - touchY;
+  //   console.log(`relX: ${relX} relY: ${relY}`)
   // }
 
   // console.log("cursors.left.isDown", cursors.left.isDown);
