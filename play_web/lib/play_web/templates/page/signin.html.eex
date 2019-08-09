@@ -3,4 +3,4 @@
   <%= submit "Play" %>
 <% end %>
 
-<div id="jason-login-btn">Sketch as Jason</div>
+<div id="jason-login-btn">Play as Jason</div>
