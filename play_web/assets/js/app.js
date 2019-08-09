@@ -23,12 +23,14 @@ function bindJason() {
   let usernameInput = document.getElementById("username-input")
   let jasonLoginBtn = document.getElementById("jason-login-btn")
 
-  jasonLoginBtn.addEventListener("click", e => {
-    console.log("logging in as jason")
-    e.preventDefault()
-    usernameInput.value = "jason"
-    loginForm.submit()
-  })
+  if (jasonLoginBtn) {
+    jasonLoginBtn.addEventListener("click", e => {
+      console.log("logging in as jason")
+      e.preventDefault()
+      usernameInput.value = "jason"
+      loginForm.submit()
+    })
+  }
 }
 
 bindJason()
