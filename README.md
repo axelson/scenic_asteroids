@@ -61,7 +61,8 @@ TODO:
   * [x] Add basic single player control via browser
   * [x] Add full single player control via browser
   * [x] Ask for player name
-  * [ ] Extract out player control state tracking from the Asteroids scene
+  * [x] Extract out player control state tracking from the Asteroids scene
+  * [ ] Add multiplayer control via browser
   * [ ] Add a waiting screen/lobby
 * [ ] Splash screen add option to choose single player or multiplayer
   * Logo will come down and then the options appear
@@ -69,6 +70,8 @@ TODO:
   * [ ] Pressing "m" will start multi player immediately
 * [ ] Test possibility of rendering the current scene to an html canvas
 * [ ] Set Phoenix Endpoint check_origin to a MFA tuple with Nerves.Network.status("wlan0").ipv4_address (and eth0, but preferring eth0)
+* [ ] Username max length of 8
+* [ ] don't allow login with username "console" since that is reserved
 
 The player javascript will record action states (not key states)
 Actions:
@@ -89,6 +92,7 @@ Resources:
 * Phaser touch notes: https://rexrainbow.github.io/phaser3-rex-notes/docs/site/touchevents/
 * Phaser GameObject docs: https://photonstorm.github.io/phaser3-docs/Phaser.GameObjects.Image.html
 * Phaser basic tutorial: https://phasergames.com/phaser-3-basics-images-text-and-click/
+* Phaser basic shapes: https://www.phaser.io/examples/v3/view/geom/circle/area
 
 NOTE: if `move_aim_direction` is used then the other move and aim actions should
 not be used. This will be enforced on the server-side.
@@ -98,3 +102,17 @@ not be used. This will be enforced on the server-side.
     * When the channel receives this it will do a `GenServer.cast` to the Asteroids scene to update that players currently set actions
     * If the channel process goes down, the scene will clear all actions for that player
       * Perhaps this can be accomplished with a process link?
+
+
+When the js player connects, then they get added to the js_players list if they get disconnected then their ship will begin floating for 10 seconds (maybe it will just spin around), after that it will die. This should be managed with a GenServer that is monitored by the Asteroids scene. The GenServer is started by the LobbyChannel (GameChannel) and is per-username so that you can refresh with the same name and .
+
+Should have a list of live players and dead players
+Players are unique based on their username, only one player with a given username can connect to the system at a time
+
+When a ship dies it explodes in a small explosion
+
+Extra content ideas:
+* Add a top-5 leaderboard in the upper right
+* Add a ship that will seek the nearest player ship
+* Have large asteroids split into multiple
+* Store a top-score on the touch-screen (in /root)
