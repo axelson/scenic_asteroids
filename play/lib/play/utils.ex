@@ -64,4 +64,15 @@ defmodule Play.Utils do
       radians
     end
   end
+
+  def map_value(map, fun) when is_map(map) and is_function(fun, 1) do
+    Map.new(map, fn {key, value} ->
+      {key, fun.(value)}
+    end)
+  end
+
+  def tap(term, func) when is_function(func, 1) do
+    func.(term)
+    term
+  end
 end

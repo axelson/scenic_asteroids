@@ -45,39 +45,39 @@ defmodule Play.Scene.Asteroids do
   alias Play.Asteroid
   alias Play.Bullet
   alias Play.CollisionBox
+  alias Play.Player
+  alias Play.PlayerController
 
   @type game_time :: integer
   @type coords :: {width :: integer, height :: integer}
   @type unit_vector :: {float, float}
   @type direction :: unit_vector
+  @type username :: String.t()
 
   defmodule State do
     @moduledoc false
     defstruct [
       :asteroids,
-      :bullets,
-      :cursor_coords,
-      :graph,
-      :key_states,
-      :last_shot,
+      :player_bullets,
+      # This should be per-player (stored on the player?)
       :num_asteroids_destroyed,
       :paused,
-      :player,
+      :live_players,
+      :dead_players,
       :time,
+      :graph,
       :viewport
     ]
 
     @type t :: %__MODULE__{
             asteroids: list(Play.Asteroid.t()),
-            bullets: list(Play.Bullet.t()),
-            cursor_coords: Play.Scene.Asteroids.coords(),
-            graph: Scenic.Graph.t(),
-            key_states: %{required(String.t()) => true},
-            last_shot: Play.Scene.Asteroids.game_time(),
+            player_bullets: %{Play.Scene.Asteroids.username() => [Play.Bullet.t()]},
             num_asteroids_destroyed: non_neg_integer,
             paused: boolean,
-            player: Play.Player.t(),
+            live_players: [Play.Player.t()],
+            dead_players: [Play.Player.t()],
             time: Play.Scene.Asteroids.game_time(),
+            graph: Scenic.Graph.t(),
             viewport: pid
           }
   end
@@ -123,8 +123,13 @@ defmodule Play.Scene.Asteroids do
   @movement_keys ["W", "A", "S", "D"]
   @firing_keys [" "]
   @keys_to_track @movement_keys ++ @firing_keys
-  @max_bullets 5
+
+  @movement_actions [:up, :right, :down, :left]
+
+  # Max bullets that each player can have on-screen at once
+  @player_max_bullets 5
   @new_asteroid_chance_per_second 0.3
+  @console_player_username "console"
 
   @initial_graph Graph.build()
                  # Rectangle used for capturing input for the scene
@@ -152,22 +157,23 @@ defmodule Play.Scene.Asteroids do
     # Logger.info("scenic_opts: #{inspect(scenic_opts)}")
     schedule_animations()
     Process.register(self(), __MODULE__)
+    PlayerController.start_link(username: @console_player_username)
 
     {:ok, initial_state(scenic_opts), push: @initial_graph}
   end
 
   defp initial_state(opts) do
+    live_players = [Play.Player.new(@console_player_username)]
+
     %State{
       asteroids: 1..7 |> Enum.map(fn _ -> new_asteroid() end),
-      bullets: [],
-      cursor_coords: {Play.Utils.screen_width() / 2, 0},
-      graph: @initial_graph,
-      key_states: %{},
-      last_shot: :never,
+      player_bullets: Map.new(live_players, fn p -> {p.username, []} end),
       num_asteroids_destroyed: 0,
       paused: false,
-      player: Play.Player.new(),
+      live_players: live_players,
+      dead_players: [],
       time: 0,
+      graph: @initial_graph,
       viewport: Keyword.get(opts, :viewport)
     }
   end
@@ -178,17 +184,17 @@ defmodule Play.Scene.Asteroids do
   def handle_info({:animate, _expected_run_time}, state) do
     state =
       state
-      |> update_state_based_on_keys()
+      |> update_players()
       # Tick updates our internal representation of state
       |> tick_time()
       |> tick_entities()
       |> maybe_add_asteroid()
-      |> update_player_direction()
       # Update the rendering of each element in the graph
       |> draw_entities()
       |> remove_dead_entities()
       |> check_collisions()
       |> update_score()
+      |> check_game_over()
 
     %{graph: graph} = state
 
@@ -201,79 +207,84 @@ defmodule Play.Scene.Asteroids do
     {:noreply, state, push: graph}
   end
 
-  def handle_info("action:left", state) do
-    IO.puts("GOT ACTION LEFT!")
-    IO.inspect(state.key_states, label: "state.key_states")
-    state = record_key_state(state, "A", :press)
-    IO.inspect(state.key_states, label: "state.key_states")
-    IO.puts("after\n")
-    {:noreply, state}
-  end
+  # def handle_info("action:left", state) do
+  #   state = record_key_state(state, "A", :press)
+  #   {:noreply, state}
+  # end
 
-  def handle_info("action:up", state) do
-    state = record_key_state(state, "W", :press)
-    {:noreply, state}
-  end
+  # def handle_info("action:up", state) do
+  #   state = record_key_state(state, "W", :press)
+  #   {:noreply, state}
+  # end
 
-  def handle_info("action:right", state) do
-    state = record_key_state(state, "D", :press)
-    {:noreply, state}
-  end
+  # def handle_info("action:right", state) do
+  #   state = record_key_state(state, "D", :press)
+  #   {:noreply, state}
+  # end
 
-  def handle_info("action:down", state) do
-    state = record_key_state(state, "S", :press)
-    {:noreply, state}
-  end
+  # def handle_info("action:down", state) do
+  #   state = record_key_state(state, "S", :press)
+  #   {:noreply, state}
+  # end
 
-  def handle_info("action:clear_player_direction:left", state) do
-    state = record_key_state(state, "A", :release)
-    {:noreply, state}
-  end
+  # def handle_info("action:clear_player_direction:left", state) do
+  #   state = record_key_state(state, "A", :release)
+  #   {:noreply, state}
+  # end
 
-  def handle_info("action:clear_player_direction:up", state) do
-    state = record_key_state(state, "W", :release)
-    {:noreply, state}
-  end
+  # def handle_info("action:clear_player_direction:up", state) do
+  #   state = record_key_state(state, "W", :release)
+  #   {:noreply, state}
+  # end
 
-  def handle_info("action:clear_player_direction:right", state) do
-    state = record_key_state(state, "D", :release)
-    {:noreply, state}
-  end
+  # def handle_info("action:clear_player_direction:right", state) do
+  #   state = record_key_state(state, "D", :release)
+  #   {:noreply, state}
+  # end
 
-  def handle_info("action:clear_player_direction:down", state) do
-    state = record_key_state(state, "S", :release)
-    {:noreply, state}
-  end
+  # def handle_info("action:clear_player_direction:down", state) do
+  #   state = record_key_state(state, "S", :release)
+  #   {:noreply, state}
+  # end
 
-  def handle_info({:try_shoot, x, y}, state) do
-    %{player: player} = state
+  # TODO: Make this specific to each player
+  # def handle_info({:try_shoot, x, y}, state) do
+  #   %{player: player} = state
 
-    # NOTE: This is a hacky way to get the player direction updated
-    # once the player state is extracted for true multiplayer this can be fixed
-    {player_x, player_y} = player.t
-    cursor_x = x + player_x
-    cursor_y = y + player_y
-    cursor_coords = {cursor_x, cursor_y}
+  #   # NOTE: This is a hacky way to get the player direction updated
+  #   # once the player state is extracted for true multiplayer this can be fixed
+  #   {player_x, player_y} = player.t
+  #   cursor_x = x + player_x
+  #   cursor_y = y + player_y
+  #   cursor_coords = {cursor_x, cursor_y}
 
-    state = %{state | cursor_coords: cursor_coords}
+  #   state = %{state | cursor_coords: cursor_coords}
 
-    state =
-      state
-      |> update_player_direction()
-      |> try_to_shoot()
+  #   state =
+  #     state
+  #     |> update_player_direction()
+  #     |> try_to_shoot()
 
-    {:noreply, state}
-  end
+  #   {:noreply, state}
+  # end
 
   defp tick_time(%State{time: t} = state), do: %{state | time: t + 1}
 
-  @spec update_player_direction(State.t()) :: State.t()
-  defp update_player_direction(%State{} = state) do
-    %{player: player, cursor_coords: cursor_coords} = state
-    direction = Play.Utils.find_angle_to(player.t, cursor_coords)
-    # IO.inspect(direction, label: "direction")
+  defp get_console_player(state) do
+    get_player(state, @console_player_username)
+  end
 
-    %{state | player: %{player | direction: direction}}
+  defp get_player(%State{} = state, username) do
+    %State{live_players: live_players, dead_players: dead_players} = state
+
+    case Enum.find(live_players, fn player -> player.username == username end) do
+      nil -> Enum.find(dead_players, fn player -> player.username == username end)
+      player -> player
+    end
+    |> case do
+      nil -> {:error, :not_found}
+      player -> {:ok, player}
+    end
   end
 
   @spec draw_entities(State.t()) :: State.t()
@@ -289,20 +300,29 @@ defmodule Play.Scene.Asteroids do
 
   @spec entities(State.t()) :: [Play.ScenicEntity.entity()]
   defp entities(%State{} = state) do
+    %State{live_players: live_players, player_bullets: player_bullets} = state
+
     Enum.concat([
-      [state.player],
+      live_players,
       state.asteroids,
       # TODO: Re-enable this dynamically
       # Enum.map(state.asteroids, &Play.Collision.from(&1)),
-      state.bullets
+      Enum.flat_map(player_bullets, fn {_, bullets} -> bullets end)
     ])
   end
 
   defp tick_entities(%State{} = state) do
-    %{
+    %State{asteroids: asteroids, player_bullets: player_bullets} = state
+
+    player_bullets =
+      Map.new(player_bullets, fn {username, bullets} ->
+        {username, Enum.map(bullets, &Play.ScenicEntity.tick/1)}
+      end)
+
+    %State{
       state
-      | asteroids: Enum.map(state.asteroids, &Play.ScenicEntity.tick/1),
-        bullets: Enum.map(state.bullets, &Play.ScenicEntity.tick/1)
+      | asteroids: Enum.map(asteroids, &Play.ScenicEntity.tick/1),
+        player_bullets: player_bullets
     }
   end
 
@@ -351,12 +371,15 @@ defmodule Play.Scene.Asteroids do
   end
 
   defp remove_dead_entities(%State{} = state) do
+    %State{asteroids: asteroids, player_bullets: player_bullets} = state
     reject_dead = &match?({:delete, _}, &1)
 
-    %{
+    player_bullets = Play.Utils.map_value(player_bullets, &Enum.reject(&1, reject_dead))
+
+    %State{
       state
-      | asteroids: Enum.reject(state.asteroids, reject_dead),
-        bullets: Enum.reject(state.bullets, reject_dead)
+      | asteroids: Enum.reject(asteroids, reject_dead),
+        player_bullets: player_bullets
     }
   end
 
@@ -399,7 +422,7 @@ defmodule Play.Scene.Asteroids do
 
   def do_handle_input({:key, {key, action, _}}, _viewport_context, state)
       when key in @keys_to_track and action in [:press, :repeat, :release] do
-    state = record_key_state(state, key, action)
+    record_console_key_state(key, action)
 
     {:noreply, state}
   end
@@ -421,21 +444,17 @@ defmodule Play.Scene.Asteroids do
 
   # Mouse/Touchscreen drag input
   def do_handle_input({:cursor_pos, cursor_coords}, _viewport_context, state) do
-    {:noreply, update_cursor_coords(state, cursor_coords)}
+    update_console_player_direction(state, cursor_coords)
+    {:noreply, state}
   end
 
   # Mouse Click/Touchscreen tap input
-  def do_handle_input(
-        {:cursor_button, {:left, :press, _, cursor_coords}},
-        _viewport_context,
-        state
-      ) do
-    # TODO: Maybe we shouldn't handle this immediately but instead handle it in the animation loop
-    state =
-      state
-      |> update_cursor_coords(cursor_coords)
-      |> update_player_direction()
-      |> try_to_shoot()
+  def do_handle_input({:cursor_button, {:left, key_action, _, _cursor_coords}}, _, state) do
+    case key_action do
+      :press -> PlayerController.set_action(@console_player_username, :shoot)
+      :release -> PlayerController.clear_action(@console_player_username, :shoot)
+      _ -> nil
+    end
 
     {:noreply, state}
   end
@@ -445,41 +464,70 @@ defmodule Play.Scene.Asteroids do
     {:noreply, state}
   end
 
-  defp record_key_state(%State{} = state, key, action) do
-    key_states = state.key_states
+  defp record_console_key_state(key, key_action) do
+    action = key_to_action(key)
 
-    key_states =
-      case action do
-        :press -> Map.put(key_states, key, true)
-        :release -> Map.delete(key_states, key)
-        _ -> key_states
-      end
-
-    %{state | key_states: key_states}
-  end
-
-  @spec update_cursor_coords(%State{}, coords()) :: %State{}
-  defp update_cursor_coords(state, cursor_coords) do
-    %{state | cursor_coords: cursor_coords}
-  end
-
-  @spec try_to_shoot(%State{}) :: %State{}
-  defp try_to_shoot(state) do
-    cond do
-      shot_recently?(state) -> state
-      length(state.bullets) >= @max_bullets -> state
-      true -> shoot(state)
+    case key_action do
+      :press -> :ok = PlayerController.set_action(@console_player_username, action)
+      :release -> :ok = PlayerController.clear_action(@console_player_username, action)
+      _ -> nil
     end
   end
 
-  @spec shoot(%State{}) :: %State{}
-  defp shoot(state) do
-    %{bullets: bullets, player: player} = state
-    IO.puts("pew pew #{length(bullets)}")
+  defp update_console_player_direction(%State{} = state, cursor_coords) do
+    {:ok, player} = get_console_player(state)
+    direction = Play.Utils.find_angle_to(player.t, cursor_coords)
+    PlayerController.set_direction(player.username, direction)
+  end
+
+  @spec try_to_shoot(State.t(), Player.t()) :: State.t()
+  defp try_to_shoot(state, player) do
+    %State{player_bullets: player_bullets} = state
+    bullets = Map.get(player_bullets, player.username)
+
+    cond do
+      player_shot_recently?(state, player) -> state
+      length(bullets) >= @player_max_bullets -> state
+      true -> player_shoot(state, player)
+    end
+  end
+
+  @spec player_shoot(State.t(), Player.t()) :: %State{}
+  defp player_shoot(state, player) do
+    %State{player_bullets: player_bullets, time: time} = state
+    bullets = Map.get(player_bullets, player.username)
 
     bullet = Play.Bullet.new(player)
+    bullets = [bullet | bullets]
+    player_bullets = Map.put(player_bullets, player.username, bullets)
+    player = %Player{player | last_shot: time}
 
-    %{state | bullets: [bullet | bullets], last_shot: state.time}
+    %{state | player_bullets: player_bullets}
+    |> update_player(player.username, player)
+  end
+
+  defp update_player(%State{} = state, username, player) do
+    %State{live_players: live_players, dead_players: dead_players} = state
+
+    live_players =
+      Enum.map(live_players, fn
+        %{username: ^username} -> player
+        p -> p
+      end)
+
+    dead_players =
+      Enum.map(dead_players, fn
+        %{username: ^username} -> player
+        p -> p
+      end)
+
+    %State{state | live_players: live_players, dead_players: dead_players}
+  end
+
+  defp update_player_direction(%State{} = state, username, direction) do
+    {:ok, player} = get_player(state, username)
+    player = %Player{player | direction: direction}
+    update_player(state, player.username, player)
   end
 
   defp schedule_animations do
@@ -492,65 +540,43 @@ defmodule Play.Scene.Asteroids do
     SchedEx.run_in(func, 1, repeat: true, time_scale: Play.GameTimer)
   end
 
-  defp key_to_direction("W"), do: :up
-  defp key_to_direction("A"), do: :left
-  defp key_to_direction("S"), do: :down
-  defp key_to_direction("D"), do: :right
+  defp key_to_action("W"), do: :up
+  defp key_to_action("A"), do: :left
+  defp key_to_action("S"), do: :down
+  defp key_to_action("D"), do: :right
+  defp key_to_action(" "), do: :shoot
 
   defp pause(%State{} = state), do: %{state | paused: !state.paused}
 
-  # TODO: Refactor this out of the scene
-  # It is like ticking the player but it requires additional input
-  # Maybe combine with update_player_direction func
-  defp update_player_coords(%State{} = state, direction) do
-    %{player: %{t: {width, height}}} = state
-    dist = 5
+  # NOTE: We fetch and udpate the player from the state in each iteration so
+  # that each function can be completely independent from the next.
+  defp update_players(%State{} = state) do
+    %State{live_players: live_players} = state
 
-    updated_coords =
-      case direction do
-        :up -> {width, height - dist}
-        :left -> {width - dist, height}
-        :down -> {width, height + dist}
-        :right -> {width + dist, height}
-      end
-      |> constrain_player_to_screen()
+    usernames = Enum.map(live_players, fn p -> p.username end)
 
-    %{state | player: %{state.player | t: updated_coords}}
-  end
+    Enum.reduce(usernames, state, fn username, state ->
+      %PlayerController.View{actions: actions, direction: direction} =
+        PlayerController.get_view(username)
 
-  defp constrain_player_to_screen({width, height}) do
-    {_, {player_width, _}, {_, player_height}} = Play.Player.player_dimensions()
+      state = update_player_direction(state, username, direction)
 
-    min_width = 0
-    max_width = Play.Utils.screen_width() - player_width
+      Enum.reduce(actions, state, fn
+        action, state when action in @movement_actions ->
+          {:ok, player} = get_player(state, username)
+          player = Player.tick_player_coords(player, action)
+          update_player(state, username, player)
 
-    min_height = 0
-    max_height = Play.Utils.screen_height() - player_height
-
-    {
-      Play.Utils.constrain(width, min_width, max_width),
-      Play.Utils.constrain(height, min_height, max_height)
-    }
-  end
-
-  defp update_state_based_on_keys(%State{} = state) do
-    %{key_states: key_states} = state
-
-    key_states
-    |> Enum.reduce(state, fn
-      {key, _key_state}, state when key in @movement_keys ->
-        direction = key_to_direction(key)
-        update_player_coords(state, direction)
-
-      {key, _key_state}, state when key in @firing_keys ->
-        try_to_shoot(state)
+        :shoot, state ->
+          {:ok, player} = get_player(state, username)
+          try_to_shoot(state, player)
+      end)
     end)
   end
 
-  defp shot_recently?(%State{last_shot: :never}), do: false
-
-  defp shot_recently?(%State{last_shot: last_shot, time: time}) do
-    time - last_shot < 4
+  defp player_shot_recently?(%State{} = state, player) do
+    %State{time: time} = state
+    Player.shot_recently?(player, time)
   end
 
   defp check_collisions(%State{time: t} = state) when rem(t, 5) == 0 do
@@ -560,13 +586,26 @@ defmodule Play.Scene.Asteroids do
 
   defp check_collisions(state), do: state
 
-  defp handle_collision({:player, :asteroid}, state), do: player_death(state)
+  defp handle_collision(
+         {:player, player, :asteroid, %CollisionBox{entity_id: asteroid_id}},
+         %State{} = state
+       ) do
+    asteroids =
+      Enum.map(state.asteroids, fn
+        %Asteroid{id: ^asteroid_id} -> {:delete, asteroid_id}
+        asteroid -> asteroid
+      end)
+
+    state = player_death(state, player)
+    %State{state | asteroids: asteroids}
+  end
 
   defp handle_collision(
          {:bullet, %Bullet{id: bullet_id}, :asteroid, %CollisionBox{entity_id: asteroid_id}},
          state
        ) do
-    %{num_asteroids_destroyed: num_asteroids_destroyed} = state
+    %State{num_asteroids_destroyed: num_asteroids_destroyed, player_bullets: player_bullets} =
+      state
 
     asteroids =
       Enum.map(state.asteroids, fn
@@ -574,16 +613,18 @@ defmodule Play.Scene.Asteroids do
         asteroid -> asteroid
       end)
 
-    bullets =
-      Enum.map(state.bullets, fn
-        %Bullet{id: ^bullet_id} -> {:delete, bullet_id}
-        bullet -> bullet
+    player_bullets =
+      Play.Utils.map_value(player_bullets, fn bullets ->
+        Enum.map(bullets, fn
+          %Bullet{id: ^bullet_id} -> {:delete, bullet_id}
+          bullet -> bullet
+        end)
       end)
 
-    %{
+    %State{
       state
       | asteroids: asteroids,
-        bullets: bullets,
+        player_bullets: player_bullets,
         num_asteroids_destroyed: num_asteroids_destroyed + 1
     }
   end
@@ -591,25 +632,31 @@ defmodule Play.Scene.Asteroids do
   defp handle_collision(_, state), do: state
 
   defp collisions(%State{} = state) do
-    %{asteroids: asteroids, player: %{t: player_coords}} = state
+    %State{asteroids: asteroids, player_bullets: player_bullets} = state
 
     asteroids
     |> Enum.flat_map(fn asteroid ->
       collision_box = Play.Collision.from(asteroid)
+      bullets = Enum.flat_map(player_bullets, fn {_, bullets} -> bullets end)
 
       Enum.concat([
-        player_collisions(player_coords, collision_box),
-        bullet_collisions(state.bullets, collision_box)
+        players_collisions(state, collision_box),
+        bullet_collisions(bullets, collision_box)
       ])
     end)
   end
 
-  defp player_collisions(player_coords, collision_box) do
-    if collides?(player_coords, collision_box) do
-      [{:player, :asteroid}]
-    else
-      []
-    end
+  defp players_collisions(%State{} = state, collision_box) do
+    %State{live_players: players} = state
+
+    players
+    |> Enum.flat_map(fn player ->
+      if collides?(player.t, collision_box) do
+        [{:player, player, :asteroid, collision_box}]
+      else
+        []
+      end
+    end)
   end
 
   defp bullet_collisions(bullets, collision_box) do
@@ -644,13 +691,31 @@ defmodule Play.Scene.Asteroids do
     %{state | graph: graph}
   end
 
-  defp player_death(state) do
-    %{player: player, num_asteroids_destroyed: num_asteroids_destroyed} = state
-    IO.puts("Player lost!")
+  defp check_game_over(%State{live_players: []} = state), do: game_over(state)
+  defp check_game_over(%State{} = state), do: state
+
+  defp player_death(%State{} = state, dieing_player) do
+    # move the player from live to dead and remove the asteroid
+    %State{live_players: live_players, dead_players: dead_players} = state
+
+    live_players =
+      Enum.reject(live_players, fn player -> player.username == dieing_player.username end)
+
+    dead_players = [dieing_player | dead_players]
+    %State{state | live_players: live_players, dead_players: dead_players}
+  end
+
+  defp game_over(state) do
+    %State{num_asteroids_destroyed: num_asteroids_destroyed} = state
+    IO.puts("Game lost!")
+
+    width = Play.Utils.screen_width() / 2
+    height = Play.Utils.screen_height() / 2
+    coords = {width, height}
 
     Scenic.ViewPort.set_root(
       state.viewport,
-      {Play.Scene.PlayerDeath, {player.t, num_asteroids_destroyed}}
+      {Play.Scene.PlayerDeath, {coords, num_asteroids_destroyed}}
     )
 
     state
