@@ -22,6 +22,7 @@ var keys;
 var platforms;
 var arrows;
 var game;
+var shooting = false;
 
 // Circle location is used to calculate the angle for firing
 const arrowBaseX = 100;
@@ -103,7 +104,15 @@ function create() {
     // Only shoot if the touch is near the circle (ideally this area would be a
     // circle but it isn't really that important)
     if (Math.abs(relX) < 100 && Math.abs(relY) < 100) {
-      sendShoot(relX, relY);
+      shooting = true;
+      sendShoot(relX, -relY);
+    }
+  });
+
+  this.input.on('pointerup', function (pointer) {
+    if (shooting) {
+      shooting = false;
+      clearShooting();
     }
   });
 }
@@ -171,6 +180,10 @@ function sendClearDirection(direction) {
 
 function sendShoot(relX, relY) {
   window.onSendShoot(relX, relY);
+}
+
+function clearShooting() {
+  window.onClearShooting();
 }
 
 function update() {

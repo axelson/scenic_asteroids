@@ -11,7 +11,8 @@ defmodule Play do
 
     # start the application with the viewport
     children = [
-      {DynamicSupervisor, name: Play.GameSupervisor, strategy: :one_for_one},
+      {DynamicSupervisor, name: Play.PlayerControllerSupervisor, strategy: :one_for_one},
+      {Registry, keys: :unique, name: Registry.Usernames},
       supervisor(Registry, [:unique, :player_controllers]),
       supervisor(Scenic, viewports: [main_viewport_config])
     ]

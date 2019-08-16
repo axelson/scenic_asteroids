@@ -64,6 +64,7 @@ defmodule Play.Scene.Asteroids do
       :paused,
       :live_players,
       :dead_players,
+      :player_pid_refs,
       :time,
       :graph,
       :viewport
@@ -76,6 +77,7 @@ defmodule Play.Scene.Asteroids do
             paused: boolean,
             live_players: [Play.Player.t()],
             dead_players: [Play.Player.t()],
+            player_pid_refs: %{reference => Play.Scene.Asteroids.username()},
             time: Play.Scene.Asteroids.game_time(),
             graph: Scenic.Graph.t(),
             viewport: pid
@@ -155,27 +157,57 @@ defmodule Play.Scene.Asteroids do
   @impl Scenic.Scene
   def init(_args, scenic_opts) do
     # Logger.info("scenic_opts: #{inspect(scenic_opts)}")
-    schedule_animations()
     Process.register(self(), __MODULE__)
-    PlayerController.start_link(username: @console_player_username)
+    schedule_animations()
+    PlayerController.start_link(username: @console_player_username, parent: self())
 
     {:ok, initial_state(scenic_opts), push: @initial_graph}
   end
 
   defp initial_state(opts) do
-    live_players = [Play.Player.new(@console_player_username)]
-
     %State{
       asteroids: 1..7 |> Enum.map(fn _ -> new_asteroid() end),
-      player_bullets: Map.new(live_players, fn p -> {p.username, []} end),
+      player_bullets: %{},
       num_asteroids_destroyed: 0,
       paused: false,
-      live_players: live_players,
+      live_players: [],
       dead_players: [],
+      player_pid_refs: %{},
       time: 0,
       graph: @initial_graph,
       viewport: Keyword.get(opts, :viewport)
     }
+  end
+
+  @impl Scenic.Scene
+  def handle_call({:register_player, username, pid}, _from, state) do
+    %State{
+      live_players: live_players,
+      player_bullets: player_bullets,
+      player_pid_refs: player_pid_refs
+    } = state
+
+    ref = Process.monitor(pid)
+
+    new_player = Play.Player.new(username)
+    live_players = [new_player | live_players]
+
+    player_bullets = Map.put(player_bullets, username, [])
+    player_pid_refs = Map.put(player_pid_refs, ref, username)
+
+    state = %State{
+      state
+      | live_players: live_players,
+        player_bullets: player_bullets,
+        player_pid_refs: player_pid_refs
+    }
+
+    {:reply, :ok, state}
+  end
+
+  def handle_call(msg, _from, state) do
+    Logger.warn("UNHANDLED handle_call: #{inspect(msg)}")
+    {:noreply, state}
   end
 
   @impl Scenic.Scene
@@ -207,66 +239,13 @@ defmodule Play.Scene.Asteroids do
     {:noreply, state, push: graph}
   end
 
-  # def handle_info("action:left", state) do
-  #   state = record_key_state(state, "A", :press)
-  #   {:noreply, state}
-  # end
+  def handle_info({:DOWN, ref, :process, _pid, _reason}, state) do
+    %State{player_pid_refs: player_pid_refs} = state
+    username = Map.get(player_pid_refs, ref)
+    state = player_died(state, username)
 
-  # def handle_info("action:up", state) do
-  #   state = record_key_state(state, "W", :press)
-  #   {:noreply, state}
-  # end
-
-  # def handle_info("action:right", state) do
-  #   state = record_key_state(state, "D", :press)
-  #   {:noreply, state}
-  # end
-
-  # def handle_info("action:down", state) do
-  #   state = record_key_state(state, "S", :press)
-  #   {:noreply, state}
-  # end
-
-  # def handle_info("action:clear_player_direction:left", state) do
-  #   state = record_key_state(state, "A", :release)
-  #   {:noreply, state}
-  # end
-
-  # def handle_info("action:clear_player_direction:up", state) do
-  #   state = record_key_state(state, "W", :release)
-  #   {:noreply, state}
-  # end
-
-  # def handle_info("action:clear_player_direction:right", state) do
-  #   state = record_key_state(state, "D", :release)
-  #   {:noreply, state}
-  # end
-
-  # def handle_info("action:clear_player_direction:down", state) do
-  #   state = record_key_state(state, "S", :release)
-  #   {:noreply, state}
-  # end
-
-  # TODO: Make this specific to each player
-  # def handle_info({:try_shoot, x, y}, state) do
-  #   %{player: player} = state
-
-  #   # NOTE: This is a hacky way to get the player direction updated
-  #   # once the player state is extracted for true multiplayer this can be fixed
-  #   {player_x, player_y} = player.t
-  #   cursor_x = x + player_x
-  #   cursor_y = y + player_y
-  #   cursor_coords = {cursor_x, cursor_y}
-
-  #   state = %{state | cursor_coords: cursor_coords}
-
-  #   state =
-  #     state
-  #     |> update_player_direction()
-  #     |> try_to_shoot()
-
-  #   {:noreply, state}
-  # end
+    {:noreply, state}
+  end
 
   defp tick_time(%State{time: t} = state), do: %{state | time: t + 1}
 
@@ -287,6 +266,19 @@ defmodule Play.Scene.Asteroids do
     end
   end
 
+  defp player_died(state, username) do
+    %State{live_players: live_players, dead_players: dead_players} = state
+
+    case Enum.split_with(live_players, fn p -> p.username == username end) do
+      {[player], players} ->
+        %State{state | live_players: players, dead_players: [player | dead_players]}
+
+      {[], _players} ->
+        # Player is already dead
+        state
+    end
+  end
+
   @spec draw_entities(State.t()) :: State.t()
   defp draw_entities(%State{} = state) do
     graph =
@@ -300,10 +292,14 @@ defmodule Play.Scene.Asteroids do
 
   @spec entities(State.t()) :: [Play.ScenicEntity.entity()]
   defp entities(%State{} = state) do
-    %State{live_players: live_players, player_bullets: player_bullets} = state
+    %State{live_players: live_players, dead_players: dead_players, player_bullets: player_bullets} =
+      state
+
+    dead_players = for p <- dead_players, do: {:delete, p.id}
 
     Enum.concat([
       live_players,
+      dead_players,
       state.asteroids,
       # TODO: Re-enable this dynamically
       # Enum.map(state.asteroids, &Play.Collision.from(&1)),
@@ -556,6 +552,7 @@ defmodule Play.Scene.Asteroids do
     usernames = Enum.map(live_players, fn p -> p.username end)
 
     Enum.reduce(usernames, state, fn username, state ->
+      # TODO: Handle the player controller being dead here (consider the player dead)
       %PlayerController.View{actions: actions, direction: direction} =
         PlayerController.get_view(username)
 

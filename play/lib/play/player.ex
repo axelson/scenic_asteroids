@@ -21,7 +21,7 @@ defmodule Play.Player do
 
   def new(username) do
     %__MODULE__{
-      id: :player,
+      id: "player:#{username}",
       t: initial_player_coordinates(),
       last_shot: :never,
       username: username,

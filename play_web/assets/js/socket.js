@@ -8,7 +8,7 @@
 // from the params if you are not using authentication.
 import {Socket} from "phoenix"
 
-let socket = new Socket("/socket", {params: {token: window.userToken}})
+let socket = new Socket("/socket", {params: window.SocketExports})
 
 // When you connect, you'll often need to authenticate the client.
 // For example, imagine you have an authentication plug, `MyAuth`,
@@ -90,12 +90,17 @@ window.onSendShoot = (relX, relY) => {
   channel.push(`try_shoot`, obj);
 }
 
+window.onClearShooting = () => {
+  channel.push('clear_shooting', {});
+}
+
 if (window.SocketExports) {
   channel.join()
     .receive("ok", onJoin)
     .receive("error", resp => {
-      console.log("Unable to join", resp)
-      alert('cannot join', resp);
+      var reason = resp["reason"]
+      console.log(`Unable to join: ${reason}`)
+      alert(`Unable to join: ${reason}`)
     })
 }
 
