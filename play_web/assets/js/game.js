@@ -19,7 +19,6 @@ var config = {
 
 var cursors;
 var keys;
-var platforms;
 var arrows;
 var game;
 var shooting = false;
@@ -35,27 +34,12 @@ window.onCreateGame = function() {
 }
 
 function preload() {
-  this.load.image('ground', '/images/platform.png');
-  this.load.image('sky', '/images/space3.png');
-  this.load.image('logo', '/images/phaser3-logo.png');
   this.load.image('arrow', '/images/arrow.png');
 }
 
 function create() {
-  this.add.image(400, 300, 'sky');
-
-  var logo = this.physics.add.image(400, 400, 'logo');
-  logo.setInteractive();
-
-  platforms = this.physics.add.staticGroup();
-
-  platforms.create(100, 200, 'ground').setScale(2).refreshBody().setInteractive();
-
   arrows = this.physics.add.staticGroup();
   createArrows(arrows);
-
-  var textConfig = {fontSize: '20px', color: '#ff0000', fontFamily: 'Arial'};
-  this.add.text(game.config.width / 2, game.config.height / 2, "SomeText", textConfig);
 
   this.input.on('gameobjectdown', function(pointer, gameObject) {
     if (isArrow(gameObject)) {
@@ -74,14 +58,8 @@ function create() {
     }
   });
 
-  logo.setCollideWorldBounds(true);
-
-  platforms = this.physics.add.staticGroup();
-
   cursors = this.input.keyboard.createCursorKeys();
   keys = {};
-
-  this.physics.add.collider(logo, platforms);
 
   var graphics = this.add.graphics({ fillStyle: { color: 0x00ff00 } });
 
