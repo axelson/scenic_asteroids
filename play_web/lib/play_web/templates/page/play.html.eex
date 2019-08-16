@@ -4,3 +4,4 @@
    window.onCreateGame();
  };
 </script>
+<div id="game"></div>
