@@ -45,7 +45,7 @@ defmodule PlayUi.MixProject do
   defp dep(:exsync, :github),
     do: {:exsync, github: "axelson/exsync", branch: "log-errors-better", override: true}
 
-  defp dep(:exsync, :path), do: {:exsync, path: "../forks/exsync"}
+  defp dep(:exsync, :path), do: {:exsync, path: "../../forks/exsync", override: true}
 
   defp dep(:launcher, :path), do: {:launcher, path: "../../launcher", override: true}
   defp dep(:launcher, :github), do: {:launcher, github: "axelson/scenic_launcher"}
