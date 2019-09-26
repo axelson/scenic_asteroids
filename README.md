@@ -64,6 +64,7 @@ TODO:
   * [x] Extract out player control state tracking from the Asteroids scene
   * [ ] Add multiplayer control via browser
   * [ ] Add a waiting screen/lobby
+* [ ] Assign a random color to each player and display it on screen and in their browser
 * [ ] Splash screen add option to choose single player or multiplayer
   * Logo will come down and then the options appear
   * [ ] Pressing "SPC" or "s" will start single player immediately
@@ -72,6 +73,8 @@ TODO:
 * [ ] Set Phoenix Endpoint check_origin to a MFA tuple with Nerves.Network.status("wlan0").ipv4_address (and eth0, but preferring eth0)
 * [ ] Username max length of 8
 * [ ] don't allow login with username "console" since that is reserved
+* [ ] limit max players to 50
+* [ ] fix restricting users to one UserSocket
 
 The player javascript will record action states (not key states)
 Actions:
@@ -93,6 +96,7 @@ Resources:
 * Phaser GameObject docs: https://photonstorm.github.io/phaser3-docs/Phaser.GameObjects.Image.html
 * Phaser basic tutorial: https://phasergames.com/phaser-3-basics-images-text-and-click/
 * Phaser basic shapes: https://www.phaser.io/examples/v3/view/geom/circle/area
+* Phaser gamepad button https://photonstorm.github.io/phaser3-docs/Phaser.Input.Gamepad.Button.html
 
 NOTE: if `move_aim_direction` is used then the other move and aim actions should
 not be used. This will be enforced on the server-side.
@@ -116,3 +120,22 @@ Extra content ideas:
 * Add a ship that will seek the nearest player ship
 * Have large asteroids split into multiple
 * Store a top-score on the touch-screen (in /root)
+
+When the js player connects to the PlayChannel they get a PlayerController spun up for them (or get rejected if one is already running and taken). The PlayerController should be spun up under a new DynamicSupervisor
+
+Then the PlayChannel adds the PlayerController to the Asteroids scene via GenServer.call which adds the new player to the live_players list, where they stay until they die.
+
+Question:
+* When do users switch from the lobby channel to the play channel? When the game starts?
+* Is a message sent to them in the lobby channel?
+
+Canvas load image notes:
+* https://stackoverflow.com/questions/14757659/loading-an-image-onto-a-canvas-with-javascript
+* https://github.com/pappersverk/scenic_driver_inky/blob/master/lib/scenic_driver_inky.ex
+  * Captures fb data with rpi_fb_capture and displays it with inky
+* Maybe I could just capture the fb with rpi_fb_capture and then send it over the phoenix channel
+* picam streams image with a plug: https://github.com/elixir-vision/picam/blob/master/examples/picam_http/lib/picam_http/streamer.ex
+
+WebRTC links
+* https://github.com/smpallen99/webrtc_example
+* DTLS is added in OTP 20
