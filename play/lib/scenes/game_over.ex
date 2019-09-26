@@ -17,6 +17,7 @@ defmodule Play.Scene.GameOver do
                    font: :roboto_mono,
                    text_align: :center
                  )
+                 |> Launcher.HiddenHomeButton.add_to_graph([])
 
   defmodule State do
     @moduledoc false

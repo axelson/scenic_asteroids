@@ -64,6 +64,7 @@ defmodule Play.Scene.Splash do
         id: :logo,
         fill: image()
       )
+      |> Launcher.HiddenHomeButton.add_to_graph([])
 
     # move the logo into the right location
     graph = Graph.modify(graph, :logo, &update_opts(&1, translate: move))

@@ -8,6 +8,7 @@ defmodule Play.Scene.PlayerDeath do
   alias Scenic.Graph
 
   @initial_graph Graph.build()
+                 |> Launcher.HiddenHomeButton.add_to_graph([])
 
   defmodule State do
     @moduledoc false
