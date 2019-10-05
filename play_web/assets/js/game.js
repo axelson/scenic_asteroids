@@ -53,6 +53,8 @@ function create() {
       console.log("send", direction);
 
       sendSetDirection(direction);
+    } else {
+      console.log("clicked on", gameObject.name);
     }
   });
 
