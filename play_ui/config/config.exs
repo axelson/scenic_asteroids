@@ -29,6 +29,8 @@ config :phoenix, :json_library, Jason
 # Disable tzdata automatic updates
 config :tzdata, :autoupdate, :disabled
 
+config :logger, :console, format: "$time $metadata[$level] $levelpad$message\n"
+
 case Mix.env() do
   :dev ->
     config :exsync,
