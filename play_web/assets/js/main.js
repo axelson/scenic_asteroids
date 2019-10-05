@@ -15,4 +15,11 @@ function bindJason() {
   }
 }
 
-bindJason()
+export function start(lobbyChannel) {
+  bindJason()
+
+  lobbyChannel.on('game_start', function() {
+    window.onCreateGame()
+  })
+}
+

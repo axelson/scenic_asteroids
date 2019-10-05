@@ -1,11 +1,12 @@
 import {Socket} from "phoenix"
 
 let socket = new Socket("/socket", {params: window.SocketExports})
+let lobbyChannel
 
 if (document.querySelector('#game')) {
   socket.connect()
 
-  let channel = socket.channel("lobby", window.SocketExports)
+  lobbyChannel = socket.channel("lobby", window.SocketExports)
 
   let onJoin = resp => {
     console.log("Joined!", resp)
@@ -14,27 +15,27 @@ if (document.querySelector('#game')) {
   window.onDirection = (direction) => {
     direction = determineDirection(direction);
     console.log(`Send direction: ${direction}`)
-    channel.push(`player_direction`, {direction: direction});
+    lobbyChannel.push(`player_direction`, {direction: direction});
   }
 
   window.onClearDirection = (direction) => {
     direction = determineDirection(direction);
-    channel.push(`clear_player_direction`, {direction: direction});
+    lobbyChannel.push(`clear_player_direction`, {direction: direction});
   }
 
   window.onSendShoot = (relX, relY) => {
     var obj = {x: relX, y: relY}
     console.log("obj", obj)
 
-    channel.push(`try_shoot`, obj);
+    lobbyChannel.push(`try_shoot`, obj);
   }
 
   window.onClearShooting = () => {
-    channel.push('clear_shooting', {});
+    lobbyChannel.push('clear_shooting', {});
   }
 
   if (window.SocketExports) {
-    channel.join()
+    lobbyChannel.join()
       .receive("ok", onJoin)
       .receive("error", resp => {
         var reason = resp["reason"]
@@ -54,4 +55,4 @@ function determineDirection(direction) {
   }
 }
 
-export default socket
+export { socket, lobbyChannel }

@@ -12,9 +12,9 @@ import css from "../css/app.css"
 import "phoenix_html"
 
 // Import local files
-//
-// Local files can be imported directly using relative paths, for example:
-import socket from "./socket.js"
+import {socket, lobbyChannel} from "./socket.js"
 
 import game from "./game.js"
-import main from "./main.js"
+import { start } from "./main.js"
+
+start(lobbyChannel)
