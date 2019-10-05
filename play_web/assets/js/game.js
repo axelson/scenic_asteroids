@@ -1,7 +1,13 @@
+const scaleFactor = 0.6;
+const gameWidth = 800 * scaleFactor;
+const gameHeight = 350 * scaleFactor
 var config = {
   type: Phaser.AUTO,
-  width: 800,
-  height: 600,
+  width: gameWidth,
+  height: gameHeight,
+  scale: {
+    mode: Phaser.Scale.FIT,
+  },
   physics: {
     default: 'arcade',
     arcade: {
@@ -26,7 +32,7 @@ var shooting = false;
 // Circle location is used to calculate the angle for firing
 const arrowBaseX = 100;
 const arrowBaseY = 100;
-const circleX = 400;
+const circleX = 350;
 const circleY = 100;
 
 window.onCreateGame = function() {
