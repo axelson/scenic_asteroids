@@ -74,14 +74,7 @@ defmodule Play.PlayerController do
       username: username
     }
 
-    {:ok, state, {:continue, :register}}
-  end
-
-  @impl GenServer
-  def handle_continue(:register, state) do
-    %State{username: username} = state
-    :ok = GenServer.call(Play.Scene.Asteroids, {:register_player, username, self()})
-    {:noreply, state}
+    {:ok, state}
   end
 
   ########

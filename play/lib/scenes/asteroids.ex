@@ -161,6 +161,8 @@ defmodule Play.Scene.Asteroids do
     schedule_animations()
     PlayerController.start_link(username: @console_player_username, parent: self())
 
+    send(self(), :notify_game_start)
+
     {:ok, initial_state(scenic_opts), push: @initial_graph}
   end
 
@@ -181,26 +183,7 @@ defmodule Play.Scene.Asteroids do
 
   @impl Scenic.Scene
   def handle_call({:register_player, username, pid}, _from, state) do
-    %State{
-      live_players: live_players,
-      player_bullets: player_bullets,
-      player_pid_refs: player_pid_refs
-    } = state
-
-    ref = Process.monitor(pid)
-
-    new_player = Play.Player.new(username)
-    live_players = [new_player | live_players]
-
-    player_bullets = Map.put(player_bullets, username, [])
-    player_pid_refs = Map.put(player_pid_refs, ref, username)
-
-    state = %State{
-      state
-      | live_players: live_players,
-        player_bullets: player_bullets,
-        player_pid_refs: player_pid_refs
-    }
+    register_player(state, username, pid)
 
     {:reply, :ok, state}
   end
@@ -247,7 +230,46 @@ defmodule Play.Scene.Asteroids do
     {:noreply, state}
   end
 
+  def handle_info(:notify_game_start, state) do
+    state = notify_game_start(state)
+    {:noreply, state}
+  end
+
+  defp notify_game_start(state) do
+    PlayWeb.Endpoint.broadcast("lobby", "game_start", %{})
+
+    state = register_player(state, @console_player_username, self())
+
+    Registry.select(Registry.Usernames, [{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}])
+    |> Enum.reduce(state, fn {username, pid, _pid}, state ->
+      state = register_player(state, username, pid)
+    end)
+  end
+
   defp tick_time(%State{time: t} = state), do: %{state | time: t + 1}
+
+  defp register_player(state, username, pid) do
+    %State{
+      live_players: live_players,
+      player_bullets: player_bullets,
+      player_pid_refs: player_pid_refs
+    } = state
+
+    ref = Process.monitor(pid)
+
+    new_player = Play.Player.new(username)
+    live_players = [new_player | live_players]
+
+    player_bullets = Map.put(player_bullets, username, [])
+    player_pid_refs = Map.put(player_pid_refs, ref, username)
+
+    %State{
+      state
+      | live_players: live_players,
+        player_bullets: player_bullets,
+        player_pid_refs: player_pid_refs
+    }
+  end
 
   defp get_console_player(state) do
     get_player(state, @console_player_username)
