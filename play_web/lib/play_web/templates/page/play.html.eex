@@ -1,7 +1,1 @@
-<script>
- window.onload = function() {
-   // Start the phaser game
-   window.onCreateGame();
- };
-</script>
 <div id="game"></div>
