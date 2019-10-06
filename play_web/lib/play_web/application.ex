@@ -9,7 +9,8 @@ defmodule PlayWeb.Application do
     # List all child processes to be supervised
     children = [
       # Start the endpoint when the application starts
-      PlayWeb.Endpoint
+      PlayWeb.Endpoint,
+      PlayWeb.Presence
       # Starts a worker by calling: PlayWeb.Worker.start_link(arg)
       # {PlayWeb.Worker, arg},
     ]

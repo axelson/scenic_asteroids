@@ -1,11 +1,14 @@
 defmodule PlayWeb.LobbyChannel do
   use Phoenix.Channel
+  alias PlayWeb.Presence
 
+  @impl Phoenix.Channel
   def join("lobby", _message, socket) do
     with {:ok, username} <- PlayWeb.UserSocket.logged_in_username(socket),
          {:ok, _} <- Registry.register(Registry.Usernames, username, self()),
          :ok = start_player_controller(username),
          :ok = Play.PlayerController.notify_connect(username) do
+      send(self(), :after_join)
       {:ok, socket}
     else
       {:error, {:already_registered, _}} ->
@@ -56,6 +59,18 @@ defmodule PlayWeb.LobbyChannel do
   def handle_in(event, msg, socket) do
     IO.puts("Unhandled event: #{event} with message: #{inspect(msg)}")
     IO.inspect(socket, label: "socket")
+    {:noreply, socket}
+  end
+
+  @impl Phoenix.Channel
+  def handle_info(:after_join, socket) do
+    push(socket, "presence_state", Presence.list(socket))
+
+    {:ok, _} =
+      Presence.track(socket, socket.assigns.username, %{
+        online_at: inspect(System.system_time(:second))
+      })
+
     {:noreply, socket}
   end
 
