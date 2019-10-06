@@ -15,11 +15,15 @@ function bindJason() {
   }
 }
 
+let started = false
 export function start(lobbyChannel) {
   bindJason()
 
   lobbyChannel.on('game_start', function() {
-    window.onCreateGame()
+    if (!started) {
+      window.onCreateGame()
+    }
+    started = true
   })
 }
 
