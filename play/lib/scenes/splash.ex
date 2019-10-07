@@ -23,7 +23,7 @@ defmodule Play.Scene.Splash do
   @initial_y_coord 0
 
   @animate_ms 10
-  @finish_delay_ms 750
+  @finish_delay_ms 9750
 
   defmodule State do
     @moduledoc false
