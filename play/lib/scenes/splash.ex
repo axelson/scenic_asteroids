@@ -10,7 +10,7 @@ defmodule Play.Scene.Splash do
   use Scenic.Scene
   alias Scenic.Graph
   alias Scenic.ViewPort
-  import Scenic.Primitives, only: [{:rect, 3}, {:update_opts, 2}]
+  import Scenic.Primitives, only: [{:rect, 3}, {:rect, 2}, {:update_opts, 2}]
 
   # Beware: this path is only valid at compile-time, not run-time
   @logo_path :code.priv_dir(:play)
@@ -59,6 +59,8 @@ defmodule Play.Scene.Splash do
 
     graph =
       Graph.build()
+      # Rectangle used for capturing input for the scene
+      |> rect({vp_width, vp_height})
       |> rect(
         {@logo_width, @logo_height},
         id: :logo,
