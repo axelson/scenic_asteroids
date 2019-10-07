@@ -36,7 +36,12 @@ defmodule PlayWeb.LobbyChannel do
     {:noreply, socket}
   end
 
-  def handle_in("try_shoot", msg, socket) do
+  def handle_in("try_shoot", _msg, socket) do
+    :ok = Play.PlayerController.set_action(username(socket), :shoot)
+    {:noreply, socket}
+  end
+
+  def handle_in("try_shoot_direction", msg, socket) do
     %{"x" => x, "y" => y} = msg
     :ok = Play.PlayerController.set_action(username(socket), :shoot)
     direction = Scenic.Math.Vector2.normalize({x, y})

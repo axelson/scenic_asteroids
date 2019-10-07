@@ -91,7 +91,7 @@ function create() {
     // circle but it isn't really that important)
     if (Math.abs(relX) < 100 && Math.abs(relY) < 100) {
       shooting = true;
-      sendShoot(relX, -relY);
+      sendShootDirection(relX, -relY);
     }
   });
 
@@ -100,6 +100,14 @@ function create() {
       shooting = false;
       clearShooting();
     }
+  });
+
+  this.input.keyboard.on('keydown-SPACE', function (event) {
+    sendShoot();
+  });
+
+  this.input.keyboard.on('keyup-SPACE', function (event) {
+    clearShooting();
   });
 }
 
@@ -164,8 +172,12 @@ function sendClearDirection(direction) {
   window.onClearDirection(direction);
 }
 
-function sendShoot(relX, relY) {
-  window.onSendShoot(relX, relY);
+function sendShoot() {
+  window.onSendShoot();
+}
+
+function sendShootDirection(relX, relY) {
+  window.onSendShootDirection(relX, relY);
 }
 
 function clearShooting() {

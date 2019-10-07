@@ -23,11 +23,15 @@ if (document.querySelector('#game')) {
     lobbyChannel.push(`clear_player_direction`, {direction: direction});
   }
 
-  window.onSendShoot = (relX, relY) => {
+  window.onSendShoot = () => {
+    lobbyChannel.push(`try_shoot`, {})
+  }
+
+  window.onSendShootDirection = (relX, relY) => {
     var obj = {x: relX, y: relY}
     console.log("obj", obj)
 
-    lobbyChannel.push(`try_shoot`, obj);
+    lobbyChannel.push(`try_shoot_direction`, obj);
   }
 
   window.onClearShooting = () => {
