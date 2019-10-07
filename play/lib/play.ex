@@ -12,7 +12,11 @@ defmodule Play do
     # start the application with the viewport
     children = [
       {DynamicSupervisor, name: Play.PlayerControllerSupervisor, strategy: :one_for_one},
+      # Registry that keeps track of all users currently signed in to the system
+      # to prevent duplicate logins
       {Registry, keys: :unique, name: Registry.Usernames},
+      # Registry that tracks all of the `Play.PlayerController` GenServers and
+      # associates them by player username
       supervisor(Registry, [:unique, :player_controllers]),
       supervisor(Scenic, viewports: [main_viewport_config])
     ]
