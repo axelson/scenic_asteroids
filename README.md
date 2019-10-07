@@ -57,6 +57,7 @@ TODO:
 * [x] Get basic nerves install working on network
 * [x] Run scenic play application on nerves!
 * [x] Get scenic play web application working on nerves
+* [ ] PlayerControllers should die if the LobbyChannel for that user dies
 * [ ] Add multiplayer via Phoenix channels
   * [x] Add basic single player control via browser
   * [x] Add full single player control via browser
