@@ -77,6 +77,21 @@ defmodule Play.PlayerController do
     {:ok, state}
   end
 
+  def start_in_supervisor(username, parent) do
+    DynamicSupervisor.start_child(
+      Play.PlayerControllerSupervisor,
+      {Play.PlayerController, username: username, parent: parent}
+    )
+    |> case do
+      {:ok, _pid} -> :ok
+      {:error, {:already_started, _pid}} -> :ok
+    end
+  end
+
+  def register(username) do
+    GenServer.cast(process_name(username), :register)
+  end
+
   ########
   # Client
   ########
@@ -102,7 +117,11 @@ defmodule Play.PlayerController do
 
   # TODO: Change this from a GenServer.call to ETS (for performance)
   def get_view(username) do
-    GenServer.call(process_name(username), :get_view)
+    if Registry.lookup(:player_controllers, username) != [] do
+      GenServer.call(process_name(username), :get_view)
+    else
+      {:error, :dead}
+    end
   end
 
   ########
@@ -150,6 +169,11 @@ defmodule Play.PlayerController do
   end
 
   def handle_call(:notify_connect, _from, state) do
+    %State{reconnect_timer: reconnect_timer} = state
+
+    if reconnect_timer do
+      Process.cancel_timer(reconnect_timer)
+    end
     state = %State{state | reconnect_timer: nil}
     {:reply, :ok, state}
   end
@@ -166,6 +190,13 @@ defmodule Play.PlayerController do
     view = %View{actions: actions, direction: direction}
 
     {:reply, view, state}
+  end
+
+  @impl GenServer
+  def handle_cast(:register, state) do
+    IO.puts("#{state.username} registering!")
+    GenServer.call(Play.Scene.Asteroids, {:register_player, state.username, self()})
+    {:noreply, state}
   end
 
   @impl GenServer

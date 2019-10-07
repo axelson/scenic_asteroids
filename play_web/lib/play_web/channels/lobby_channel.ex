@@ -20,14 +20,7 @@ defmodule PlayWeb.LobbyChannel do
   end
 
   defp start_player_controller(username) do
-    DynamicSupervisor.start_child(
-      Play.PlayerControllerSupervisor,
-      {Play.PlayerController, username: username, parent: self()}
-    )
-    |> case do
-      {:ok, _pid} -> :ok
-      {:error, {:already_started, _pid}} -> :ok
-    end
+    Play.PlayerController.start_in_supervisor(username, self())
   end
 
   def handle_in("player_direction", msg, socket) do

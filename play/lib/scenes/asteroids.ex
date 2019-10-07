@@ -159,11 +159,28 @@ defmodule Play.Scene.Asteroids do
     # Logger.info("scenic_opts: #{inspect(scenic_opts)}")
     Process.register(self(), __MODULE__)
     schedule_animations()
-    PlayerController.start_link(username: @console_player_username, parent: self())
 
-    send(self(), :notify_game_start)
+    # PlayerController.start_link(username: @console_player_username, parent: self())
+    state = initial_state(scenic_opts)
 
-    {:ok, initial_state(scenic_opts), push: @initial_graph}
+    # send(self(), :notify_game_start)
+
+    PlayerController.start_in_supervisor(@console_player_username, self())
+    :ok = Play.PlayerController.notify_connect(@console_player_username)
+    state = register_player(state, @console_player_username, self())
+
+    Registry.select(Registry.Usernames, [{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}])
+    |> Enum.each(fn {username, _pid, _pid} ->
+      # state = register_player(state, username, pid)
+      PlayerController.register(username)
+    end)
+
+    PlayWeb.Endpoint.broadcast("lobby", "game_start", %{})
+
+    # {:ok, initial_state(scenic_opts), push: @initial_graph}
+    # {:ok, initial_state(scenic_opts), push: @initial_graph, continue: :notify_game_start}
+    # {:ok, :mystate, push: @initial_graph, continue: :notify_game_start}
+    {:ok, state, push: @initial_graph}
   end
 
   defp initial_state(opts) do
@@ -181,11 +198,19 @@ defmodule Play.Scene.Asteroids do
     }
   end
 
+  def player_alive(username) do
+    GenServer.call(__MODULE__, {:player_alive, username})
+  end
+
   @impl Scenic.Scene
   def handle_call({:register_player, username, pid}, _from, state) do
-    register_player(state, username, pid)
+    state = register_player(state, username, pid)
 
     {:reply, :ok, state}
+  end
+
+  def handle_call({:player_alive, username}, _from, state) do
+    {:reply, player_alive?(state, username), state}
   end
 
   def handle_call(msg, _from, state) do
@@ -230,21 +255,6 @@ defmodule Play.Scene.Asteroids do
     {:noreply, state}
   end
 
-  def handle_info(:notify_game_start, state) do
-    state = notify_game_start(state)
-    {:noreply, state}
-  end
-
-  defp notify_game_start(state) do
-    PlayWeb.Endpoint.broadcast("lobby", "game_start", %{})
-
-    state = register_player(state, @console_player_username, self())
-
-    Registry.select(Registry.Usernames, [{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}])
-    |> Enum.reduce(state, fn {username, pid, _pid}, state ->
-      state = register_player(state, username, pid)
-    end)
-  end
 
   defp tick_time(%State{time: t} = state), do: %{state | time: t + 1}
 
@@ -286,6 +296,12 @@ defmodule Play.Scene.Asteroids do
       nil -> {:error, :not_found}
       player -> {:ok, player}
     end
+  end
+
+  defp player_alive?(state, username) do
+    %State{live_players: live_players} = state
+
+    Enum.any?(live_players, fn player -> player.username == username end)
   end
 
   defp player_died(state, username) do
@@ -575,21 +591,25 @@ defmodule Play.Scene.Asteroids do
 
     Enum.reduce(usernames, state, fn username, state ->
       # TODO: Handle the player controller being dead here (consider the player dead)
-      %PlayerController.View{actions: actions, direction: direction} =
-        PlayerController.get_view(username)
+      case PlayerController.get_view(username) do
+        {:error, :dead} ->
+          # IO.puts("#{username} is dead!")
+          state
 
-      state = update_player_direction(state, username, direction)
+        %PlayerController.View{actions: actions, direction: direction} ->
+          state = update_player_direction(state, username, direction)
 
-      Enum.reduce(actions, state, fn
-        action, state when action in @movement_actions ->
-          {:ok, player} = get_player(state, username)
-          player = Player.tick_player_coords(player, action)
-          update_player(state, username, player)
+          Enum.reduce(actions, state, fn
+            action, state when action in @movement_actions ->
+              {:ok, player} = get_player(state, username)
+              player = Player.tick_player_coords(player, action)
+              update_player(state, username, player)
 
-        :shoot, state ->
-          {:ok, player} = get_player(state, username)
-          try_to_shoot(state, player)
-      end)
+            :shoot, state ->
+              {:ok, player} = get_player(state, username)
+              try_to_shoot(state, player)
+          end)
+      end
     end)
   end
 
