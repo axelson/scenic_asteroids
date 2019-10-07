@@ -62,19 +62,22 @@ TODO:
   * [x] Add full single player control via browser
   * [x] Ask for player name
   * [x] Extract out player control state tracking from the Asteroids scene
-  * [ ] Add multiplayer control via browser
+  * [x] Add multiplayer control via browser
   * [ ] Add a waiting screen/lobby
 * [ ] Assign a random color to each player and display it on screen and in their browser
 * [ ] Splash screen add option to choose single player or multiplayer
-  * Logo will come down and then the options appear
+  * [ ] Logo will come down and then the options appear
   * [ ] Pressing "SPC" or "s" will start single player immediately
   * [ ] Pressing "m" will start multi player immediately
+* [ ] Display the join url somewhere?
 * [ ] Test possibility of rendering the current scene to an html canvas
 * [ ] Set Phoenix Endpoint check_origin to a MFA tuple with Nerves.Network.status("wlan0").ipv4_address (and eth0, but preferring eth0)
 * [ ] Username max length of 8
 * [ ] don't allow login with username "console" since that is reserved
 * [ ] limit max players to 50
 * [ ] fix restricting users to one UserSocket
+* [ ] Convert from poncho to single application (with Boundary)?
+* [ ] Add a full-screen button on the web client
 
 The player javascript will record action states (not key states)
 Actions:
@@ -139,3 +142,12 @@ Canvas load image notes:
 WebRTC links
 * https://github.com/smpallen99/webrtc_example
 * DTLS is added in OTP 20
+
+Random phaser code
+
++  var helloButtonRect = new Phaser.Geom.Rectangle(gameWidth / 2, gameHeight / 2, 100, 100);
++  var graphics = this.add.graphics({fillStyle: {color: 0x0000ff}});
++  graphics.fillRectShape(helloButtonRect);
++
++  const helloButton = this.add.text(gameWidth / 2, gameHeight / 2, 'Hello Phaser!', { fill: '#0f0', name: 'bob' });
++  helloButton.setInteractive();
