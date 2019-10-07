@@ -1,1 +1,4 @@
+<div id="waiting-message">
+  Waiting for game to start
+</div>
 <div id="game"></div>

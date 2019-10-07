@@ -22,6 +22,7 @@ export function start(lobbyChannel) {
   lobbyChannel.on('game_start', function() {
     if (!started) {
       window.onCreateGame()
+      jQuery('#waiting-message').hide()
     }
     started = true
   })
