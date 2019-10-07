@@ -19,13 +19,14 @@ defmodule Play.Player do
   @player_distance_per_tick 5
   @time_between_shots 6
 
+  @spec new(String.t()) :: t
   def new(username) do
     %__MODULE__{
       id: "player:#{username}",
       t: initial_player_coordinates(),
       last_shot: :never,
       username: username,
-      direction: 0
+      direction: {1.0, 0.0}
     }
   end
 
