@@ -69,6 +69,11 @@ defmodule PlayWeb.LobbyChannel do
         online_at: inspect(System.system_time(:second))
       })
 
+    if Process.whereis(Play.Scene.Asteroids) &&
+         Play.Scene.Asteroids.player_alive(socket.assigns.username) do
+      push(socket, "game_start", %{})
+    end
+
     {:noreply, socket}
   end
 
