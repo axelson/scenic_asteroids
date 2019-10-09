@@ -16,6 +16,7 @@ defmodule Play.Player do
         }
 
   @player_dimensions {{0, 0}, {-10, 30}, {10, 30}}
+  @rotate_actions [:rotate_left, :rotate_right]
 
   @player_distance_per_tick 5
   @time_between_shots 6
@@ -38,16 +39,45 @@ defmodule Play.Player do
     %__MODULE__{t: {width, height}} = player
     dist = @player_distance_per_tick
 
-    updated_coords =
-      case action do
-        :up -> {width, height - dist}
-        :left -> {width - dist, height}
-        :down -> {width, height + dist}
-        :right -> {width + dist, height}
-      end
-      |> constrain_player_to_screen()
+    if action in @rotate_actions do
+      tick_rotation(player, action)
+    else
+      updated_coords =
+        case action do
+          :up -> {width, height - dist}
+          :left -> {width - dist, height}
+          :down -> {width, height + dist}
+          :right -> {width + dist, height}
+        end
+        |> constrain_player_to_screen()
 
-    %__MODULE__{player | t: updated_coords}
+      %__MODULE__{player | t: updated_coords}
+    end
+  end
+
+  @tick_turn_distance :math.pi() / 30
+  defp tick_rotation(%__MODULE__{} = player, action) do
+    direction = player.direction
+    radians = Play.Utils.unit_vector_to_radians(direction)
+
+    radians =
+      case action do
+        :rotate_left -> radians - @tick_turn_distance
+        :rotate_right -> radians + @tick_turn_distance
+      end
+
+    new_direction = Play.Utils.radians_to_unit_vector(radians)
+
+    %__MODULE__{player | direction: new_direction}
+  end
+
+  defp tick_rotation(%__MODULE__{} = player, :rotate_right) do
+    direction = player.direction
+    radians = Play.Utils.unit_vector_to_radians(direction)
+    radians = radians + :math.pi() / 30
+    new_direction = Play.Utils.radians_to_unit_vector(radians)
+
+    %__MODULE__{player | direction: new_direction}
   end
 
   defp constrain_player_to_screen({width, height}) do

@@ -126,7 +126,7 @@ defmodule Play.Scene.Asteroids do
   @firing_keys [" "]
   @keys_to_track @movement_keys ++ @firing_keys
 
-  @movement_actions [:up, :right, :down, :left]
+  @movement_actions [:up, :right, :down, :left, :rotate_left, :rotate_right]
 
   # Max bullets that each player can have on-screen at once
   @player_max_bullets 5
@@ -609,10 +609,18 @@ defmodule Play.Scene.Asteroids do
         %PlayerController.View{actions: actions, direction: direction} ->
           state = update_player_direction(state, username, direction)
 
+          # NOTE: Don't get the player outside of the loop because we changing
+          # the user in the overall state each iteration
           Enum.reduce(actions, state, fn
             action, state when action in @movement_actions ->
               {:ok, player} = get_player(state, username)
               player = Player.tick_player_coords(player, action)
+
+              # HACK! Bad performance!
+              if action in [:rotate_left, :rotate_right] do
+                PlayerController.set_direction(username, player.direction)
+              end
+
               update_player(state, username, player)
 
             :shoot, state ->

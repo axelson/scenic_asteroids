@@ -36,6 +36,26 @@ defmodule PlayWeb.LobbyChannel do
     {:noreply, socket}
   end
 
+  def handle_in("rotate_left", _msg, socket) do
+    :ok = Play.PlayerController.set_action(username(socket), :rotate_left)
+    {:noreply, socket}
+  end
+
+  def handle_in("clear_rotate_left", _msg, socket) do
+    :ok = Play.PlayerController.clear_action(username(socket), :rotate_left)
+    {:noreply, socket}
+  end
+
+  def handle_in("rotate_right", _msg, socket) do
+    :ok = Play.PlayerController.set_action(username(socket), :rotate_right)
+    {:noreply, socket}
+  end
+
+  def handle_in("clear_rotate_right", _msg, socket) do
+    :ok = Play.PlayerController.clear_action(username(socket), :rotate_right)
+    {:noreply, socket}
+  end
+
   def handle_in("try_shoot", _msg, socket) do
     :ok = Play.PlayerController.set_action(username(socket), :shoot)
     {:noreply, socket}

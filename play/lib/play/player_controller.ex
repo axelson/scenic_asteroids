@@ -43,7 +43,15 @@ defmodule Play.PlayerController do
   @action_right :right
   @action_down :down
   @action_left :left
-  @actions [@action_shoot, @action_up, @action_right, @action_down, @action_left]
+  @actions [
+    @action_shoot,
+    @action_up,
+    @action_right,
+    @action_down,
+    @action_left,
+    :rotate_left,
+    :rotate_right
+  ]
 
   # Amount of time in ms that an action is valid for before being cleared
   @action_clear_timeout 1_000

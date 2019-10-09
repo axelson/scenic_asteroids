@@ -109,6 +109,20 @@ function create() {
   this.input.keyboard.on('keyup-SPACE', function (event) {
     clearShooting();
   });
+
+  this.input.keyboard.on('keydown-Q', function (event) {
+    window.onRotateLeft();
+  })
+  this.input.keyboard.on('keyup-Q', function (event) {
+    window.onClearRotateLeft();
+  })
+
+  this.input.keyboard.on('keydown-E', function (event) {
+    window.onRotateRight();
+  })
+  this.input.keyboard.on('keyup-E', function (event) {
+    window.onClearRotateRight();
+  })
 }
 
 function arrowToDirection(gameObject) {

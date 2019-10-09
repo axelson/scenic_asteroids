@@ -38,6 +38,21 @@ if (document.querySelector('#game')) {
     lobbyChannel.push('clear_shooting', {});
   }
 
+  window.onRotateLeft = () => {
+    console.log("rot left!")
+    lobbyChannel.push('rotate_left', {})
+  }
+  window.onClearRotateLeft = () => {
+    lobbyChannel.push('clear_rotate_left', {})
+  }
+
+  window.onRotateRight = () => {
+    lobbyChannel.push('rotate_right', {})
+  }
+  window.onClearRotateRight = () => {
+    lobbyChannel.push('clear_rotate_right', {})
+  }
+
   if (window.SocketExports) {
     lobbyChannel.join()
       .receive("ok", onJoin)

@@ -49,13 +49,17 @@ defmodule Play.Utils do
     Scenic.Math.Vector2.normalize(vector)
   end
 
+  def radians_to_unit_vector(radians) do
+    {:math.sin(radians), :math.cos(radians)}
+  end
+
   # Directly above
-  defp unit_vector_to_radians({0.0, 1.0}), do: 0
+  def unit_vector_to_radians({0.0, 1.0}), do: 0
 
   # Directly below
-  defp unit_vector_to_radians({0.0, -1.0}), do: :math.pi()
+  def unit_vector_to_radians({0.0, -1.0}), do: :math.pi()
 
-  defp unit_vector_to_radians({a, b}) when a <= 1.0 and b <= 1.0 do
+  def unit_vector_to_radians({a, b}) when a <= 1.0 and b <= 1.0 do
     radians = :math.pi() / 2 - :math.atan(b / a)
 
     if a < 0 do
