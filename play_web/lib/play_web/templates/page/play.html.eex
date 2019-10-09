@@ -2,7 +2,7 @@
   Waiting for game to start
 </div>
 <div id="player-instructions">
-  Move with the arrows (or arrow keys). Shoot by tapping near the circle (or spacebar).
+  Move with the arrows (or arrow keys). Shoot by tapping near the circle (or spacebar). (rotate with q and e)
 </div>
 <div id="player-color">
   Your ship is <span id="player-color-value"></span> (Look at the screen!)
