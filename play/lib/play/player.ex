@@ -2,7 +2,7 @@ defmodule Play.Player do
   @moduledoc """
   Represents the player
   """
-  defstruct [:id, :t, :direction, :username, :last_shot]
+  defstruct [:id, :t, :direction, :username, :color, :last_shot]
 
   alias Play.Player
 
@@ -11,6 +11,7 @@ defmodule Play.Player do
           t: Play.Scene.Asteroids.coords(),
           direction: Play.Scene.Asteroids.direction(),
           last_shot: Play.Scene.Asteroids.game_time(),
+          color: any,
           username: String.t()
         }
 
@@ -21,11 +22,14 @@ defmodule Play.Player do
 
   @spec new(String.t()) :: t
   def new(username) do
+    color = if username == "console", do: :white, else: Play.ColorAssigner.get_next_color()
+
     %__MODULE__{
       id: "player:#{username}",
       t: initial_player_coordinates(),
       last_shot: :never,
       username: username,
+      color: color,
       direction: {1.0, 0.0}
     }
   end
@@ -68,14 +72,18 @@ defmodule Play.Player do
   end
 
   defp initial_player_coordinates do
-    width = Play.Utils.screen_width() / 2
-    height = Play.Utils.screen_height() / 2
+    max_rand = 200
+    rand_x = :rand.uniform(max_rand) - max_rand / 2
+    rand_y = :rand.uniform(max_rand) - max_rand / 2
+
+    width = Play.Utils.screen_width() / 2 + rand_x
+    height = Play.Utils.screen_height() / 2 + rand_y
     {width, height}
   end
 
   def player_dimensions, do: @player_dimensions
 
-  defimpl Play.ScenicEntity, for: __MODULE__ do
+  defimpl Play.ScenicEntity, for: Play.Player do
     def id(%Player{id: id}), do: id
 
     def tick(%Player{} = player), do: player
@@ -85,7 +93,7 @@ defmodule Play.Player do
         id: player.id,
         t: player.t,
         rotate: Play.Utils.scenic_radians(player.direction),
-        stroke: {1, :white}
+        stroke: {1, player.color}
       )
     end
   end
