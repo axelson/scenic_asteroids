@@ -1,3 +1,14 @@
 /* This file is for your main application css. */
 
 @import "./phoenix.css";
+
+#player-color {
+  display: none;
+}
+#player-color-value {
+  background: black;
+}
+
+#player-instructions {
+  display: none;
+}

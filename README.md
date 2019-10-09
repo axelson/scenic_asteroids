@@ -65,7 +65,7 @@ TODO:
   * [x] Extract out player control state tracking from the Asteroids scene
   * [x] Add multiplayer control via browser
   * [ ] Add a waiting screen/lobby
-* [ ] Assign a random color to each player and display it on screen and in their browser
+* [x] Assign a random color to each player and display it on screen and in their browser
 * [ ] Splash screen add option to choose single player or multiplayer
   * [ ] Logo will come down and then the options appear
   * [ ] Pressing "SPC" or "s" will start single player immediately

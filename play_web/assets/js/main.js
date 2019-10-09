@@ -23,8 +23,28 @@ export function start(lobbyChannel) {
     if (!started) {
       window.onCreateGame()
       jQuery('#waiting-message').hide()
+      jQuery('#player-instructions').show()
     }
     started = true
   })
+
+  lobbyChannel.push('request_player_color', {})
+
+  lobbyChannel.on('player_color', function(msg) {
+    console.log("msg", msg)
+
+    jQuery('#player-color-value')
+      .text(msg.color)
+      .css({color: cssColor(msg.color)})
+
+    jQuery('#player-color').show()
+  })
 }
 
+function cssColor(color) {
+  switch(color) {
+    case "orange_red": return "orangered"
+    case "powder_blue": return "powderblue"
+    default: return color
+  }
+}

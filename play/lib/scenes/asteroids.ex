@@ -202,6 +202,10 @@ defmodule Play.Scene.Asteroids do
     GenServer.call(__MODULE__, {:player_alive, username})
   end
 
+  def player_color(username) do
+    GenServer.call(__MODULE__, {:player_color, username})
+  end
+
   @impl Scenic.Scene
   def handle_call({:register_player, username, pid}, _from, state) do
     state = register_player(state, username, pid)
@@ -211,6 +215,13 @@ defmodule Play.Scene.Asteroids do
 
   def handle_call({:player_alive, username}, _from, state) do
     {:reply, player_alive?(state, username), state}
+  end
+
+  def handle_call({:player_color, username}, _from, state) do
+    case get_player(state, username) do
+      {:ok, player} -> {:reply, {:ok, player.color}, state}
+      {:error, :not_found} = err -> {:reply, err, state}
+    end
   end
 
   def handle_call(msg, _from, state) do
@@ -254,7 +265,6 @@ defmodule Play.Scene.Asteroids do
 
     {:noreply, state}
   end
-
 
   defp tick_time(%State{time: t} = state), do: %{state | time: t + 1}
 

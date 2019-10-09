@@ -54,6 +54,15 @@ defmodule PlayWeb.LobbyChannel do
     {:noreply, socket}
   end
 
+  def handle_in("request_player_color", _msg, socket) do
+    case Play.Scene.Asteroids.player_color(username(socket)) do
+      {:ok, color} -> push(socket, "player_color", %{color: color})
+      _ -> nil
+    end
+
+    {:noreply, socket}
+  end
+
   def handle_in(event, msg, socket) do
     IO.puts("Unhandled event: #{event} with message: #{inspect(msg)}")
     IO.inspect(socket, label: "socket")
@@ -62,20 +71,23 @@ defmodule PlayWeb.LobbyChannel do
 
   @impl Phoenix.Channel
   def handle_info(:after_join, socket) do
+    username = username(socket)
     push(socket, "presence_state", Presence.list(socket))
 
     {:ok, _} =
-      Presence.track(socket, socket.assigns.username, %{
+      Presence.track(socket, username, %{
         online_at: inspect(System.system_time(:second))
       })
 
     if Process.whereis(Play.Scene.Asteroids) &&
-         Play.Scene.Asteroids.player_alive(socket.assigns.username) do
+         Play.Scene.Asteroids.player_alive(username) do
       push(socket, "game_start", %{})
     end
 
     {:noreply, socket}
   end
+
+  defp username(socket), do: socket.assigns.username
 
   defp direction_to_action("up"), do: :up
   defp direction_to_action("right"), do: :right
