@@ -162,3 +162,9 @@ Random phaser code
 +
 +  const helloButton = this.add.text(gameWidth / 2, gameHeight / 2, 'Hello Phaser!', { fill: '#0f0', name: 'bob' });
 +  helloButton.setInteractive();
+
+Notes for updating socket config
++  # TODO: Implement this with nerves_network (on fw via config)
++  # socket "/socket", PlayWeb.UserSocket,
++  #   websocket: [check_origin: {PlayWeb.Auth, :check_origin, []}],
++  #   longpoll: false

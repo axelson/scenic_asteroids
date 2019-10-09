@@ -56,7 +56,7 @@ defmodule Play.PlayerController do
   # Amount of time in ms that an action is valid for before being cleared
   @action_clear_timeout 1_000
   # Amount of time that a user has to reconnect before the player is considered dead
-  @reconnect_timeout 10_000
+  @reconnect_timeout 2_000
 
   def start_link(opts \\ []) do
     username = Keyword.fetch!(opts, :username)
@@ -219,14 +219,18 @@ defmodule Play.PlayerController do
     {:stop, reason, state}
   end
 
-  def handle_info({:DOWN, _ref, :process, _object, _reason}, state) do
+  def handle_info({:DOWN, ref, :process, _object, _reason}, state) do
+    IO.puts("#{state.username} PROCESS DOWN! ref: #{inspect(ref)}")
     timer = Process.send_after(self(), :reconnect_timer_expired, @reconnect_timeout)
     state = %State{state | reconnect_timer: timer}
     {:noreply, state}
   end
 
   def handle_info(:reconnect_timer_expired, state) do
-    Logger.debug("PlayerController for #{state.username} is shutting down normally")
+    Logger.debug(
+      "PlayerController for #{state.username} is shutting down due to reconnect_timer expiring"
+    )
+
     {:stop, :normal, state}
   end
 
