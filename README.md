@@ -57,19 +57,15 @@ TODO:
 * [x] Get basic nerves install working on network
 * [x] Run scenic play application on nerves!
 * [x] Get scenic play web application working on nerves
-* [ ] PlayerControllers should die if the LobbyChannel for that user dies
-* [ ] Add multiplayer via Phoenix channels
+* [x] PlayerControllers should die if the LobbyChannel for that user dies
+* [x] Add multiplayer via Phoenix channels
   * [x] Add basic single player control via browser
   * [x] Add full single player control via browser
   * [x] Ask for player name
   * [x] Extract out player control state tracking from the Asteroids scene
   * [x] Add multiplayer control via browser
-  * [ ] Add a waiting screen/lobby
+  * [x] Add a waiting screen/lobby
 * [x] Assign a random color to each player and display it on screen and in their browser
-* [ ] Splash screen add option to choose single player or multiplayer
-  * [ ] Logo will come down and then the options appear
-  * [ ] Pressing "SPC" or "s" will start single player immediately
-  * [ ] Pressing "m" will start multi player immediately
 * [ ] Display the join url somewhere?
 * [ ] Test possibility of rendering the current scene to an html canvas
 * [ ] Set Phoenix Endpoint check_origin to a MFA tuple with Nerves.Network.status("wlan0").ipv4_address (and eth0, but preferring eth0)
@@ -79,6 +75,10 @@ TODO:
 * [ ] fix restricting users to one UserSocket
 * [ ] Convert from poncho to single application (with Boundary)?
 * [ ] Add a full-screen button on the web client
+* [ ] Splash screen add option to choose single player or multiplayer
+  * [ ] Logo will come down and then the options appear
+  * [ ] Pressing "SPC" or "s" will start single player immediately
+  * [ ] Pressing "m" will start multi player immediately
 
 The player javascript will record action states (not key states)
 Actions:
