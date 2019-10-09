@@ -66,15 +66,25 @@ TODO:
   * [x] Add multiplayer control via browser
   * [x] Add a waiting screen/lobby
 * [x] Assign a random color to each player and display it on screen and in their browser
-* [ ] Display the join url somewhere?
-* [ ] Test possibility of rendering the current scene to an html canvas
-* [ ] Set Phoenix Endpoint check_origin to a MFA tuple with Nerves.Network.status("wlan0").ipv4_address (and eth0, but preferring eth0)
 * [ ] Username max length of 8
+* [ ] Track and display per-player score
+* [ ] Add a full-screen button on the web client
+* [ ] Clean up the view when playing the game (remove header?)
+* [ ] Make ships spin if socket becomes disconnected
+* [ ] Client javascript should resend keys periodically if they're still held down???
+  * Or should we just dispense with the action timer and if the socket becomes disconnected then clear all actions?
 * [ ] don't allow login with username "console" since that is reserved
+* [ ] Waiting screen should show present users
+* [ ] Deploy changes to nerves
+* [ ] Add ability to boot people based on usernames
+
+Maybe:
+* [ ] Test possibility of rendering the current scene to an html canvas
 * [ ] limit max players to 50
 * [ ] fix restricting users to one UserSocket
 * [ ] Convert from poncho to single application (with Boundary)?
-* [ ] Add a full-screen button on the web client
+* [ ] Display the join url somewhere?
+* [ ] Set Phoenix Endpoint check_origin to a MFA tuple with Nerves.Network.status("wlan0").ipv4_address (and eth0, but preferring eth0)
 * [ ] Splash screen add option to choose single player or multiplayer
   * [ ] Logo will come down and then the options appear
   * [ ] Pressing "SPC" or "s" will start single player immediately
