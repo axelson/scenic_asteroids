@@ -123,6 +123,18 @@ function create() {
   this.input.keyboard.on('keyup-E', function (event) {
     window.onClearRotateRight();
   })
+  this.input.keyboard.on('keydown', function (event) {
+    const direction = keyToDirection(event.key)
+    if (direction) {
+      sendSetDirection(direction);
+    }
+  })
+  this.input.keyboard.on('keyup', function (event) {
+    const direction = keyToDirection(event.key)
+    if (direction) {
+      sendClearDirection(direction);
+    }
+  })
 }
 
 function arrowToDirection(gameObject) {
@@ -243,5 +255,15 @@ function update() {
     recordDirection('down');
   } else {
     unRecordDirection('down');
+  }
+}
+
+function keyToDirection(key) {
+  switch(key) {
+    case 'w': return 'up'
+    case 'a': return 'left'
+    case 's': return 'down'
+    case 'd': return 'right'
+    default: return null
   }
 }
