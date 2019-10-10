@@ -37,6 +37,7 @@ const circleY = 100;
 
 window.onCreateGame = function() {
   game = new Phaser.Game(config);
+  window.game = game
 }
 
 function preload() {

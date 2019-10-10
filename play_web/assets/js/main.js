@@ -16,7 +16,7 @@ function bindJason() {
 }
 
 let started = false
-export function start(lobbyChannel) {
+export function start(socket, lobbyChannel) {
   bindJason()
 
   lobbyChannel.on('game_start', function() {
@@ -26,9 +26,9 @@ export function start(lobbyChannel) {
       jQuery('#player-instructions').show()
     }
     started = true
-  })
 
-  lobbyChannel.push('request_player_color', {})
+    lobbyChannel.push('request_player_color', {})
+  })
 
   lobbyChannel.on('player_color', function(msg) {
     console.log("msg", msg)
@@ -38,6 +38,26 @@ export function start(lobbyChannel) {
       .css({color: cssColor(msg.color)})
 
     jQuery('#player-color').show()
+  })
+
+  lobbyChannel.onClose(() => {
+    console.log('channel closed!')
+  })
+
+  lobbyChannel.onError(e => {
+    console.log("lobby channel error", e)
+  })
+
+  socket.onOpen(() => {
+    jQuery('#disconnected-message').hide();
+  })
+
+  socket.onError(e => {
+    if (socket.isConnected()) {
+      jQuery('#disconnected-message').hide();
+    } else {
+      jQuery('#disconnected-message').show();
+    }
   })
 }
 

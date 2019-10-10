@@ -12,3 +12,8 @@
 #player-instructions {
   display: none;
 }
+
+#disconnected-message {
+  display: none;
+  color: red;
+}
