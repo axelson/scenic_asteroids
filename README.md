@@ -168,3 +168,8 @@ Notes for updating socket config
 +  # socket "/socket", PlayWeb.UserSocket,
 +  #   websocket: [check_origin: {PlayWeb.Auth, :check_origin, []}],
 +  #   longpoll: false
+
+Registry.select(Registry.Usernames, [{{:"$1", :"$2", :"$3"}, [], [{{:"$
+1", :"$2", :"$3"}}]}])
+Registry.select(:player_controllers, [{{:"$1", :"$2", :"$3"}, [],
+[{{:"$1", :"$2", :"$3"}}]}])
