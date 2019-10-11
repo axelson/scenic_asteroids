@@ -14,9 +14,17 @@ defmodule PlayWeb.PageController do
   end
 
   def signin(conn, %{"user" => %{"username" => username}}) do
-    conn
-    |> put_session(:username, username)
-    |> redirect(to: "/play")
+    case check_valid_username(username) do
+      :ok ->
+        conn
+        |> put_session(:username, username)
+        |> redirect(to: "/play")
+
+      {:error, message} ->
+        conn
+        |> put_flash(:error, message)
+        |> render("signin.html")
+    end
   end
 
   def logout(conn, _) do
@@ -36,6 +44,18 @@ defmodule PlayWeb.PageController do
       |> put_flash(:error, "Please sign-in!")
       |> render("signin.html")
       |> halt()
+    end
+  end
+
+  defp check_valid_username("console"), do: {:error, "That username is reserved"}
+
+  defp check_valid_username(username) do
+    length = String.length(username)
+
+    if length <= 8 do
+      :ok
+    else
+      {:error, "A username can be at most 8 characters, got #{length}"}
     end
   end
 end

@@ -66,7 +66,7 @@ TODO:
   * [x] Add multiplayer control via browser
   * [x] Add a waiting screen/lobby
 * [x] Assign a random color to each player and display it on screen and in their browser
-* [ ] Username max length of 8
+* [x] Username max length of 8
 * [ ] Track and display per-player score
 * [ ] Add a full-screen button on the web client
 * [ ] Clean up the view when playing the game (remove header?)
