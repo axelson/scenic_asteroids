@@ -757,10 +757,18 @@ defmodule Play.Scene.Asteroids do
   end
 
   defp update_score(%State{} = state) do
-    %{graph: graph} = state
-    score = score(state)
-    graph = Graph.modify(graph, :score, &text(&1, "score: #{score}"))
-    %{state | graph: graph}
+    %State{graph: graph, player_scores: player_scores} = state
+
+    score_messages =
+      player_scores
+      |> Enum.sort_by(fn {_, score} -> score end, &>=/2)
+      |> Enum.map(fn {username, score} -> "#{username} - #{score}" end)
+      |> Enum.join("\n")
+
+    message = "Score:\n" <> score_messages
+
+    graph = Graph.modify(graph, :score, &text(&1, message))
+    %State{state | graph: graph}
   end
 
   defp check_game_over(%State{live_players: []} = state), do: game_over(state)
@@ -798,11 +806,6 @@ defmodule Play.Scene.Asteroids do
   # Only unpause on key press (not release)
   defp unpause_from_input({:key, {_, :press, _}}), do: true
   defp unpause_from_input(_), do: false
-
-  defp score(%State{player_scores: player_scores}) do
-    Map.values(player_scores)
-    |> Enum.sum()
-  end
 
   defp graph(%State{paused: true}), do: @paused_graph
   defp graph(%State{graph: graph}), do: graph
