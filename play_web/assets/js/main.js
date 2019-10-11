@@ -19,11 +19,20 @@ let started = false
 export function start(socket, lobbyChannel) {
   bindJason()
 
+  jQuery('#fullscreen-button').on('click', function (e) {
+    if (window.game.scale.isFullscreen) {
+      window.game.scale.stopFullscreen()
+    } else {
+      window.game.scale.startFullscreen()
+    }
+  })
+
   lobbyChannel.on('game_start', function() {
     if (!started) {
       window.onCreateGame()
       jQuery('#waiting-message').hide()
       jQuery('#player-instructions').show()
+      jQuery('#fullscreen-button').show()
     }
     started = true
 

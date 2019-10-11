@@ -111,6 +111,15 @@ function create() {
     clearShooting();
   });
 
+  var that = this;
+  this.input.keyboard.on('keydown-F', function (event) {
+    if (that.scale.isFullscreen) {
+      that.scale.stopFullscreen();
+    } else {
+      that.scale.startFullscreen();
+    }
+  })
+
   this.input.keyboard.on('keydown-Q', function (event) {
     window.onRotateLeft();
   })

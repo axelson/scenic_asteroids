@@ -67,13 +67,15 @@ TODO:
   * [x] Add a waiting screen/lobby
 * [x] Assign a random color to each player and display it on screen and in their browser
 * [x] Username max length of 8
+* [x] don't allow login with username "console" since that is reserved
 * [x] Track and display per-player score
-* [ ] Add a full-screen button on the web client
-* [ ] Clean up the view when playing the game (remove header?)
-* [ ] Make ships spin if socket becomes disconnected
+* [x] Add a full-screen button on the web client
+* [x] Make ships spin if socket becomes disconnected
 * [ ] Client javascript should resend keys periodically if they're still held down???
   * Or should we just dispense with the action timer and if the socket becomes disconnected then clear all actions?
-* [ ] don't allow login with username "console" since that is reserved
+* [ ] Move ship color text into Phaser
+* [ ] Make a full-screen button in Phaser
+* [ ] Clean up the view when playing the game (remove header?)
 * [ ] Waiting screen should show present users
 * [ ] Deploy changes to nerves
 * [ ] Add ability to boot people based on usernames

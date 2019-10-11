@@ -10,4 +10,5 @@
 <div id="player-color">
   Your ship is <span id="player-color-value"></span> (Look at the screen!)
 </div>
+<div id="fullscreen-button">Activate fullscreen (or press F)</div>
 <div id="game"></div>
