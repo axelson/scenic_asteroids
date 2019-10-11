@@ -14,14 +14,22 @@ defmodule Play.PlayerController do
 
   defmodule State do
     @moduledoc false
-    defstruct [:action_states, :action_timers, :direction, :username, :reconnect_timer]
+    defstruct [
+      :action_states,
+      :action_timers,
+      :direction,
+      :username,
+      :reconnect_timer,
+      :connected?
+    ]
 
     @type t :: %__MODULE__{
             action_states: %{required(atom) => true},
             action_timers: %{required(atom) => reference},
             direction: Play.Scene.Asteroids.direction(),
             username: Play.Scene.Asteroids.username(),
-            reconnect_timer: reference
+            reconnect_timer: reference,
+            connected?: boolean
           }
   end
 
@@ -70,16 +78,12 @@ defmodule Play.PlayerController do
     parent = Keyword.fetch!(opts, :parent)
     username = Keyword.fetch!(opts, :username)
 
-    # We monitor the parent process because if that process dies, then if no new
-    # conections come in then we kill ourselves. Also when disconnected we might
-    # start the ship spinning
-    Process.monitor(parent)
-
     state = %State{
       action_states: %{},
       action_timers: %{},
       direction: {1, 0},
-      username: username
+      username: username,
+      connected?: true
     }
 
     {:ok, state}
@@ -176,33 +180,51 @@ defmodule Play.PlayerController do
     {:reply, :ok, state}
   end
 
-  def handle_call(:notify_connect, _from, state) do
+  def handle_call(:notify_connect, {from_pid, _}, state) do
     %State{reconnect_timer: reconnect_timer} = state
 
     if reconnect_timer do
+      # IO.puts("PlayerController (#{state.username}): cancelling reconnect timer")
       Process.cancel_timer(reconnect_timer)
     end
-    state = %State{state | reconnect_timer: nil}
+
+    # We monitor the parent process because if that process dies, then if no new
+    # conections come in then we kill ourselves
+    # IO.puts("PlayerController (#{state.username}): monitoring #{inspect(from_pid)}")
+    Process.monitor(from_pid)
+
+    state = %State{state | reconnect_timer: nil, connected?: true}
     {:reply, :ok, state}
   end
 
   def handle_call(:get_view, _from, state) do
-    %State{action_states: action_states, direction: direction} = state
+    %State{action_states: action_states, direction: direction, connected?: connected?} = state
 
     actions =
       Enum.flat_map(action_states, fn
         {action, true} -> [action]
         _ -> []
       end)
+      |> maybe_add_death_spin(state)
 
     view = %View{actions: actions, direction: direction}
 
     {:reply, view, state}
   end
 
+  defp maybe_add_death_spin(actions, state) do
+    %State{connected?: connected?} = state
+
+    cond do
+      connected? -> actions
+      Enum.any?(actions, :rotate_right) -> actions
+      true -> [:rotate_right | actions]
+    end
+  end
+
   @impl GenServer
   def handle_cast(:register, state) do
-    IO.puts("#{state.username} registering!")
+    # IO.puts("#{state.username} registering! in pid #{inspect(self())}")
     GenServer.call(Play.Scene.Asteroids, {:register_player, state.username, self()})
     {:noreply, state}
   end
@@ -219,16 +241,23 @@ defmodule Play.PlayerController do
     {:stop, reason, state}
   end
 
-  def handle_info({:DOWN, ref, :process, _object, _reason}, state) do
-    IO.puts("#{state.username} PROCESS DOWN! ref: #{inspect(ref)}")
-    timer = Process.send_after(self(), :reconnect_timer_expired, @reconnect_timeout)
-    state = %State{state | reconnect_timer: timer}
+  def handle_info({:DOWN, ref, :process, pid, _reason}, state) do
+    %State{reconnect_timer: reconnect_timer} = state
+    # IO.puts("PlayerController (#{state.username}): PROCESS DOWN! #{inspect(pid)}")
+
+    timer =
+      unless reconnect_timer do
+        # IO.puts("PlayerController (#{state.username}): reconnect timer set")
+        Process.send_after(self(), :reconnect_timer_expired, @reconnect_timeout)
+      end
+
+    state = %State{state | reconnect_timer: timer, connected?: false}
     {:noreply, state}
   end
 
   def handle_info(:reconnect_timer_expired, state) do
-    Logger.debug(
-      "PlayerController for #{state.username} is shutting down due to reconnect_timer expiring"
+    Logger.warn(
+      "PlayerController (#{state.username}): shutting down due to reconnect_timer expiring"
     )
 
     {:stop, :normal, state}
@@ -238,6 +267,15 @@ defmodule Play.PlayerController do
     Logger.warn("Unhandled event: #{inspect(event)}")
     {:noreply, state}
   end
+
+  @impl GenServer
+  def terminate({:shutdown, :closed}, state) do
+    # username = state.username
+    # IO.puts("PlayerController for #{username} closed")
+    :ok
+  end
+
+  def terminate(_, _), do: :ok
 
   defp do_clear_action(%State{} = state, action) do
     %State{action_states: action_states, action_timers: action_timers} = state

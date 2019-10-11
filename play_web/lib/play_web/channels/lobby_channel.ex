@@ -92,6 +92,7 @@ defmodule PlayWeb.LobbyChannel do
   @impl Phoenix.Channel
   def handle_info(:after_join, socket) do
     username = username(socket)
+    # IO.puts("LobbyChannel #{username} joined in #{inspect(self())}")
     push(socket, "presence_state", Presence.list(socket))
 
     {:ok, _} =

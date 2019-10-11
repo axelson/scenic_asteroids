@@ -156,6 +156,7 @@ defmodule Play.Scene.Asteroids do
   @impl Scenic.Scene
   def init(_args, scenic_opts) do
     # Logger.info("scenic_opts: #{inspect(scenic_opts)}")
+    # IO.puts("\n\nAsteroids scene starting with pid: #{inspect(self())}")
     Process.register(self(), __MODULE__)
     schedule_animations()
 
@@ -602,7 +603,6 @@ defmodule Play.Scene.Asteroids do
     usernames = Enum.map(live_players, fn p -> p.username end)
 
     Enum.reduce(usernames, state, fn username, state ->
-      # TODO: Handle the player controller being dead here (consider the player dead)
       case PlayerController.get_view(username) do
         {:error, :dead} ->
           # IO.puts("#{username} is dead!")
