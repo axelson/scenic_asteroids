@@ -489,6 +489,11 @@ defmodule Play.Scene.Asteroids do
     {:noreply, state}
   end
 
+  def do_handle_input({:key, {"G", :press, _}}, _viewport_context, state) do
+    game_over(state)
+    {:noreply, state}
+  end
+
   # Mouse/Touchscreen drag input
   def do_handle_input({:cursor_pos, cursor_coords}, _viewport_context, state) do
     update_console_player_direction(state, cursor_coords)
