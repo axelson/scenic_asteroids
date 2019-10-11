@@ -12,13 +12,13 @@ defmodule Play.Scene.PlayerDeath do
 
   defmodule State do
     @moduledoc false
-    defstruct [:size, :graph, :time, :score, :viewport]
+    defstruct [:size, :graph, :time, :player_scores, :viewport]
 
     @type t :: %__MODULE__{}
   end
 
   @impl Scenic.Scene
-  def init({{x, y}, score}, scenic_opts) do
+  def init({{x, y}, player_scores}, scenic_opts) do
     size = 3
 
     graph =
@@ -30,7 +30,7 @@ defmodule Play.Scene.PlayerDeath do
       size: size,
       time: 0,
       viewport: scenic_opts[:viewport],
-      score: score
+      player_scores: player_scores
     }
 
     Process.send_after(self(), :animate, 10)
@@ -40,8 +40,8 @@ defmodule Play.Scene.PlayerDeath do
 
   @impl Scenic.Scene
   def handle_info(:animate, %{time: t} = state) when t >= 150 do
-    %{score: score} = state
-    Scenic.ViewPort.set_root(state.viewport, {Play.Scene.GameOver, score})
+    %{player_scores: player_scores} = state
+    Scenic.ViewPort.set_root(state.viewport, {Play.Scene.GameOver, player_scores})
     {:noreply, state}
   end
 

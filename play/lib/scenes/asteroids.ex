@@ -59,8 +59,7 @@ defmodule Play.Scene.Asteroids do
     defstruct [
       :asteroids,
       :player_bullets,
-      # This should be per-player (stored on the player?)
-      :num_asteroids_destroyed,
+      :player_scores,
       :paused,
       :live_players,
       :dead_players,
@@ -73,7 +72,7 @@ defmodule Play.Scene.Asteroids do
     @type t :: %__MODULE__{
             asteroids: list(Play.Asteroid.t()),
             player_bullets: %{Play.Scene.Asteroids.username() => [Play.Bullet.t()]},
-            num_asteroids_destroyed: non_neg_integer,
+            player_scores: %{Play.Scene.Asteroids.username() => non_neg_integer()},
             paused: boolean,
             live_players: [Play.Player.t()],
             dead_players: [Play.Player.t()],
@@ -187,7 +186,7 @@ defmodule Play.Scene.Asteroids do
     %State{
       asteroids: 1..7 |> Enum.map(fn _ -> new_asteroid() end),
       player_bullets: %{},
-      num_asteroids_destroyed: 0,
+      player_scores: %{},
       paused: false,
       live_players: [],
       dead_players: [],
@@ -272,6 +271,7 @@ defmodule Play.Scene.Asteroids do
     %State{
       live_players: live_players,
       player_bullets: player_bullets,
+      player_scores: player_scores,
       player_pid_refs: player_pid_refs
     } = state
 
@@ -281,12 +281,14 @@ defmodule Play.Scene.Asteroids do
     live_players = [new_player | live_players]
 
     player_bullets = Map.put(player_bullets, username, [])
+    player_scores = Map.put(player_scores, username, 0)
     player_pid_refs = Map.put(player_pid_refs, ref, username)
 
     %State{
       state
       | live_players: live_players,
         player_bullets: player_bullets,
+        player_scores: player_scores,
         player_pid_refs: player_pid_refs
     }
   end
@@ -661,8 +663,7 @@ defmodule Play.Scene.Asteroids do
          {:bullet, %Bullet{id: bullet_id}, :asteroid, %CollisionBox{entity_id: asteroid_id}},
          state
        ) do
-    %State{num_asteroids_destroyed: num_asteroids_destroyed, player_bullets: player_bullets} =
-      state
+    %State{player_scores: player_scores, player_bullets: player_bullets} = state
 
     asteroids =
       Enum.map(state.asteroids, fn
@@ -670,8 +671,22 @@ defmodule Play.Scene.Asteroids do
         asteroid -> asteroid
       end)
 
+    # Find the player who owns the bullet
+    username =
+      Enum.find_value(player_bullets, fn {username, bullets} ->
+        if Enum.any?(bullets, fn
+             %Bullet{id: ^bullet_id} -> true
+             {:delete, ^bullet_id} -> true
+             _ -> false
+           end) do
+          username
+        end
+      end)
+
+    player_scores = Map.update!(player_scores, username, fn score -> score + 1 end)
+
     player_bullets =
-      Play.Utils.map_value(player_bullets, fn bullets ->
+      Map.update!(player_bullets, username, fn bullets ->
         Enum.map(bullets, fn
           %Bullet{id: ^bullet_id} -> {:delete, bullet_id}
           bullet -> bullet
@@ -682,7 +697,7 @@ defmodule Play.Scene.Asteroids do
       state
       | asteroids: asteroids,
         player_bullets: player_bullets,
-        num_asteroids_destroyed: num_asteroids_destroyed + 1
+        player_scores: player_scores
     }
   end
 
@@ -763,7 +778,7 @@ defmodule Play.Scene.Asteroids do
   end
 
   defp game_over(state) do
-    %State{num_asteroids_destroyed: num_asteroids_destroyed} = state
+    %State{player_scores: player_scores} = state
     IO.puts("Game lost!")
 
     width = Play.Utils.screen_width() / 2
@@ -772,7 +787,7 @@ defmodule Play.Scene.Asteroids do
 
     Scenic.ViewPort.set_root(
       state.viewport,
-      {Play.Scene.PlayerDeath, {coords, num_asteroids_destroyed}}
+      {Play.Scene.PlayerDeath, {coords, player_scores}}
     )
 
     state
@@ -784,7 +799,10 @@ defmodule Play.Scene.Asteroids do
   defp unpause_from_input({:key, {_, :press, _}}), do: true
   defp unpause_from_input(_), do: false
 
-  defp score(%State{num_asteroids_destroyed: n}), do: n
+  defp score(%State{player_scores: player_scores}) do
+    Map.values(player_scores)
+    |> Enum.sum()
+  end
 
   defp graph(%State{paused: true}), do: @paused_graph
   defp graph(%State{graph: graph}), do: graph
