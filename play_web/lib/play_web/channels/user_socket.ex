@@ -21,7 +21,27 @@ defmodule PlayWeb.UserSocket do
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
   def connect(params, socket, connect_info) do
+    # Example connect_info:
+    # %{peer_data: %{address: {192, 168, 1, 102}, port: 39127, ssl_cert: nil}, x_headers: []}
+
+    ip_addr_tuple = connect_info.peer_data.address
+    IO.inspect(socket, label: "socket")
+    IO.inspect(connect_info, label: "connect_info")
+
     token = params["token"]
+
+    with {:banned, false} <- {:banned, PlayWeb.BannedIPs.banned?()},
+         {:ok, username} <- Phoenix.Token.verify(socket, @salt, token, max_age: 86400) do
+      socket =
+        socket
+        |> assign(:username, username)
+    else
+      {:banned, true} ->
+        socket_error(socket, :banned)
+
+      {:error, :missing} ->
+        socket_error(socket, :not_logged_in)
+    end
 
     case Phoenix.Token.verify(socket, @salt, token, max_age: 86400) do
       {:ok, username} ->

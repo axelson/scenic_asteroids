@@ -2,7 +2,7 @@ defmodule PlayWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :play_web
 
   socket "/socket", PlayWeb.UserSocket,
-    websocket: true,
+    websocket: [connect_info: [:peer_data, :x_headers]],
     longpoll: false
 
   # Serve at "/" the static files from "priv/static" directory.
