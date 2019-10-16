@@ -123,7 +123,8 @@ defmodule Play.Player do
         id: player.id,
         t: player.t,
         rotate: Play.Utils.scenic_radians(player.direction),
-        stroke: {1, player.color}
+        stroke: {1, player.color},
+        fill: player.color
       )
     end
   end

@@ -9,7 +9,7 @@ defmodule Play.ColorAssigner do
     :gold,
     :salmon,
     :orange_red,
-    :powder_blue
+    :chocolate
   ]
 
   def start_link(opts) do
