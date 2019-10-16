@@ -6,7 +6,8 @@ defmodule PlayWeb.PageController do
   plug :require_user when action not in [:signin]
 
   def index(conn, _params) do
-    render(conn, "index.html")
+    conn
+    |> redirect(to: "/play")
   end
 
   def play(conn, _params) do
