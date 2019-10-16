@@ -2,15 +2,19 @@
 
 @import "./phoenix.css";
 
+#instructions-area {
+  min-height: 100px;
+}
+
 #player-color {
-  display: none;
+  visibility: hidden;
 }
 #player-color-value {
   background: black;
 }
 
 #player-instructions {
-  display: none;
+  visibility: hidden;
 }
 
 #disconnected-message {
@@ -19,5 +23,5 @@
 }
 
 #fullscreen-button {
-  display: none;
+  visibility: hidden;
 }

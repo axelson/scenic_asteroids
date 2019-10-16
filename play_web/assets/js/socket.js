@@ -29,7 +29,7 @@ if (document.querySelector('#game')) {
 
   window.onSendShootDirection = (relX, relY) => {
     var obj = {x: relX, y: relY}
-    console.log("obj", obj)
+    // console.log("obj", obj)
 
     lobbyChannel.push(`try_shoot_direction`, obj);
   }

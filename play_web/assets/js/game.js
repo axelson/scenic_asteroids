@@ -27,6 +27,8 @@ var cursors;
 var keys;
 var arrows;
 var game;
+var fullScreenBtnGroup;
+var fullScreenBtn;
 var shooting = false;
 
 // Circle location is used to calculate the angle for firing
@@ -42,18 +44,33 @@ window.onCreateGame = function() {
 
 function preload() {
   this.load.image('arrow', '/images/arrow.png');
+  this.load.image('fullscreen', '/images/full-screen.png');
 }
 
 function create() {
+  var that = this;
+
   arrows = this.physics.add.staticGroup();
   createArrows(arrows);
 
+  fullScreenBtnGroup = this.physics.add.staticGroup();
+  fullScreenBtn = fullScreenBtnGroup.create(gameWidth - 20, 20, 'fullscreen').setInteractive();
+  fullScreenBtn.name = "full-screen-btn"
+
   this.input.on('gameobjectdown', function(pointer, gameObject) {
+
     if (isArrow(gameObject)) {
       const direction = arrowToDirection(gameObject);
       console.log("send", direction);
 
       sendSetDirection(direction);
+    } else if(gameObject.name == "full-screen-btn") {
+      if (that.scale.isFullscreen) {
+        that.scale.stopFullscreen();
+      } else {
+        that.scale.startFullscreen();
+      }
+  
     } else {
       console.log("clicked on", gameObject.name);
     }
@@ -81,7 +98,7 @@ function create() {
   drawCircle(graphics, circle);
 
   this.input.on('pointerdown', function (pointer) {
-    console.log('down!');
+    console.log('pointer down!');
     var touchX = pointer.x;
     var touchY = pointer.y;
     console.log(`x: ${touchX} y:${touchY}`);
@@ -111,7 +128,6 @@ function create() {
     clearShooting();
   });
 
-  var that = this;
   this.input.keyboard.on('keydown-F', function (event) {
     if (that.scale.isFullscreen) {
       that.scale.stopFullscreen();

@@ -28,11 +28,12 @@ export function start(socket, lobbyChannel) {
   })
 
   lobbyChannel.on('game_start', function() {
+    console.log('game starting!')
     if (!started) {
       window.onCreateGame()
       jQuery('#waiting-message').hide()
-      jQuery('#player-instructions').show()
-      jQuery('#fullscreen-button').show()
+      jQuery('#player-instructions').css('visibility', 'visible')
+      jQuery('#fullscreen-button').css('visibility', 'visible')
     }
     started = true
 
@@ -46,7 +47,7 @@ export function start(socket, lobbyChannel) {
       .text(msg.color)
       .css({color: cssColor(msg.color)})
 
-    jQuery('#player-color').show()
+    jQuery('#player-color').css('visibility', 'visible')
   })
 
   lobbyChannel.onClose(() => {
