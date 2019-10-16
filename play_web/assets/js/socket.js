@@ -1,4 +1,5 @@
 import {Socket} from "phoenix"
+import { throttle } from './throttle.js'
 
 let socket = new Socket("/socket", {params: window.SocketExports})
 let lobbyChannel
@@ -38,16 +39,18 @@ if (document.querySelector('#game')) {
     lobbyChannel.push('clear_shooting', {});
   }
 
+  const rotateLeft = throttle(() => lobbyChannel.push('rotate_left', {}), 300)
   window.onRotateLeft = () => {
-    console.log("rot left!")
-    lobbyChannel.push('rotate_left', {})
+    rotateLeft()
   }
   window.onClearRotateLeft = () => {
     lobbyChannel.push('clear_rotate_left', {})
   }
 
+  const rotateRight = throttle(() => lobbyChannel.push('rotate_right', {}), 300)
   window.onRotateRight = () => {
-    lobbyChannel.push('rotate_right', {})
+    console.log('trying rotate right')
+    rotateRight()
   }
   window.onClearRotateRight = () => {
     lobbyChannel.push('clear_rotate_right', {})

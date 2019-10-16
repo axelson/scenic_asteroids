@@ -1,3 +1,5 @@
+import { throttle } from './throttle.js'
+
 const scaleFactor = 0.6;
 const gameWidth = 800 * scaleFactor;
 const gameHeight = 350 * scaleFactor
@@ -150,6 +152,7 @@ function create() {
     window.onClearRotateRight();
   })
   this.input.keyboard.on('keydown', function (event) {
+    // console.log('')
     const direction = keyToDirection(event.key)
     if (direction) {
       sendSetDirection(direction);
@@ -199,12 +202,13 @@ function createArrows() {
 // game.input.addPointer(3);
 
 function recordDirection(direction) {
+  sendSetDirection(direction);
   // Need to keep track of if this key is currently pressed so we know when it
   // transitions
   if (!keys[direction]) {
     console.log(`recording direction: ${direction}`)
     keys[direction] = true;
-    sendSetDirection(direction);
+    // sendSetDirection(direction);
   }
 }
 
@@ -215,9 +219,15 @@ function unRecordDirection(direction) {
     sendClearDirection(direction);
   }
 }
+// var sendSetDirectionThrottled = throttle(sendSetDirection, 200)
+// var sendSetDirection = throttle(function(direction) {
+//   console.log("send set direction with direction", direction)
+//   window.onDirection(direction);
+// }, 200);
 
 function sendSetDirection(direction) {
-  window.onDirection(direction);
+  // window.onDirection(direction);
+  recordDirectionFunctions[direction]()
 }
 
 function sendClearDirection(direction) {
@@ -293,3 +303,12 @@ function keyToDirection(key) {
     default: return null
   }
 }
+
+const throttleTimeMs = 300
+var recordDirectionFunctions = {
+  up: throttle(() => window.onDirection('up'), throttleTimeMs),
+  left: throttle(() => window.onDirection('left'), throttleTimeMs),
+  down: throttle(() => window.onDirection('down'), throttleTimeMs),
+  right: throttle(() => window.onDirection('right'), throttleTimeMs)  
+}
+

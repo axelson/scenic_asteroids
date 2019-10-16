@@ -71,10 +71,10 @@ TODO:
 * [x] Track and display per-player score
 * [x] Add a full-screen button on the web client
 * [x] Make ships spin if socket becomes disconnected
-* [ ] Client javascript should resend keys periodically if they're still held down???
+* [x] Client javascript should resend keys periodically if they're still held down???
   * Or should we just dispense with the action timer and if the socket becomes disconnected then clear all actions?
 * [ ] Move ship color text into Phaser
-* [ ] Make a full-screen button in Phaser
+* [x] Make a full-screen button in Phaser
 * [ ] Clean up the view when playing the game (remove header?)
 * [ ] Waiting screen should show present users
 * [ ] Deploy changes to nerves
