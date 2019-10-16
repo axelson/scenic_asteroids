@@ -1,5 +1,5 @@
 <div id="waiting-message">
-  Waiting for game to start
+  Waiting for next game to start
 </div>
 <div id="player-instructions">
   Move with the arrows (or arrow keys). Shoot by tapping near the circle (or spacebar). (rotate with q and e)

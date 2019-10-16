@@ -73,7 +73,7 @@ defmodule Play.Scene.GameOver do
       |> Enum.map(fn {username, score} -> "#{username} - #{score}" end)
       |> Enum.join("\n")
 
-    message = "Final scores:\n" <> score_messages
+    message = "Final Scores:\n" <> score_messages
 
     font_size = 40
     font = :roboto
