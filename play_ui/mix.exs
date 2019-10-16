@@ -28,14 +28,14 @@ defmodule PlayUi.MixProject do
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "1.0.0-rc.7", only: :dev, runtime: false},
       dep(:phoenix_live_reload, :path),
-      dep(:exsync, :github),
+      dep(:exsync, :hex),
       {:play, path: "../play"},
       {:play_web, path: "../play_web"},
       dep(:launcher, :github),
       # Need master for fix of: https://github.com/boydm/scenic_driver_glfw/issues/25
       # {:scenic_driver_glfw, "~> 0.10", targets: :host},
       {:scenic_driver_glfw, github: "boydm/scenic_driver_glfw", override: true, targets: :host},
-      dep(:scenic_live_reload, :github)
+      dep(:scenic_live_reload, :hex)
     ]
     |> List.flatten()
   end
