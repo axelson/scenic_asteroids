@@ -12,13 +12,33 @@ defmodule Play.Scene.Splash do
   alias Scenic.ViewPort
   import Scenic.Primitives, only: [{:rect, 3}, {:rect, 2}, {:update_opts, 2}]
 
-  # Beware: this path is only valid at compile-time, not run-time
-  @logo_path :code.priv_dir(:play)
-             |> Path.join("logo.png")
+  @counter_max 500
 
-  @logo_hash Scenic.Cache.Support.Hash.file!(@logo_path, :sha)
+  # Heights of the logo slices
+  @logo_filenames [
+    {"logo-0.png", height: 4, start_t: 0},
+    {"logo-1.png", height: 6, start_t: 50},
+    {"logo-2.png", height: 5, start_t: 100},
+    {"logo-3.png", height: 6, start_t: 150},
+    {"logo-4.png", height: 5, start_t: 190},
+    {"logo-5.png", height: 4, start_t: 230},
+    {"logo-6.png", height: 13, start_t: 250}
+  ]
 
-  @logo_width 515
+  @logo_hashes Map.new(
+                 @logo_filenames,
+                 fn {filename, _} ->
+                   hash =
+                     Scenic.Cache.Support.Hash.file!(
+                       Path.join(:code.priv_dir(:play), filename),
+                       :sha
+                     )
+
+                   {filename, hash}
+                 end
+               )
+
+  @logo_width 344
   @logo_height 211
   @initial_y_coord 0
 
@@ -45,31 +65,17 @@ defmodule Play.Scene.Splash do
     # calculate the transform that centers the logo in the viewport
     {:ok, %ViewPort.Status{size: {vp_width, vp_height}}} = ViewPort.info(viewport)
 
-    final_y_coord = vp_height / 2 - @logo_height / 2
+    final_y_coord = vp_height / 2
     final_x_coord = vp_width / 2 - @logo_width / 2
 
-    move = {
-      final_x_coord,
-      @initial_y_coord
-    }
-
-    # load the logo texture into the cache
-    logo_path = :code.priv_dir(:play) |> Path.join("logo.png")
-    {:ok, _hash} = Scenic.Cache.Static.Texture.load(logo_path, @logo_hash)
+    load_hashes()
 
     graph =
       Graph.build()
       # Rectangle used for capturing input for the scene
       |> rect({vp_width, vp_height})
-      |> rect(
-        {@logo_width, @logo_height},
-        id: :logo,
-        fill: image()
-      )
+      |> render_logo_rects()
       |> Launcher.HiddenHomeButton.add_to_graph([])
-
-    # move the logo into the right location
-    graph = Graph.modify(graph, :logo, &update_opts(&1, translate: move))
 
     # start a very simple animation timer
     {:ok, timer} = :timer.send_interval(@animate_ms, :animate)
@@ -87,15 +93,24 @@ defmodule Play.Scene.Splash do
     {:ok, state, push: graph}
   end
 
-  # --------------------------------------------------------
-  # A very simple animation. A timer runs, which increments a counter. The counter
-  # is used to move the logo into the center of the screen
-  # Then there is a short pause and the next scene is loaded
+  def render_logo_rects(graph) do
+    Enum.reduce(@logo_filenames, graph, fn {filename, opts}, graph ->
+      graph
+      |> rect(
+        {@logo_width, opts[:height]},
+        id: filename,
+        fill: image(filename),
+        # Start off the screen
+        t: {0, -20}
+      )
+    end)
+  end
+
   def handle_info(
         :animate,
         %{timer: timer, counter: counter} = state
       )
-      when counter >= 256 do
+      when counter > @counter_max do
     :timer.cancel(timer)
     Process.send_after(self(), :finish, @finish_delay_ms)
     {:noreply, state}
@@ -114,18 +129,47 @@ defmodule Play.Scene.Splash do
       final_y_coord: final_y_coord
     } = state
 
-    y_coord = counter / 255 * final_y_coord
-    t = {final_x_coord, y_coord}
-
-    # Only needed for reloading (can put this in a on-reload?)
-    logo_path = :code.priv_dir(:play) |> Path.join("logo.png")
-    {:ok, _hash} = Scenic.Cache.Static.Texture.load(logo_path, @logo_hash)
+    load_hashes()
 
     graph =
-      graph
-      |> Graph.modify(:logo, &update_opts(&1, fill: image(), translate: t))
+      @logo_filenames
+      |> Enum.with_index()
+      |> Enum.reduce(graph, fn {{filename, opts}, index}, graph ->
+        start_time = Keyword.get(opts, :start_t)
+        height = Keyword.get(opts, :height)
+
+        if counter >= start_time && counter - start_time <= 70 do
+          extra_y = total_height(filename)
+
+          y = :math.pow(1.1, counter - start_time) - height - 2
+          y_max = final_y_coord - extra_y
+          t = {final_x_coord, min(y, y_max)}
+
+          graph
+          |> Graph.modify(filename, &update_opts(&1, file: image(filename), translate: t))
+        else
+          graph
+        end
+      end)
 
     {:noreply, %State{state | graph: graph, counter: counter + 1}, push: graph}
+  end
+
+  # Calculate the relative height of this slice of the logo
+  defp total_height(filename) do
+    Enum.reduce_while(@logo_filenames, 0, fn
+      {^filename, opts}, height -> {:halt, height + opts[:height]}
+      {filename, opts}, height -> {:cont, height + opts[:height]}
+    end)
+  end
+
+  defp load_hashes do
+    @logo_filenames
+    |> Enum.map(fn {filename, _} -> filename end)
+    |> Enum.each(fn filename ->
+      logo_path = :code.priv_dir(:play) |> Path.join(filename)
+      {:ok, _hash} = Scenic.Cache.Static.Texture.load(logo_path, @logo_hashes[filename])
+    end)
   end
 
   # --------------------------------------------------------
@@ -147,5 +191,15 @@ defmodule Play.Scene.Splash do
     ViewPort.set_root(vp, {first_scene, nil})
   end
 
-  defp image, do: {:image, @logo_hash}
+  defp image(filename) do
+    height =
+      @logo_filenames
+      |> Enum.flat_map(fn
+        {^filename, opts} -> [opts[:height]]
+        _ -> []
+      end)
+      |> hd()
+
+    {:image, @logo_hashes[filename]}
+  end
 end
