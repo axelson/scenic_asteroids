@@ -398,10 +398,18 @@ defmodule Play.Scene.Asteroids do
         :west -> {0 - size, rand_y}
       end
 
-    direction = {:rand.uniform(), :rand.uniform()}
-    speed = :rand.uniform(2)
+    direction = {maybe_negate(:rand.uniform()), maybe_negate(:rand.uniform())}
+    speed = :rand.uniform(3)
 
     Play.Asteroid.new({x, y}, size, direction, speed)
+  end
+
+  defp maybe_negate(number) do
+    if :rand.uniform(10) >= 5 do
+      number
+    else
+      -number
+    end
   end
 
   defp add_asteroid?(%State{asteroids: asteroids}) when length(asteroids) > 100, do: false
