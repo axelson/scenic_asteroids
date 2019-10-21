@@ -21,3 +21,8 @@ addons:
       - libglfw3-dev
       - libglew1.13
       - libglew-dev
+cache:
+  directories:
+  - $HOME/.mix
+  - deps
+  - _build

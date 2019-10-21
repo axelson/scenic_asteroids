@@ -18,7 +18,7 @@ defmodule Play.Demo do
 
   def start_player(username) do
     Registry.register(Registry.Usernames, username, self())
-    :ok = Play.PlayerController.start_in_supervisor(username, self())
+    :ok = Play.PlayerController.start_in_supervisor(username)
     :ok = Play.PlayerController.notify_connect(username)
   end
 end

@@ -20,7 +20,7 @@ defmodule PlayWeb.UserSocket do
   #
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
-  def connect(params, socket, connect_info) do
+  def connect(params, socket, _connect_info) do
     token = params["token"]
 
     case Phoenix.Token.verify(socket, @salt, token, max_age: 86400) do

@@ -17,7 +17,7 @@ defmodule Play.ColorAssigner do
   end
 
   @impl GenServer
-  def init(opts) do
+  def init(_opts) do
     {:ok, @colors}
   end
 

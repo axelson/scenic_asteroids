@@ -20,9 +20,10 @@ defmodule PlayWeb.LobbyChannel do
   end
 
   defp start_player_controller(username) do
-    Play.PlayerController.start_in_supervisor(username, self())
+    Play.PlayerController.start_in_supervisor(username)
   end
 
+  @impl Phoenix.Channel
   def handle_in("player_direction", msg, socket) do
     action = direction_to_action(msg["direction"])
     :ok = Play.PlayerController.set_action(username(socket), action)
@@ -69,7 +70,7 @@ defmodule PlayWeb.LobbyChannel do
     {:noreply, socket}
   end
 
-  def handle_in("clear_shooting", msg, socket) do
+  def handle_in("clear_shooting", _msg, socket) do
     Play.PlayerController.clear_action(username(socket), :shoot)
     {:noreply, socket}
   end
@@ -107,8 +108,6 @@ defmodule PlayWeb.LobbyChannel do
 
     {:noreply, socket}
   end
-
-  defp username(socket), do: socket.assigns.username
 
   defp direction_to_action("up"), do: :up
   defp direction_to_action("right"), do: :right

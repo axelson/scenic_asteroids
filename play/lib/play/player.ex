@@ -71,15 +71,6 @@ defmodule Play.Player do
     %__MODULE__{player | direction: new_direction}
   end
 
-  defp tick_rotation(%__MODULE__{} = player, :rotate_right) do
-    direction = player.direction
-    radians = Play.Utils.unit_vector_to_radians(direction)
-    radians = radians + :math.pi() / 30
-    new_direction = Play.Utils.radians_to_unit_vector(radians)
-
-    %__MODULE__{player | direction: new_direction}
-  end
-
   defp constrain_player_to_screen({width, height}) do
     {_, {player_width, _}, {_, player_height}} = player_dimensions()
 

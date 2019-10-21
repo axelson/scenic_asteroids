@@ -15,6 +15,8 @@ config :play, :viewport, %{
   ]
 }
 
+config :play, :endpoint, PlayWeb.Endpoint
+
 config :play_web, PlayWeb.Endpoint,
   url: [host: "localhost"],
   reloadable_apps: [:play, :play_ui, :play_web],

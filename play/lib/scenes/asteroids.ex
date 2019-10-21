@@ -160,26 +160,19 @@ defmodule Play.Scene.Asteroids do
     Process.register(self(), __MODULE__)
     schedule_animations()
 
-    # PlayerController.start_link(username: @console_player_username, parent: self())
     state = initial_state(scenic_opts)
 
-    # send(self(), :notify_game_start)
-
-    PlayerController.start_in_supervisor(@console_player_username, self())
+    PlayerController.start_in_supervisor(@console_player_username)
     :ok = Play.PlayerController.notify_connect(@console_player_username)
     state = register_player(state, @console_player_username, self())
 
     Registry.select(Registry.Usernames, [{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}])
-    |> Enum.each(fn {username, _pid, _pid} ->
-      # state = register_player(state, username, pid)
+    |> Enum.each(fn {username, _, _pid} ->
       PlayerController.register(username)
     end)
 
-    PlayWeb.Endpoint.broadcast("lobby", "game_start", %{})
+    endpoint().broadcast("lobby", "game_start", %{})
 
-    # {:ok, initial_state(scenic_opts), push: @initial_graph}
-    # {:ok, initial_state(scenic_opts), push: @initial_graph, continue: :notify_game_start}
-    # {:ok, :mystate, push: @initial_graph, continue: :notify_game_start}
     {:ok, state, push: @initial_graph}
   end
 
@@ -826,4 +819,6 @@ defmodule Play.Scene.Asteroids do
   defp overlap(x, x1, x2), do: x > x1 && x < x2
 
   defp restart, do: Process.exit(self(), :kill)
+
+  defp endpoint, do: Application.fetch_env!(:play, :endpoint)
 end
