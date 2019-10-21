@@ -171,7 +171,7 @@ defmodule Play.Scene.Asteroids do
       PlayerController.register(username)
     end)
 
-    PlayWeb.Endpoint.broadcast("lobby", "game_start", %{})
+    endpoint().broadcast("lobby", "game_start", %{})
 
     {:ok, state, push: @initial_graph}
   end
@@ -819,4 +819,6 @@ defmodule Play.Scene.Asteroids do
   defp overlap(x, x1, x2), do: x > x1 && x < x2
 
   defp restart, do: Process.exit(self(), :kill)
+
+  defp endpoint, do: Application.fetch_env!(:play, :endpoint)
 end

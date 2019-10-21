@@ -39,8 +39,6 @@ defmodule Play.Scene.Splash do
                )
 
   @logo_width 344
-  @logo_height 211
-  @initial_y_coord 0
 
   @animate_ms 10
   @finish_delay_ms 9750
@@ -133,8 +131,7 @@ defmodule Play.Scene.Splash do
 
     graph =
       @logo_filenames
-      |> Enum.with_index()
-      |> Enum.reduce(graph, fn {{filename, opts}, index}, graph ->
+      |> Enum.reduce(graph, fn {filename, opts}, graph ->
         start_time = Keyword.get(opts, :start_t)
         height = Keyword.get(opts, :height)
 
@@ -159,7 +156,7 @@ defmodule Play.Scene.Splash do
   defp total_height(filename) do
     Enum.reduce_while(@logo_filenames, 0, fn
       {^filename, opts}, height -> {:halt, height + opts[:height]}
-      {filename, opts}, height -> {:cont, height + opts[:height]}
+      {_filename, opts}, height -> {:cont, height + opts[:height]}
     end)
   end
 
@@ -191,15 +188,5 @@ defmodule Play.Scene.Splash do
     ViewPort.set_root(vp, {first_scene, nil})
   end
 
-  defp image(filename) do
-    height =
-      @logo_filenames
-      |> Enum.flat_map(fn
-        {^filename, opts} -> [opts[:height]]
-        _ -> []
-      end)
-      |> hd()
-
-    {:image, @logo_hashes[filename]}
-  end
+  defp image(filename), do: {:image, @logo_hashes[filename]}
 end

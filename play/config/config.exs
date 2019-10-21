@@ -5,3 +5,5 @@ config :play, :viewport, %{
   size: {500, 500},
   default_scene: {Play.Scene.Splash, Play.Scene.Asteroids}
 }
+
+config :play, :endpoint, PlayWeb.Endpoint
