@@ -68,14 +68,12 @@ defmodule Play.PlayerController do
 
   def start_link(opts \\ []) do
     username = Keyword.fetch!(opts, :username)
-    parent = Keyword.fetch!(opts, :parent)
-    Logger.debug("player controller for #{username} starting with parent: #{inspect(parent)}")
+    Logger.debug("player controller for #{username} starting")
     GenServer.start_link(__MODULE__, opts, name: process_name(username))
   end
 
   @impl GenServer
   def init(opts) do
-    parent = Keyword.fetch!(opts, :parent)
     username = Keyword.fetch!(opts, :username)
 
     state = %State{
@@ -89,10 +87,10 @@ defmodule Play.PlayerController do
     {:ok, state}
   end
 
-  def start_in_supervisor(username, parent) do
+  def start_in_supervisor(username) do
     DynamicSupervisor.start_child(
       Play.PlayerControllerSupervisor,
-      {Play.PlayerController, username: username, parent: parent}
+      {Play.PlayerController, username: username}
     )
     |> case do
       {:ok, _pid} -> :ok
@@ -188,9 +186,8 @@ defmodule Play.PlayerController do
       Process.cancel_timer(reconnect_timer)
     end
 
-    # We monitor the parent process because if that process dies, then if no new
+    # We monitor the connected process because if that process dies, then if no new
     # conections come in then we kill ourselves
-    # IO.puts("PlayerController (#{state.username}): monitoring #{inspect(from_pid)}")
     Process.monitor(from_pid)
 
     state = %State{state | reconnect_timer: nil, connected?: true}
@@ -198,7 +195,7 @@ defmodule Play.PlayerController do
   end
 
   def handle_call(:get_view, _from, state) do
-    %State{action_states: action_states, direction: direction, connected?: connected?} = state
+    %State{action_states: action_states, direction: direction} = state
 
     actions =
       Enum.flat_map(action_states, fn
@@ -241,7 +238,7 @@ defmodule Play.PlayerController do
     {:stop, reason, state}
   end
 
-  def handle_info({:DOWN, ref, :process, pid, _reason}, state) do
+  def handle_info({:DOWN, _ref, :process, _pid, _reason}, state) do
     %State{reconnect_timer: reconnect_timer} = state
     # IO.puts("PlayerController (#{state.username}): PROCESS DOWN! #{inspect(pid)}")
 
@@ -267,15 +264,6 @@ defmodule Play.PlayerController do
     Logger.warn("Unhandled event: #{inspect(event)}")
     {:noreply, state}
   end
-
-  @impl GenServer
-  def terminate({:shutdown, :closed}, state) do
-    # username = state.username
-    # IO.puts("PlayerController for #{username} closed")
-    :ok
-  end
-
-  def terminate(_, _), do: :ok
 
   defp do_clear_action(%State{} = state, action) do
     %State{action_states: action_states, action_timers: action_timers} = state
