@@ -113,7 +113,7 @@ defmodule Play.Player do
 
   def player_dimensions, do: @player_dimensions
 
-  defimpl Play.ScenicEntity, for: Play.Player do
+  defimpl Play.ScenicEntity, for: __MODULE__ do
     def id(%Player{id: id}), do: id
 
     def tick(%Player{} = player), do: player
