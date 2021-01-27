@@ -21,7 +21,7 @@ config :play_web, PlayWeb.Endpoint,
   server: true,
   secret_key_base: "4m4EdLqbm138oXxQyvWMUy8CEiksqoNBPjoHZEwvhnGVML9SrFNCXtE57z6x8EV1",
   render_errors: [view: PlayWeb.ErrorView, accepts: ~w(html json)],
-  pubsub: [name: PlayWeb.PubSub, adapter: Phoenix.PubSub.PG2]
+  pubsub_server: PlayWeb.PubSub
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason

@@ -8,6 +8,7 @@ defmodule PlayWeb.Application do
   def start(_type, _args) do
     # List all child processes to be supervised
     children = [
+      {Phoenix.PubSub, name: PlayWeb.PubSub},
       # Start the endpoint when the application starts
       PlayWeb.Endpoint,
       PlayWeb.Presence
