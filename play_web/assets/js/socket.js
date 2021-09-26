@@ -62,6 +62,8 @@ if (document.querySelector('#game')) {
         alert(`Unable to join: ${reason}`)
       })
   }
+} else {
+  console.warn("unable to find #game div!")
 }
 
 function determineDirection(direction) {
