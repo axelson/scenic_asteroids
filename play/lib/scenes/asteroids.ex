@@ -39,6 +39,7 @@ defmodule Play.Scene.Asteroids do
 
   use Scenic.Scene
   import Scenic.Primitives
+  import Play.Utils, only: [input_state: 1]
   require Logger
 
   alias Scenic.Graph
@@ -121,8 +122,8 @@ defmodule Play.Scene.Asteroids do
   # Question: Should there be a process per asteroid?
   # Answer: No!
 
-  @movement_keys ["W", "A", "S", "D"]
-  @firing_keys [" "]
+  @movement_keys [:key_w, :key_a, :key_s, :key_d, :key_q, :key_e]
+  @firing_keys [:key_space]
   @keys_to_track @movement_keys ++ @firing_keys
 
   @movement_actions [:up, :right, :down, :left, :rotate_left, :rotate_right]
@@ -134,7 +135,9 @@ defmodule Play.Scene.Asteroids do
 
   @initial_graph Graph.build()
                  # Rectangle used for capturing input for the scene
-                 |> rect({Play.Utils.screen_width(), Play.Utils.screen_height()})
+                 |> rect({Play.Utils.screen_width(), Play.Utils.screen_height()},
+                   input: [:cursor_button, :cursor_pos]
+                 )
                  |> text("Score: 0",
                    id: :score,
                    t: {Play.Utils.screen_width(), 15},
@@ -146,7 +149,9 @@ defmodule Play.Scene.Asteroids do
 
   @paused_graph Graph.build()
                 # Rectangle used for capturing input for the scene
-                |> rect({Play.Utils.screen_width(), Play.Utils.screen_height()})
+                |> rect({Play.Utils.screen_width(), Play.Utils.screen_height()},
+                  input: [:cursor_button]
+                )
                 |> text("Game Paused",
                   t: {Play.Utils.screen_width() / 2, Play.Utils.screen_height() / 2},
                   fill: :white,
@@ -154,14 +159,15 @@ defmodule Play.Scene.Asteroids do
                 )
 
   @impl Scenic.Scene
-  def init(_args, scenic_opts) do
+  def init(scene, _args, _scenic_opts) do
+    Scenic.Scene.capture_input(scene, [:key])
     # Logger.info("scenic_opts: #{inspect(scenic_opts)}")
     # IO.puts("\n\nAsteroids scene starting with pid: #{inspect(self())}")
     Process.register(self(), __MODULE__)
     schedule_animations()
 
     # PlayerController.start_link(username: @console_player_username, parent: self())
-    state = initial_state(scenic_opts)
+    state = initial_state(scene)
 
     # send(self(), :notify_game_start)
 
@@ -170,7 +176,7 @@ defmodule Play.Scene.Asteroids do
     state = register_player(state, @console_player_username, self())
 
     Registry.select(Registry.Usernames, [{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}])
-    |> Enum.each(fn {username, _pid, _pid} ->
+    |> Enum.each(fn {username, _pid, _other_pid} ->
       # state = register_player(state, username, pid)
       PlayerController.register(username)
     end)
@@ -180,10 +186,16 @@ defmodule Play.Scene.Asteroids do
     # {:ok, initial_state(scenic_opts), push: @initial_graph}
     # {:ok, initial_state(scenic_opts), push: @initial_graph, continue: :notify_game_start}
     # {:ok, :mystate, push: @initial_graph, continue: :notify_game_start}
-    {:ok, state, push: @initial_graph}
+
+    scene =
+      scene
+      |> assign(:state, state)
+      |> push_graph(@initial_graph)
+
+    {:ok, scene}
   end
 
-  defp initial_state(opts) do
+  defp initial_state(scene) do
     %State{
       asteroids: 1..7 |> Enum.map(fn _ -> new_asteroid() end),
       player_bullets: %{},
@@ -194,7 +206,7 @@ defmodule Play.Scene.Asteroids do
       player_pid_refs: %{},
       time: 0,
       graph: @initial_graph,
-      viewport: Keyword.get(opts, :viewport)
+      viewport: scene.viewport
     }
   end
 
@@ -206,33 +218,39 @@ defmodule Play.Scene.Asteroids do
     GenServer.call(__MODULE__, {:player_color, username})
   end
 
-  @impl Scenic.Scene
-  def handle_call({:register_player, username, pid}, _from, state) do
+  @impl GenServer
+  def handle_call({:register_player, username, pid}, _from, scene) do
+    state = scene.assigns.state
     state = register_player(state, username, pid)
-
-    {:reply, :ok, state}
+    scene = assign(scene, :state, state)
+    {:reply, :ok, scene}
   end
 
-  def handle_call({:player_alive, username}, _from, state) do
-    {:reply, player_alive?(state, username), state}
+  def handle_call({:player_alive, username}, _from, scene) do
+    {:reply, player_alive?(scene.assigns.state, username), scene}
   end
 
-  def handle_call({:player_color, username}, _from, state) do
+  def handle_call({:player_color, username}, _from, scene) do
+    state = scene.assigns.state
+
     case get_player(state, username) do
-      {:ok, player} -> {:reply, {:ok, player.color}, state}
-      {:error, :not_found} = err -> {:reply, err, state}
+      {:ok, player} -> {:reply, {:ok, player.color}, scene}
+      {:error, :not_found} = err -> {:reply, err, scene}
     end
   end
 
-  def handle_call(msg, _from, state) do
+  def handle_call(msg, _from, scene) do
     Logger.warn("UNHANDLED handle_call: #{inspect(msg)}")
-    {:noreply, state}
+    {:noreply, scene}
   end
 
-  @impl Scenic.Scene
-  def handle_info({:animate, _}, %{paused: true} = state), do: {:noreply, state}
+  @impl GenServer
+  def handle_info({:animate, _}, %{assigns: %{state: %{paused: true}}} = scene),
+    do: {:noreply, scene}
 
-  def handle_info({:animate, _expected_run_time}, state) do
+  def handle_info({:animate, _expected_run_time}, scene) do
+    state = scene.assigns.state
+
     state =
       state
       |> update_players()
@@ -255,15 +273,22 @@ defmodule Play.Scene.Asteroids do
     #   # IO.inspect(state, label: "state")
     # end
 
-    {:noreply, state, push: graph}
+    scene =
+      scene
+      |> assign(:state, state)
+      |> push_graph(graph)
+
+    {:noreply, scene}
   end
 
-  def handle_info({:DOWN, ref, :process, _pid, _reason}, state) do
+  def handle_info({:DOWN, ref, :process, _pid, _reason}, scene) do
+    state = scene.assigns.state
     %State{player_pid_refs: player_pid_refs} = state
     username = Map.get(player_pid_refs, ref)
     state = player_died(state, username)
 
-    {:noreply, state}
+    scene = assign(scene, :state, state)
+    {:noreply, scene}
   end
 
   defp tick_time(%State{time: t} = state), do: %{state | time: t + 1}
@@ -431,7 +456,7 @@ defmodule Play.Scene.Asteroids do
   end
 
   @impl Scenic.Scene
-  def filter_event(event, sec, state) do
+  def handle_event(event, sec, state) do
     IO.inspect(event, label: "event")
     IO.inspect(sec, label: "sec")
 
@@ -439,90 +464,111 @@ defmodule Play.Scene.Asteroids do
   end
 
   @impl Scenic.Scene
-  def handle_input(input, _viewport_context, %State{paused: true} = state) do
+  def handle_input(input, _context, %{assigns: %{state: %State{paused: true}}} = scene) do
+    IO.inspect(input, label: "input (asteroids.ex:460)")
+    state = scene.assigns.state
+
     if unpause_from_input(input) do
       Logger.info("Unpausing from input: #{inspect(input)}")
       state = %State{state | paused: false}
-      {:noreply, state}
+      scene = assign(scene, :state, state)
+      {:noreply, scene}
     else
-      {:noreply, state}
+      {:noreply, scene}
     end
   end
 
-  def handle_input(input, viewport_context, state) do
+  def handle_input(input, viewport_context, scene) do
     # IO.inspect(input, label: "#{__MODULE__} received input")
     # Logger.info("Received input: #{inspect input}")
-    do_handle_input(input, viewport_context, state)
+    do_handle_input(input, viewport_context, scene)
   end
 
-  def do_handle_input({:key, {"H", :press, _}}, _viewport_context, state) do
-    Launcher.switch_to_launcher(state.viewport)
+  # {:key, {:key_d, 1, []}}
+  def do_handle_input({:key, {:key_h, input_state(:press), _}}, _context, scene) do
+    Launcher.switch_to_launcher(scene.viewport)
 
-    {:noreply, state}
+    {:noreply, scene}
   end
 
-  def do_handle_input({:key, {"R", :press, _}}, _viewport_context, state) do
+  def do_handle_input({:key, {:key_r, input_state(:press), _}}, _context, scene) do
     restart()
 
-    {:noreply, state}
+    {:noreply, scene}
   end
 
-  def do_handle_input({:key, {key, action, _}}, _viewport_context, state)
-      when key in @keys_to_track and action in [:press, :repeat, :release] do
+  def do_handle_input({:key, {key, action, _}}, _context, scene)
+      when key in @keys_to_track and
+             action in [input_state(:press), input_state(:repeat), input_state(:release)] do
     record_console_key_state(key, action)
 
-    {:noreply, state}
+    {:noreply, scene}
   end
 
-  def do_handle_input({:key, {"Q", :press, _}}, _viewport_context, _state) do
+  def do_handle_input({:key, {:key_f, input_state(:press), _}}, _context, _state) do
     System.stop(0)
   end
 
-  def do_handle_input({:key, {"P", :press, _}}, _viewport_context, state) do
+  def do_handle_input({:key, {:key_p, input_state(:press), _}}, _context, scene) do
+    state = scene.assigns.state
     Logger.info("Pausing by pressing P")
     state = pause(state)
-    {:noreply, state, push: graph(state)}
+
+    scene =
+      scene
+      |> assign(:state, state)
+      |> push_graph(graph(state))
+
+    {:noreply, scene}
   end
 
-  def do_handle_input({:key, {"I", :press, _}}, _viewport_context, state) do
-    IO.inspect(state.graph, label: "graph")
-    {:noreply, state}
+  def do_handle_input({:key, {:key_i, input_state(:press), _}}, _context, scene) do
+    IO.inspect(scene.assigns.state.graph, label: "graph")
+    {:noreply, scene}
   end
 
-  def do_handle_input({:key, {"G", :press, _}}, _viewport_context, state) do
-    game_over(state)
-    {:noreply, state}
+  def do_handle_input({:key, {:key_g, input_state(:press), _}}, _context, scene) do
+    game_over(scene)
+    {:noreply, scene}
   end
 
   # Mouse/Touchscreen drag input
-  def do_handle_input({:cursor_pos, cursor_coords}, _viewport_context, state) do
+  def do_handle_input({:cursor_pos, cursor_coords}, _context, scene) do
+    state = scene.assigns.state
     update_console_player_direction(state, cursor_coords)
-    {:noreply, state}
+    {:noreply, scene}
   end
 
   # Mouse Click/Touchscreen tap input
-  def do_handle_input({:cursor_button, {:left, key_action, _, _cursor_coords}}, _, state) do
+  def do_handle_input({:cursor_button, {:btn_left, key_action, _, _cursor_coords}}, _, scene) do
     case key_action do
-      :press -> PlayerController.set_action(@console_player_username, :shoot)
-      :release -> PlayerController.clear_action(@console_player_username, :shoot)
+      # Press
+      1 -> PlayerController.set_action(@console_player_username, :shoot)
+      # Release
+      0 -> PlayerController.clear_action(@console_player_username, :shoot)
       _ -> nil
     end
 
-    {:noreply, state}
+    {:noreply, scene}
   end
 
-  def do_handle_input(_input, _, state) do
-    # IO.inspect(input, label: "#{__MODULE__} ignoring input")
-    {:noreply, state}
+  def do_handle_input(input, _, scene) do
+    IO.inspect(input, label: "#{__MODULE__} ignoring input")
+    {:noreply, scene}
   end
 
   defp record_console_key_state(key, key_action) do
     action = key_to_action(key)
 
     case key_action do
-      :press -> :ok = PlayerController.set_action(@console_player_username, action)
-      :release -> :ok = PlayerController.clear_action(@console_player_username, action)
-      _ -> nil
+      input_state(:press) ->
+        :ok = PlayerController.set_action(@console_player_username, action)
+
+      input_state(:release) ->
+        :ok = PlayerController.clear_action(@console_player_username, action)
+
+      _ ->
+        nil
     end
   end
 
@@ -592,11 +638,13 @@ defmodule Play.Scene.Asteroids do
     SchedEx.run_in(func, 1, repeat: true, time_scale: Play.GameTimer)
   end
 
-  defp key_to_action("W"), do: :up
-  defp key_to_action("A"), do: :left
-  defp key_to_action("S"), do: :down
-  defp key_to_action("D"), do: :right
-  defp key_to_action(" "), do: :shoot
+  defp key_to_action(:key_w), do: :up
+  defp key_to_action(:key_a), do: :left
+  defp key_to_action(:key_s), do: :down
+  defp key_to_action(:key_d), do: :right
+  defp key_to_action(:key_q), do: :rotate_left
+  defp key_to_action(:key_e), do: :rotate_right
+  defp key_to_action(:key_space), do: :shoot
 
   defp pause(%State{} = state), do: %{state | paused: !state.paused}
 
@@ -800,16 +848,18 @@ defmodule Play.Scene.Asteroids do
 
     Scenic.ViewPort.set_root(
       state.viewport,
-      {Play.Scene.PlayerDeath, {coords, player_scores}}
+      Play.Scene.PlayerDeath,
+      {coords, player_scores}
     )
 
     state
   end
 
-  defp unpause_from_input({:key, {"left_alt", :press, 0}}), do: false
-  defp unpause_from_input({:cursor_button, {_, :press, _, _}}), do: true
+  # Ignore alt-tab
+  defp unpause_from_input({:key, {:key_leftalt, _input_state, _}}), do: false
+  defp unpause_from_input({:cursor_button, {:btn_left, input_state(:press), _, _}}), do: true
   # Only unpause on key press (not release)
-  defp unpause_from_input({:key, {_, :press, _}}), do: true
+  defp unpause_from_input({:key, {_key, input_state(:press), _}}), do: true
   defp unpause_from_input(_), do: false
 
   defp graph(%State{paused: true}), do: @paused_graph

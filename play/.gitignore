@@ -26,3 +26,4 @@ foo-*.tar
 # Ignore scripts marked as secret - usually passwords and such in config files
 *.secret.exs
 *.secrets.exs
+priv/__scenic

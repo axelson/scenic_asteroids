@@ -75,7 +75,6 @@ defmodule Play.PlayerController do
 
   @impl GenServer
   def init(opts) do
-    parent = Keyword.fetch!(opts, :parent)
     username = Keyword.fetch!(opts, :username)
 
     state = %State{
@@ -198,7 +197,7 @@ defmodule Play.PlayerController do
   end
 
   def handle_call(:get_view, _from, state) do
-    %State{action_states: action_states, direction: direction, connected?: connected?} = state
+    %State{action_states: action_states, direction: direction} = state
 
     actions =
       Enum.flat_map(action_states, fn
@@ -241,7 +240,7 @@ defmodule Play.PlayerController do
     {:stop, reason, state}
   end
 
-  def handle_info({:DOWN, ref, :process, pid, _reason}, state) do
+  def handle_info({:DOWN, _ref, :process, _pid, _reason}, state) do
     %State{reconnect_timer: reconnect_timer} = state
     # IO.puts("PlayerController (#{state.username}): PROCESS DOWN! #{inspect(pid)}")
 
@@ -269,7 +268,7 @@ defmodule Play.PlayerController do
   end
 
   @impl GenServer
-  def terminate({:shutdown, :closed}, state) do
+  def terminate({:shutdown, :closed}, _state) do
     # username = state.username
     # IO.puts("PlayerController for #{username} closed")
     :ok

@@ -18,6 +18,7 @@ defmodule PlayUi.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
+      mod: {PlayUiApplication, []},
       extra_applications: [:logger]
     ]
   end
@@ -32,10 +33,10 @@ defmodule PlayUi.MixProject do
       {:play, path: "../play"},
       {:play_web, path: "../play_web"},
       dep(:launcher, :github),
-      # Need master for fix of: https://github.com/boydm/scenic_driver_glfw/issues/25
-      # {:scenic_driver_glfw, "~> 0.10", targets: :host},
-      {:scenic_driver_glfw, github: "boydm/scenic_driver_glfw", override: true, targets: :host},
-      dep(:scenic_live_reload, :github)
+      {:scenic, github: "boydm/scenic", branch: "v0.11", override: true},
+      # {:scenic, path: "~/dev/forks/scenic", override: true},
+      {:scenic_driver_local, github: "ScenicFramework/scenic_driver_local"},
+      dep(:scenic_live_reload, :path)
     ]
     |> List.flatten()
   end

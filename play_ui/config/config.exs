@@ -1,19 +1,20 @@
 use Mix.Config
 
 # Configure the main viewport for the Scenic application
-config :play, :viewport, %{
+config :play, :viewport,
   name: :main_viewport,
   size: {500, 500},
-  # default_scene: {Play.Scene.Asteroids, nil},
   default_scene: {Play.Scene.Splash, Play.Scene.Asteroids},
   drivers: [
-    %{
-      module: Scenic.Driver.Glfw,
-      name: :glfw,
-      opts: [resizeable: false, title: "play"]
-    }
+    [
+      module: Scenic.Driver.Local,
+      window: [
+        title: "Scenic Asteroids"
+      ]
+    ]
   ]
-}
+
+config :scenic, :assets, module: Play.Assets
 
 config :play_web, PlayWeb.Endpoint,
   url: [host: "localhost"],

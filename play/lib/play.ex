@@ -18,7 +18,7 @@ defmodule Play do
       # Registry that tracks all of the `Play.PlayerController` GenServers and
       # associates them by player username
       supervisor(Registry, [:unique, :player_controllers]),
-      supervisor(Scenic, viewports: [main_viewport_config]),
+      {Scenic, [main_viewport_config]},
       Play.Demo,
       Play.ColorAssigner
     ]
