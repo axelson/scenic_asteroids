@@ -8,15 +8,10 @@ defmodule Play.Scene.Splash do
   """
 
   use Scenic.Scene
+  require Play.Utils
+  import Scenic.Primitives, only: [{:rect, 3}, {:rect, 2}, {:update_opts, 2}]
   alias Scenic.Graph
   alias Scenic.ViewPort
-  import Scenic.Primitives, only: [{:rect, 3}, {:rect, 2}, {:update_opts, 2}]
-
-  # Beware: this path is only valid at compile-time, not run-time
-  @logo_path :code.priv_dir(:play)
-             |> Path.join("logo.png")
-
-  @logo_hash Scenic.Cache.Support.Hash.file!(@logo_path, :sha)
 
   @logo_width 515
   @logo_height 211
@@ -39,11 +34,11 @@ defmodule Play.Scene.Splash do
   end
 
   # --------------------------------------------------------
-  def init(first_scene, opts) do
-    viewport = opts[:viewport]
-
+  def init(scene, first_scene, _scenic_opts) do
+    Scenic.Scene.capture_input(scene, [:key])
+    # Scenic.ViewPort.capture_input(scene, )
     # calculate the transform that centers the logo in the viewport
-    {:ok, %ViewPort.Status{size: {vp_width, vp_height}}} = ViewPort.info(viewport)
+    %Scenic.ViewPort{size: {vp_width, vp_height}} = scene.viewport
 
     final_y_coord = vp_height / 2 - @logo_height / 2
     final_x_coord = vp_width / 2 - @logo_width / 2
@@ -53,14 +48,10 @@ defmodule Play.Scene.Splash do
       @initial_y_coord
     }
 
-    # load the logo texture into the cache
-    logo_path = :code.priv_dir(:play) |> Path.join("logo.png")
-    {:ok, _hash} = Scenic.Cache.Static.Texture.load(logo_path, @logo_hash)
-
     graph =
       Graph.build()
       # Rectangle used for capturing input for the scene
-      |> rect({vp_width, vp_height})
+      |> rect({vp_width, vp_height}, input: [:cursor_button])
       |> rect(
         {@logo_width, @logo_height},
         id: :logo,
@@ -75,7 +66,7 @@ defmodule Play.Scene.Splash do
     {:ok, timer} = :timer.send_interval(@animate_ms, :animate)
 
     state = %State{
-      viewport: viewport,
+      viewport: scene.viewport,
       timer: timer,
       graph: graph,
       first_scene: first_scene,
@@ -84,7 +75,12 @@ defmodule Play.Scene.Splash do
       final_y_coord: final_y_coord
     }
 
-    {:ok, state, push: graph}
+    scene =
+      scene
+      |> assign(:state, state)
+      |> push_graph(graph)
+
+    {:ok, scene}
   end
 
   # --------------------------------------------------------
@@ -93,20 +89,22 @@ defmodule Play.Scene.Splash do
   # Then there is a short pause and the next scene is loaded
   def handle_info(
         :animate,
-        %{timer: timer, counter: counter} = state
+        %{assigns: %{state: %{timer: timer, counter: counter}}} = scene
       )
       when counter >= 256 do
     :timer.cancel(timer)
     Process.send_after(self(), :finish, @finish_delay_ms)
-    {:noreply, state}
+    {:noreply, scene}
   end
 
-  def handle_info(:finish, state) do
-    go_to_first_scene(state)
-    {:noreply, state}
+  def handle_info(:finish, scene) do
+    go_to_first_scene(scene.assigns.state)
+    {:noreply, scene}
   end
 
-  def handle_info(:animate, %State{} = state) do
+  def handle_info(:animate, scene) do
+    state = scene.assigns.state
+
     %State{
       graph: graph,
       counter: counter,
@@ -117,35 +115,38 @@ defmodule Play.Scene.Splash do
     y_coord = counter / 255 * final_y_coord
     t = {final_x_coord, y_coord}
 
-    # Only needed for reloading (can put this in a on-reload?)
-    logo_path = :code.priv_dir(:play) |> Path.join("logo.png")
-    {:ok, _hash} = Scenic.Cache.Static.Texture.load(logo_path, @logo_hash)
-
     graph =
       graph
       |> Graph.modify(:logo, &update_opts(&1, fill: image(), translate: t))
 
-    {:noreply, %State{state | graph: graph, counter: counter + 1}, push: graph}
+    state = %State{state | graph: graph, counter: counter + 1}
+
+    scene =
+      scene
+      |> assign(:state, state)
+      |> push_graph(graph)
+
+    {:noreply, scene}
   end
 
   # --------------------------------------------------------
   # short cut to go right to the new scene on user input
-  def handle_input({:cursor_button, {_, :press, _, _}}, _context, state) do
-    go_to_first_scene(state)
-    {:noreply, state}
+  def handle_input({:cursor_button, {_, 1, _, _}}, _context, scene) do
+    go_to_first_scene(scene.assigns.state)
+    {:noreply, scene}
   end
 
-  def handle_input({:key, _}, _context, state) do
-    go_to_first_scene(state)
-    {:noreply, state}
+  def handle_input({:key, _key}, _context, scene) do
+    go_to_first_scene(scene.assigns.state)
+    {:noreply, scene}
   end
 
-  def handle_input(_input, _context, state), do: {:noreply, state}
+  def handle_input(_input, _context, scene), do: {:noreply, scene}
 
   # --------------------------------------------------------
   defp go_to_first_scene(%{viewport: vp, first_scene: first_scene}) do
-    ViewPort.set_root(vp, {first_scene, nil})
+    ViewPort.set_root(vp, first_scene, nil)
   end
 
-  defp image, do: {:image, @logo_hash}
+  defp image, do: {:image, "images/logo.png"}
 end

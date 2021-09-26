@@ -18,7 +18,7 @@ defmodule Play.Scene.PlayerDeath do
   end
 
   @impl Scenic.Scene
-  def init({{x, y}, player_scores}, scenic_opts) do
+  def init(scene, {{x, y}, player_scores}, _scenic_opts) do
     size = 3
 
     graph =
@@ -29,23 +29,30 @@ defmodule Play.Scene.PlayerDeath do
       graph: graph,
       size: size,
       time: 0,
-      viewport: scenic_opts[:viewport],
+      viewport: scene.viewport,
       player_scores: player_scores
     }
 
     Process.send_after(self(), :animate, 10)
 
-    {:ok, state, push: graph(state)}
+    scene =
+      scene
+      |> assign(:state, state)
+      |> push_graph(graph(state))
+
+    {:ok, scene}
   end
 
-  @impl Scenic.Scene
-  def handle_info(:animate, %{time: t} = state) when t >= 150 do
+  @impl GenServer
+  def handle_info(:animate, %{assigns: %{state: %{time: t}}} = scene) when t >= 150 do
+    state = scene.assigns.state
     %{player_scores: player_scores} = state
-    Scenic.ViewPort.set_root(state.viewport, {Play.Scene.GameOver, player_scores})
-    {:noreply, state}
+    Scenic.ViewPort.set_root(scene.viewport, Play.Scene.GameOver, player_scores)
+    {:noreply, scene}
   end
 
-  def handle_info(:animate, state) do
+  def handle_info(:animate, scene) do
+    state = scene.assigns.state
     %{graph: graph, size: size} = state
 
     graph =
@@ -55,7 +62,12 @@ defmodule Play.Scene.PlayerDeath do
     Process.send_after(self(), :animate, 10)
     state = %{state | graph: graph, size: size + 1, time: state.time + 1}
 
-    {:noreply, state, push: graph(state)}
+    scene =
+      scene
+      |> assign(:state, state)
+      |> push_graph(graph(state))
+
+    {:noreply, scene}
   end
 
   defp graph(%State{graph: graph}), do: graph

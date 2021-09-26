@@ -5,13 +5,16 @@ defmodule Play.Scene.GameOver do
 
   use Scenic.Scene
   import Scenic.Primitives
+  import Play.Utils, only: [input_state: 1]
   alias Scenic.Graph
 
   @refresh_rate round(1_000 / 30)
 
   @initial_graph Graph.build()
                  # Rectangle used for capturing input for the scene
-                 |> rect({Play.Utils.screen_width(), Play.Utils.screen_height()})
+                 |> rect({Play.Utils.screen_width(), Play.Utils.screen_height()},
+                   input: [:cursor_button]
+                 )
                  |> text("",
                    id: :score,
                    t: {Play.Utils.screen_width() / 2, Play.Utils.screen_height() / 2},
@@ -27,43 +30,42 @@ defmodule Play.Scene.GameOver do
   end
 
   @impl Scenic.Scene
-  def init(player_scores, scenic_opts) do
+  def init(scene, player_scores, scenic_opts) do
     graph = show_score(player_scores)
 
-    state = %State{viewport: scenic_opts[:viewport], graph: graph}
+    state = %State{viewport: scene.viewport, graph: graph}
     schedule_refresh()
 
-    {:ok, state, push: graph}
+    scene =
+      scene
+      |> assign(:state, state)
+      |> push_graph(graph)
+
+    {:ok, scene}
   end
 
   @impl Scenic.Scene
-  def handle_input({:cursor_button, {_, :press, _, _}}, _context, state) do
-    restart_game(state)
-    {:noreply, state}
+  def handle_input({:cursor_button, {:btn_left, input_state(:press), _, _}}, _context, scene) do
+    restart_game(scene.assigns.state)
+    {:noreply, scene}
   end
 
-  def handle_input({:key, {key, _, _}}, _context, state) do
-    case String.to_charlist(key) do
-      [char] when char in ?A..?Z or key in [" "] ->
-        restart_game(state)
-
-      _ ->
-        nil
-    end
-
-    {:noreply, state}
+  def handle_input({:key, {_key, input_state(:press), _}}, _context, scene) do
+    restart_game(scene.assigns.state)
+    {:noreply, scene}
   end
 
-  def handle_input(_, _, state), do: {:noreply, state}
+  def handle_input(_, _, scene), do: {:noreply, scene}
 
-  @impl Scenic.Scene
-  def handle_info(:refresh, state) do
+  @impl GenServer
+  def handle_info(:refresh, scene) do
     schedule_refresh()
-    {:noreply, state, push: state.graph}
+    scene = push_graph(scene, scene.assigns.state.graph)
+    {:noreply, scene}
   end
 
   defp restart_game(%State{viewport: vp}) do
-    Scenic.ViewPort.set_root(vp, {Play.Scene.Splash, Play.Scene.Asteroids})
+    Scenic.ViewPort.set_root(vp, Play.Scene.Splash, Play.Scene.Asteroids)
   end
 
   defp show_score(player_scores) do
@@ -76,8 +78,7 @@ defmodule Play.Scene.GameOver do
     message = "Final scores:\n" <> score_messages
 
     font_size = 40
-    font = :roboto
-    fm = Scenic.Cache.Static.FontMetrics.get!(font)
+    {:ok, {_type, fm}} = Scenic.Assets.Static.meta(:roboto_mono)
     ascent = FontMetrics.ascent(font_size, fm)
     fm_width = FontMetrics.width(message, font_size, fm)
     num_lines = String.split(message, "\n") |> length()
