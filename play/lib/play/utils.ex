@@ -11,13 +11,13 @@ defmodule Play.Utils do
   end
 
   def screen_width do
-    # TODO: This should be moved to the play_ui project
-    {width, _height} = Application.get_env(:play, :viewport)[:size]
+    # TODO: This should be passed in instead of stored in config
+    {width, _height} = Application.get_env(:play, :viewport_size)
     width
   end
 
   def screen_height do
-    {_width, height} = Application.get_env(:play, :viewport)[:size]
+    {_width, height} = Application.get_env(:play, :viewport_size)
     height
   end
 
