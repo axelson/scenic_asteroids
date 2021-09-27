@@ -133,20 +133,6 @@ defmodule Play.Scene.Asteroids do
   @new_asteroid_chance_per_second 0.3
   @console_player_username "console"
 
-  @initial_graph Graph.build()
-                 # Rectangle used for capturing input for the scene
-                 |> rect({Play.Utils.screen_width(), Play.Utils.screen_height()},
-                   input: [:cursor_button, :cursor_pos]
-                 )
-                 |> text("Score: 0",
-                   id: :score,
-                   t: {Play.Utils.screen_width(), 15},
-                   fill: :white,
-                   font: :roboto_mono,
-                   text_align: :right
-                 )
-                 |> Launcher.HiddenHomeButton.add_to_graph([])
-
   @paused_graph Graph.build()
                 # Rectangle used for capturing input for the scene
                 |> rect({Play.Utils.screen_width(), Play.Utils.screen_height()},
@@ -169,8 +155,6 @@ defmodule Play.Scene.Asteroids do
     # PlayerController.start_link(username: @console_player_username, parent: self())
     state = initial_state(scene)
 
-    # send(self(), :notify_game_start)
-
     PlayerController.start_in_supervisor(@console_player_username, self())
     :ok = Play.PlayerController.notify_connect(@console_player_username)
     state = register_player(state, @console_player_username, self())
@@ -181,16 +165,12 @@ defmodule Play.Scene.Asteroids do
       PlayerController.register(username)
     end)
 
-    PlayWeb.Endpoint.broadcast("lobby", "game_start", %{})
-
-    # {:ok, initial_state(scenic_opts), push: @initial_graph}
-    # {:ok, initial_state(scenic_opts), push: @initial_graph, continue: :notify_game_start}
-    # {:ok, :mystate, push: @initial_graph, continue: :notify_game_start}
+    Play.PhxEndpointProxy.notify_game_start()
 
     scene =
       scene
       |> assign(:state, state)
-      |> push_graph(@initial_graph)
+      |> push_graph(graph(state))
 
     {:ok, scene}
   end
@@ -205,9 +185,25 @@ defmodule Play.Scene.Asteroids do
       dead_players: [],
       player_pid_refs: %{},
       time: 0,
-      graph: @initial_graph,
+      graph: initial_graph(),
       viewport: scene.viewport
     }
+  end
+
+  defp initial_graph do
+    Graph.build()
+    # Rectangle used for capturing input for the scene
+    |> rect({Play.Utils.screen_width(), Play.Utils.screen_height()},
+      input: [:cursor_button, :cursor_pos]
+    )
+    |> text("Score: 0",
+      id: :score,
+      t: {Play.Utils.screen_width(), 15},
+      fill: :white,
+      font: :roboto_mono,
+      text_align: :right
+    )
+    |> Launcher.HiddenHomeButton.add_to_graph([])
   end
 
   def player_alive(username) do

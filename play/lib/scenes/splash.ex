@@ -9,7 +9,7 @@ defmodule Play.Scene.Splash do
 
   use Scenic.Scene
   require Play.Utils
-  import Scenic.Primitives, only: [{:rect, 3}, {:rect, 2}, {:update_opts, 2}]
+  import Scenic.Primitives, only: [{:rect, 3}, {:update_opts, 2}]
   alias Scenic.Graph
   alias Scenic.ViewPort
 
@@ -148,5 +148,5 @@ defmodule Play.Scene.Splash do
     ViewPort.set_root(vp, first_scene, nil)
   end
 
-  defp image, do: {:image, "images/logo.png"}
+  defp image, do: {:image, {:play, "images/logo.png"}}
 end

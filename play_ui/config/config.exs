@@ -14,7 +14,9 @@ config :play, :viewport,
     ]
   ]
 
-config :play, viewport_size: {500, 500}
+config :play,
+  viewport_size: {500, 500},
+  phx_endpoint: PlayWeb.Endpoint
 
 config :scenic, :assets, module: Play.Assets
 
