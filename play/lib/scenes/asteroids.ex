@@ -519,7 +519,7 @@ defmodule Play.Scene.Asteroids do
   end
 
   def do_handle_input({:key, {:key_i, input_state(:press), _}}, _context, scene) do
-    IO.inspect(scene.assigns.state.graph, label: "graph")
+    Logger.info("graph: #{inspect(scene.assigns.state.graph)}")
     {:noreply, scene}
   end
 
@@ -537,19 +537,21 @@ defmodule Play.Scene.Asteroids do
 
   # Mouse Click/Touchscreen tap input
   def do_handle_input({:cursor_button, {:btn_left, key_action, _, _cursor_coords}}, _, scene) do
-    case key_action do
-      # Press
-      1 -> PlayerController.set_action(@console_player_username, :shoot)
-      # Release
-      0 -> PlayerController.clear_action(@console_player_username, :shoot)
-      _ -> nil
-    end
+    handle_tap_click(key_action)
+    {:noreply, scene}
+  end
+
+  def do_handle_input({:key, {:btn_touch, key_action, _, cursor_coords}}, _, scene) do
+    state = scene.assigns.state
+
+    handle_tap_click(key_action)
+    update_console_player_direction(state, cursor_coords)
 
     {:noreply, scene}
   end
 
   def do_handle_input(input, _, scene) do
-    IO.inspect(input, label: "#{__MODULE__} ignoring input")
+    Logger.warn("ignoring input: #{inspect(input)}")
     {:noreply, scene}
   end
 
@@ -849,6 +851,16 @@ defmodule Play.Scene.Asteroids do
     )
 
     state
+  end
+
+  defp handle_tap_click(key_action) do
+    case key_action do
+      # Press
+      1 -> PlayerController.set_action(@console_player_username, :shoot)
+      # Release
+      0 -> PlayerController.clear_action(@console_player_username, :shoot)
+      _ -> nil
+    end
   end
 
   # Ignore alt-tab
