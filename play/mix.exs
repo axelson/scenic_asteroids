@@ -30,13 +30,13 @@ defmodule Play.MixProject do
   defp deps do
     [
       {:credo, "~> 1.0", only: [:dev, :test], runtime: false},
-      {:dialyxir, "1.0.0-rc.7", only: :dev, runtime: false},
+      {:dialyxir, "~> 1.1", only: :dev, runtime: false},
       {:elixir_make, "~> 0.6"},
       {:inch_ex, github: "rrrene/inch_ex", only: [:dev, :test]},
       dep(:launcher, :github),
       {:scenic, github: "boydm/scenic", branch: "v0.11"},
       {:sched_ex, "~> 1.1.1"},
-      {:truetype_metrics, "~> 0.5.1"}
+      {:truetype_metrics, "~> 0.6"}
     ]
   end
 
