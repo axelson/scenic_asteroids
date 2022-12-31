@@ -33,9 +33,8 @@ defmodule PlayUi.MixProject do
       {:play, path: "../play"},
       {:play_web, path: "../play_web"},
       dep(:launcher, :github),
-      {:scenic, github: "boydm/scenic", branch: "v0.11", override: true},
-      # {:scenic, path: "~/dev/forks/scenic", override: true},
-      {:scenic_driver_local, github: "ScenicFramework/scenic_driver_local"},
+      {:scenic, "~> 0.11"},
+      {:scenic_driver_local, "~> 0.11"},
       dep(:scenic_live_reload, :path)
     ]
     |> List.flatten()

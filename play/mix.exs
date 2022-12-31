@@ -34,7 +34,7 @@ defmodule Play.MixProject do
       {:elixir_make, "~> 0.6"},
       {:inch_ex, github: "rrrene/inch_ex", only: [:dev, :test]},
       dep(:launcher, :github),
-      {:scenic, github: "boydm/scenic", branch: "v0.11"},
+      {:scenic, "~> 0.11"},
       {:sched_ex, "~> 1.1.1"},
       {:truetype_metrics, "~> 0.6"}
     ]
