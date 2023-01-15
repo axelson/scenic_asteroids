@@ -21,6 +21,9 @@ config :play_web, PlayWeb.Endpoint,
     ]
   ]
 
+config :play,
+  viewport_size: {500, 500}
+
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed
