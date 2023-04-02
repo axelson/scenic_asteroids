@@ -7,7 +7,6 @@ defmodule PlayWeb.MixProject do
       version: "0.1.0",
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
@@ -33,7 +32,8 @@ defmodule PlayWeb.MixProject do
   defp deps do
     [
       {:play, path: "../play"},
-      {:phoenix, "~> 1.6.0"},
+      {:phoenix, "~> 1.7.0"},
+      {:phoenix_view, "~> 2.0"},
       {:phoenix_live_view, "~> 0.18.7"},
       {:phoenix_pubsub, "~> 2.0"},
       {:phoenix_html, "~> 3.0"},
