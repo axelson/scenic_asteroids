@@ -33,7 +33,8 @@ defmodule PlayUi.MixProject do
       {:play, path: "../play"},
       {:play_web, path: "../play_web"},
       dep(:launcher, :github),
-      {:scenic, "~> 0.11"},
+      # {:scenic, "~> 0.11"},
+      {:scenic, github: "ScenicFramework/scenic", override: true},
       {:scenic_driver_local, "~> 0.11"},
       dep(:scenic_live_reload, :path)
     ]

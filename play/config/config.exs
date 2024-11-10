@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 config :play, :viewport,
   name: :main_viewport,

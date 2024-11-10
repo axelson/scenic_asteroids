@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 # Configure the main viewport for the Scenic application
 config :play, :viewport,
