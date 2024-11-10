@@ -23,6 +23,7 @@ defmodule PlayWeb.LobbyChannel do
     Play.PlayerController.start_in_supervisor(username, self())
   end
 
+  @impl Phoenix.Channel
   def handle_in("player_direction", msg, socket) do
     action = direction_to_action(msg["direction"])
     :ok = Play.PlayerController.set_action(username(socket), action)
@@ -69,7 +70,7 @@ defmodule PlayWeb.LobbyChannel do
     {:noreply, socket}
   end
 
-  def handle_in("clear_shooting", msg, socket) do
+  def handle_in("clear_shooting", _msg, socket) do
     Play.PlayerController.clear_action(username(socket), :shoot)
     {:noreply, socket}
   end
@@ -108,17 +109,16 @@ defmodule PlayWeb.LobbyChannel do
     {:noreply, socket}
   end
 
-  defp username(socket), do: socket.assigns.username
+  defp username(socket) do
+    {:ok, username} = PlayWeb.UserSocket.logged_in_username(socket)
+    username
+  end
 
   defp direction_to_action("up"), do: :up
   defp direction_to_action("right"), do: :right
   defp direction_to_action("down"), do: :down
   defp direction_to_action("left"), do: :left
 
-  defp username(socket) do
-    {:ok, username} = PlayWeb.UserSocket.logged_in_username(socket)
-    username
-  end
 
   defp translate_error(:not_logged_in), do: "Not logged in"
   defp translate_error(:username_taken), do: "Username already taken"
