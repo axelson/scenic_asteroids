@@ -36,7 +36,9 @@ defmodule PlayWeb do
       import Phoenix.Controller, only: [get_flash: 1, get_flash: 2, view_module: 1]
 
       # Use all HTML functionality (forms, tags, etc)
-      use Phoenix.HTML
+      import Phoenix.HTML
+      import Phoenix.HTML.Form
+      use PhoenixHTMLHelpers
 
       import PlayWeb.ErrorHelpers
       import PlayWeb.Gettext

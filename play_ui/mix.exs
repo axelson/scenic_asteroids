@@ -28,7 +28,7 @@ defmodule PlayUi.MixProject do
     [
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: :dev, runtime: false},
-      dep(:phoenix_live_reload, :path),
+      dep(:phoenix_live_reload, :hex),
       dep(:exsync, :github),
       {:play, path: "../play"},
       {:play_web, path: "../play_web"},
@@ -54,7 +54,7 @@ defmodule PlayUi.MixProject do
   defp dep(:phoenix_live_reload, :path),
     do: {:phoenix_live_reload, path: "../../forks/phoenix_live_reload", only: :dev}
 
-  defp dep(:phoenix_live_reload, :github), do: {:phoenix_live_reload, "~> 1.2", only: :dev}
+  defp dep(:phoenix_live_reload, :hex), do: {:phoenix_live_reload, "~> 1.2", only: :dev}
 
   defp dep(:scenic_live_reload, :hex), do: {:scenic_live_reload, "~> 0.1", only: :dev}
 
