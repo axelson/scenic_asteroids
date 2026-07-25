@@ -236,7 +236,7 @@ defmodule Play.Scene.Asteroids do
   end
 
   def handle_call(msg, _from, scene) do
-    Logger.warn("UNHANDLED handle_call: #{inspect(msg)}")
+    Logger.warning("UNHANDLED handle_call: #{inspect(msg)}")
     {:noreply, scene}
   end
 
@@ -551,7 +551,7 @@ defmodule Play.Scene.Asteroids do
   end
 
   def do_handle_input(input, _, scene) do
-    Logger.warn("ignoring input: #{inspect(input)}")
+    Logger.warning("ignoring input: #{inspect(input)}")
     {:noreply, scene}
   end
 

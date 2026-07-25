@@ -35,7 +35,7 @@ defmodule PlayWeb.UserSocket do
         socket_error(socket, :not_logged_in)
 
       err ->
-        Logger.warn("An unhandled error occurred joining UserSocket: #{inspect(err)}")
+        Logger.warning("An unhandled error occurred joining UserSocket: #{inspect(err)}")
         socket_error(socket, :unknown_error)
     end
   end

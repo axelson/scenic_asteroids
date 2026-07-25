@@ -54,10 +54,10 @@ defmodule Play.Utils do
   end
 
   # Directly above
-  def unit_vector_to_radians({0.0, 1.0}), do: 0
+  def unit_vector_to_radians({+0.0, 1.0}), do: 0
 
   # Directly below
-  def unit_vector_to_radians({0.0, -1.0}), do: :math.pi()
+  def unit_vector_to_radians({+0.0, -1.0}), do: :math.pi()
 
   def unit_vector_to_radians({a, b}) when a <= 1.0 and b <= 1.0 do
     radians = :math.pi() / 2 - :math.atan(b / a)
@@ -102,7 +102,7 @@ defmodule Play.Utils do
     quote do
       def handle_input(input, _context, scene) do
         require Logger
-        Logger.warn("Ignoring input: #{inspect(input)}")
+        Logger.warning("Ignoring input: #{inspect(input)}")
         {:noreply, scene}
       end
     end

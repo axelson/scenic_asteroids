@@ -159,7 +159,7 @@ defmodule Play.PlayerController do
 
   def handle_call({:set_action, action}, _from, state) do
     reason = "Unable to handle action: #{inspect(action)}"
-    Logger.warn(reason)
+    Logger.warning(reason)
     {:stop, reason, {:error, reason}, state}
   end
 
@@ -170,7 +170,7 @@ defmodule Play.PlayerController do
 
   def handle_call({:clear_action, action}, _from, state) do
     reason = "Unable to handle clear action: #{inspect(action)}"
-    Logger.warn(reason)
+    Logger.warning(reason)
     {:stop, reason, state}
   end
 
@@ -236,7 +236,7 @@ defmodule Play.PlayerController do
 
   def handle_info({:clear_action, action}, state) do
     reason = "Unable to handle clear action: #{inspect(action)}"
-    Logger.warn(reason)
+    Logger.warning(reason)
     {:stop, reason, state}
   end
 
@@ -255,7 +255,7 @@ defmodule Play.PlayerController do
   end
 
   def handle_info(:reconnect_timer_expired, state) do
-    Logger.warn(
+    Logger.warning(
       "PlayerController (#{state.username}): shutting down due to reconnect_timer expiring"
     )
 
@@ -263,7 +263,7 @@ defmodule Play.PlayerController do
   end
 
   def handle_info(event, state) do
-    Logger.warn("Unhandled event: #{inspect(event)}")
+    Logger.warning("Unhandled event: #{inspect(event)}")
     {:noreply, state}
   end
 

@@ -21,7 +21,7 @@ defmodule PlayWeb do
     quote do
       use Phoenix.Controller, namespace: PlayWeb
       import Plug.Conn
-      import PlayWeb.Gettext
+      use Gettext, backend: PlayWeb.Gettext
       alias PlayWeb.Router.Helpers, as: Routes
     end
   end
@@ -41,7 +41,7 @@ defmodule PlayWeb do
       use PhoenixHTMLHelpers
 
       import PlayWeb.ErrorHelpers
-      import PlayWeb.Gettext
+      use Gettext, backend: PlayWeb.Gettext
       alias PlayWeb.Router.Helpers, as: Routes
     end
   end
@@ -57,7 +57,7 @@ defmodule PlayWeb do
   def channel do
     quote do
       use Phoenix.Channel
-      import PlayWeb.Gettext
+      use Gettext, backend: PlayWeb.Gettext
     end
   end
 
