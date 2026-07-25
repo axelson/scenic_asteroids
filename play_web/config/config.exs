@@ -22,6 +22,18 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :esbuild,
+  version: "0.25.0",
+  play_web: [
+    args: ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/js),
+    cd: Path.expand("../assets", __DIR__),
+    env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
+  ],
+  play_web_css: [
+    args: ~w(css/app.css --bundle --outdir=../priv/static/css),
+    cd: Path.expand("../assets", __DIR__)
+  ]
+
 config :tzdata, :autoupdate, :disabled
 
 # Import environment specific config. This must remain at the bottom
